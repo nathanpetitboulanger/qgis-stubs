@@ -34,6 +34,11 @@ PYQT_SLOT = typing.Union[collections.abc.Callable[..., Any], QtCore.pyqtBoundSig
 
 
 class Qgs3DAlgorithms(_core.QgsProcessingProvider):
+    """QGIS 3D processing algorithm provider.
+
+    Qgs3DAlgorithms(parent: QObject|None = None)
+    Constructor for Qgs3DAlgorithms.
+    """
 
     def __init__(self, parent: typing.Optional[QtCore.QObject] = ...) -> None: ...
 
@@ -47,24 +52,37 @@ class Qgs3DAlgorithms(_core.QgsProcessingProvider):
 
 
 class Qgs3D(PyQt6.sip.wrapper):
+    """A singleton class containing various registries and other global members
+    related to 3D classes.
+
+    .. versionadded:: 3.16
+    """
 
     @staticmethod
-    def terrainRegistry() -> typing.Optional['Qgs3DTerrainRegistry']: ...
+    def terrainRegistry() -> typing.Optional['Qgs3DTerrainRegistry']:
+        """Returns the terrain registry, used for managing 3D terrains."""
     @staticmethod
-    def materialRegistry() -> typing.Optional[_core.QgsMaterialRegistry]: ...
+    def materialRegistry() -> typing.Optional[_core.QgsMaterialRegistry]:
+        """Returns the material registry, used for managing 3D materials."""
     @staticmethod
-    def initialize() -> None: ...
+    def initialize() -> None:
+        """Initializes the 3D framework."""
     @staticmethod
-    def instance() -> typing.Optional['Qgs3D']: ...
+    def instance() -> typing.Optional['Qgs3D']:
+        """Returns a pointer to the singleton instance."""
 
 
 class Qgs3DMapScene(QtCore.QObject):
+    """Entity that encapsulates our 3D scene - contains all other entities
+    (such as terrain) as children.
+    """
 
     class SceneState(enum.IntEnum):
         Ready = ... # type: Qgs3DMapScene.SceneState
         Updating = ... # type: Qgs3DMapScene.SceneState
 
-    def updateTemporal(self) -> None: ...
+    def updateTemporal(self) -> None:
+        """Updates the temporale entities"""
     gpuMemoryLimitReached: typing.ClassVar[QtCore.pyqtSignal]
     viewed2DExtentFrom3DChanged: typing.ClassVar[QtCore.pyqtSignal]
     fpsCounterEnabledChanged: typing.ClassVar[QtCore.pyqtSignal]
@@ -72,32 +90,159 @@ class Qgs3DMapScene(QtCore.QObject):
     sceneStateChanged: typing.ClassVar[QtCore.pyqtSignal]
     totalPendingJobsCountChanged: typing.ClassVar[QtCore.pyqtSignal]
     terrainEntityChanged: typing.ClassVar[QtCore.pyqtSignal]
-    def clipPlaneEquations(self) -> list[QtGui.QVector4D]: ...
-    def disableClipping(self) -> None: ...
-    def enableClipping(self, clipPlaneEquations: collections.abc.Iterable[QtGui.QVector4D]) -> None: ...
+    def clipPlaneEquations(self) -> list[QtGui.QVector4D]:
+        """Returns list of clipping planes if clipping is enabled, otherwise an
+        empty list.
+
+        .. versionadded:: 3.44
+        """
+    def disableClipping(self) -> None:
+        """Disables OpenGL clipping.
+
+        .. seealso:: `enableClipping`
+
+        .. versionadded:: 3.40
+        """
+    def enableClipping(self, clipPlaneEquations: collections.abc.Iterable[QtGui.QVector4D]) -> None:
+        """Enables OpenGL clipping based on the planes equations defined in
+        ``clipPlaneEquations``. The number of planes is equal to the size of
+        ``clipPlaneEquations``. A plane equation contains 4 elements. A simple
+        way to define a clip plane equation is to define a normalized normal to
+        the plane and its distance from the origin of the scene. In that case,
+        the first 3 elements are the coordinates of the normal of the plane as
+        ``(X, Y, Z)``. They need to be normalized. The last element is the
+        distance of the plane from the origin of the scene. In mathematical
+        terms, a 3d plane can be defined with the equation ``ax+by+cz+d=0`` The
+        normal is ``(a, b, c)`` with ``|a, b, c| = 1`` The distance is ``-d``.
+
+        The number of available clip planes depends on the OpenGL
+        implementation. It should at least handle 6 additional clip planes. When
+        the map scene is created, this number is retrieved. If
+        ``clipPlaneEquations`` contains more than this maximum, only the first
+        ones will be kept.
+
+        .. seealso:: `disableClipping`
+
+        .. versionadded:: 3.40
+        """
     @staticmethod
     @deprecated("""Since 3.36. Use QgisAppInterface.mapCanvases3D() instead.""")
-    def openScenes() -> typing.Any: ...
-    def setSceneOriginShiftEnabled(self, enabled: bool) -> None: ...
-    def hasSceneOriginShiftEnabled(self) -> bool: ...
-    def setSceneUpdatesEnabled(self, enabled: bool) -> None: ...
-    def hasSceneUpdatesEnabled(self) -> bool: ...
-    def mapSettings(self) -> typing.Optional['Qgs3DMapSettings']: ...
-    def elevationRange(self, ignoreTerrain: bool = ...) -> _core.QgsDoubleRange: ...
-    def sceneExtent(self) -> _core.QgsRectangle: ...
-    def exportScene(self, exportSettings: 'Qgs3DMapExportSettings') -> bool: ...
-    def worldSpaceError(self, epsilon: float, distance: float) -> float: ...
-    def sceneState(self) -> 'Qgs3DMapScene.SceneState': ...
-    def totalPendingJobsCount(self) -> int: ...
-    def viewFrustum2DExtent(self) -> list[_core.QgsPointXY]: ...
-    def setViewFrom2DExtent(self, extent: _core.QgsRectangle) -> None: ...
-    def viewZoomFull(self) -> None: ...
-    def cameraController(self) -> typing.Optional['QgsCameraController']: ...
+    def openScenes() -> typing.Any:
+        """Returns a map of 3D map scenes (by name) open in the QGIS application.
+
+        .. note::
+
+           Only available from the QGIS desktop application.
+
+        .. deprecated:: 3.36
+
+           Use QgisAppInterface.mapCanvases3D() instead.
+        .. versionadded:: 3.30
+        """
+    def setSceneOriginShiftEnabled(self, enabled: bool) -> None:
+        """Returns whether the 3D scene is allowed to automatically move the
+        scene's origin. See `Qgs3DMapScene.hasSceneOriginShiftEnabled`
+        for more details.
+
+        Normally, origin shifts are enabled. But for debugging purposes, it may
+        be useful to temporarily disable origin shifts.
+
+        .. versionadded:: 3.44
+        """
+    def hasSceneOriginShiftEnabled(self) -> bool:
+        """Returns whether the 3D scene is allowed to automatically move the
+        scene's origin. This is necessary in large scenes (e.g. more than 50km
+        across) to avoid issues with numerical precision (due to the use of
+        32-bit floats in rendering), that may cause jitter in camera position or
+        object location. When 3D scene moves the origin (because the camera is
+        far from it), user should not see any change - transforms of 3D entities
+        should be updated accordingly.
+
+        Normally, origin shifts are enabled. But for debugging purposes, it may
+        be useful to temporarily disable origin shifts.
+
+        .. versionadded:: 3.44
+        """
+    def setSceneUpdatesEnabled(self, enabled: bool) -> None:
+        """Sets whether updates of the 3D scene's entities are allowed. Normally,
+        scene updates are enabled. But for debugging purposes, it may be useful
+        to temporarily disable scene updates.
+
+        .. versionadded:: 3.40
+        """
+    def hasSceneUpdatesEnabled(self) -> bool:
+        """Returns whether updates of the 3D scene's entities are allowed.
+        Normally, scene updates are enabled. But for debugging purposes, it may
+        be useful to temporarily disable scene updates.
+
+        .. versionadded:: 3.40
+        """
+    def mapSettings(self) -> typing.Optional['Qgs3DMapSettings']:
+        """Returns the 3D map settings.
+
+        .. versionadded:: 3.30
+        """
+    def elevationRange(self, ignoreTerrain: bool = ...) -> _core.QgsDoubleRange:
+        """Returns the scene's elevation range
+
+        .. note::
+
+           Only some layer types are considered by this method (e.g. terrain, point cloud and mesh layers)
+
+        :param ignoreTerrain: indicates whether the calculation will ignore
+                              terrain
+
+        .. versionadded:: 3.30
+        """
+    def sceneExtent(self) -> _core.QgsRectangle:
+        """Returns the scene extent in the map's CRS
+
+        .. versionadded:: 3.20
+        """
+    def exportScene(self, exportSettings: 'Qgs3DMapExportSettings') -> bool:
+        """Exports the scene according to the scene export settings Returns
+        ``False`` if the operation failed
+        """
+    def worldSpaceError(self, epsilon: float, distance: float) -> float:
+        """Given screen error (in pixels) and distance from camera (in 3D world
+        coordinates), this function estimates the error in world space. Takes
+        into account camera's field of view and the screen (3D view) size.
+        """
+    def sceneState(self) -> 'Qgs3DMapScene.SceneState':
+        """Returns the current state of the scene"""
+    def totalPendingJobsCount(self) -> int:
+        """Returns number of pending jobs for all chunked entities
+
+        .. versionadded:: 3.12
+        """
+    def viewFrustum2DExtent(self) -> list[_core.QgsPointXY]:
+        """Calculates the 2D extent viewed by the 3D camera as the vertices of the
+        viewed trapezoid
+
+        .. versionadded:: 3.26
+        """
+    def setViewFrom2DExtent(self, extent: _core.QgsRectangle) -> None:
+        """Resets camera view to show the extent ``extent`` (top view)
+
+        .. versionadded:: 3.26
+        """
+    def viewZoomFull(self) -> None:
+        """Resets camera view to show the whole scene (top view)"""
+    def cameraController(self) -> typing.Optional['QgsCameraController']:
+        """Returns camera controller"""
     Ready: Qgs3DMapScene.SceneState
     Updating: Qgs3DMapScene.SceneState
 
 
 class Qgs3DMapSettings(QtCore.QObject, _core.QgsTemporalRangeObject):
+    """Definition of the world.
+
+    .. warning::
+
+       Qgs3DMapSettings are a QObject subclass, and accordingly are not
+       safe for access across different threads. See Qgs3DRenderContext instead
+       for a safe snapshot of settings from Qgs3DMapSettings.
+    """
 
     @typing.overload
     def __init__(self) -> None: ...
@@ -153,163 +298,859 @@ class Qgs3DMapSettings(QtCore.QObject, _core.QgsTemporalRangeObject):
     selectionColorChanged: typing.ClassVar[QtCore.pyqtSignal]
     backgroundColorChanged: typing.ClassVar[QtCore.pyqtSignal]
     settingsChanged: typing.ClassVar[QtCore.pyqtSignal]
-    def setTextureFilterQuality(self, quality: _core.Qgis.TextureFilterQuality) -> None: ...
-    def textureFilterQuality(self) -> _core.Qgis.TextureFilterQuality: ...
-    def isMsaaEnabled(self) -> bool: ...
-    def setMsaaEnabled(self, enabled: bool) -> None: ...
-    def setIs2DMapOverlayEnabled(self, enabled: bool) -> None: ...
-    def is2DMapOverlayEnabled(self) -> bool: ...
+    def setTextureFilterQuality(self, quality: _core.Qgis.TextureFilterQuality) -> None:
+        """Sets the texture filtering ``quality``.
+
+        .. seealso:: `textureFilterQuality`
+
+        .. versionadded:: 4.2
+        """
+    def textureFilterQuality(self) -> _core.Qgis.TextureFilterQuality:
+        """Returns the texture filtering quality.
+
+        .. seealso:: `setTextureFilterQuality`
+
+        .. versionadded:: 4.2
+        """
+    def isMsaaEnabled(self) -> bool:
+        """Returns whether multisample anti-aliasing (MSAA) is enabled
+
+        .. seealso:: `setMsaaEnabled`
+
+        .. versionadded:: 4.2
+        """
+    def setMsaaEnabled(self, enabled: bool) -> None:
+        """Sets whether multisample anti-aliasing (MSAA) is enabled
+
+        .. seealso:: `isMsaaEnabled`
+
+        .. versionadded:: 4.2
+        """
+    def setIs2DMapOverlayEnabled(self, enabled: bool) -> None:
+        """Sets whether 2D map overlay is enabled
+
+        .. seealso:: `is2DMapOverlayEnabled`
+
+        .. versionadded:: 4.0
+        """
+    def is2DMapOverlayEnabled(self) -> bool:
+        """Returns whether 2D map overlay is enabled
+
+        .. seealso:: `setIs2DMapOverlayEnabled`
+
+        .. versionadded:: 4.0
+        """
     @deprecated("""Since 4.2. Use debugFlags() instead.""")
-    def showDebugPanel(self) -> bool: ...
+    def showDebugPanel(self) -> bool:
+        """Returns whether the debug side panel is shown
+
+        .. deprecated:: 4.2
+
+           Use `Qgs3DMapSettings.debugFlags` instead.
+        """
     @deprecated("""Since 4.2. Use setDebugFlags() instead.""")
-    def setShowDebugPanel(self, enabled: bool) -> None: ...
-    def setShowExtentIn2DView(self, show: bool) -> None: ...
-    def showExtentIn2DView(self) -> bool: ...
-    def setIsDebugOverlayEnabled(self, debugOverlayEnabled: bool) -> None: ...
-    def isDebugOverlayEnabled(self) -> bool: ...
-    def setViewFrustumVisualizationEnabled(self, enabled: bool) -> None: ...
-    def viewFrustumVisualizationEnabled(self) -> bool: ...
-    def setViewSyncMode(self, mode: _core.Qgis.ViewSyncModeFlag) -> None: ...
-    def viewSyncMode(self) -> _core.Qgis.ViewSyncModeFlag: ...
-    def setRendererUsage(self, rendererUsage: _core.Qgis.RendererUsage) -> None: ...
-    def rendererUsage(self) -> _core.Qgis.RendererUsage: ...
-    def setTerrainRenderingEnabled(self, terrainRenderingEnabled: bool) -> None: ...
-    def terrainRenderingEnabled(self) -> bool: ...
+    def setShowDebugPanel(self, enabled: bool) -> None:
+        """Sets whether the debug side panel is shown
+
+        .. deprecated:: 4.2
+
+           Use `Qgs3DMapSettings.setDebugFlags` instead.
+        """
+    def setShowExtentIn2DView(self, show: bool) -> None:
+        """Sets whether the extent is displayed on the main 2D map canvas
+
+        .. versionadded:: 3.32
+        """
+    def showExtentIn2DView(self) -> bool:
+        """Returns whether the extent is displayed on the main 2D map canvas
+
+        .. seealso:: `setShowExtentIn2DView`
+
+        .. versionadded:: 3.32
+        """
+    def setIsDebugOverlayEnabled(self, debugOverlayEnabled: bool) -> None:
+        """Sets whether debug overlay is enabled The debug overlay displays some
+        debugging and profiling information. It has been introduced in Qt
+        version 5.15. This parameter is transient. It is not saved in the
+        project parameters.
+
+        .. seealso:: `isDebugOverlayEnabled`
+
+        .. versionadded:: 3.26
+        """
+    def isDebugOverlayEnabled(self) -> bool:
+        """Returns whether debug overlay is enabled
+
+        .. seealso:: `setIsDebugOverlayEnabled`
+
+        .. versionadded:: 3.26
+        """
+    def setViewFrustumVisualizationEnabled(self, enabled: bool) -> None:
+        """Sets whether the camera's view frustum is visualized on the 2D map
+        canvas
+
+        .. versionadded:: 3.26
+        """
+    def viewFrustumVisualizationEnabled(self) -> bool:
+        """Returns whether the camera's view frustum is visualized on the 2D map
+        canvas
+
+        .. versionadded:: 3.26
+        """
+    def setViewSyncMode(self, mode: _core.Qgis.ViewSyncModeFlag) -> None:
+        """Sets the view sync mode (used to synchronize the 2D main map canvas and
+        the 3D camera navigation)
+
+        .. versionadded:: 3.26
+        """
+    def viewSyncMode(self) -> _core.Qgis.ViewSyncModeFlag:
+        """Returns the view sync mode (used to synchronize the 2D main map canvas
+        and the 3D camera navigation)
+
+        .. versionadded:: 3.26
+        """
+    def setRendererUsage(self, rendererUsage: _core.Qgis.RendererUsage) -> None:
+        """Sets the renderer usage
+
+        .. seealso:: `rendererUsage`
+
+        .. versionadded:: 3.24
+        """
+    def rendererUsage(self) -> _core.Qgis.RendererUsage:
+        """Returns the renderer usage
+
+        .. seealso:: `rendererUsage`
+
+        .. versionadded:: 3.24
+        """
+    def setTerrainRenderingEnabled(self, terrainRenderingEnabled: bool) -> None:
+        """Sets whether the 2D terrain surface will be rendered in.
+
+        .. seealso:: `terrainRenderingEnabled`
+
+        .. versionadded:: 3.22
+        """
+    def terrainRenderingEnabled(self) -> bool:
+        """Returns whether the 2D terrain surface will be rendered.
+
+        .. seealso:: `setTerrainRenderingEnabled`
+
+        .. versionadded:: 3.22
+        """
     @deprecated("""Since 4.2. Use setDebugFlags() instead.""")
-    def setIsFpsCounterEnabled(self, fpsCounterEnabled: bool) -> None: ...
+    def setIsFpsCounterEnabled(self, fpsCounterEnabled: bool) -> None:
+        """Sets whether FPS counter label is enabled.
+
+        .. deprecated:: 4.2
+
+           Use `Qgs3DMapSettings.setDebugFlags` instead.
+        """
     @deprecated("""Since 4.2. Use debugFlags() instead.""")
-    def isFpsCounterEnabled(self) -> bool: ...
+    def isFpsCounterEnabled(self) -> bool:
+        """Returns whether FPS counter label is enabled
+
+        .. deprecated:: 4.2
+
+           Use `Qgs3DMapSettings.debugFlags` instead.
+        """
     @deprecated("""Since 4.2. Use setBackgroundSettings() instead.""")
-    def setIsSkyboxEnabled(self, enabled: bool) -> None: ...
+    def setIsSkyboxEnabled(self, enabled: bool) -> None:
+        """Sets whether the skybox is enabled.
+
+        .. seealso:: `isSkyboxEnabled`
+
+        .. versionadded:: 3.16
+
+        .. deprecated:: 4.2
+
+           Use `Qgs3DMapSettings.setBackgroundSettings` instead.
+        """
     @deprecated("""Since 4.2. Use backgroundSettings() instead.""")
-    def isSkyboxEnabled(self) -> bool: ...
-    def outputDpi(self) -> float: ...
-    def setOutputDpi(self, dpi: float) -> None: ...
-    def setCameraMovementSpeed(self, movementSpeed: float) -> None: ...
-    def cameraMovementSpeed(self) -> float: ...
-    def setProjectionType(self, projectionType: _core.Qgis.Map3DProjectionType) -> None: ...
-    def projectionType(self) -> _core.Qgis.Map3DProjectionType: ...
-    def setFieldOfView(self, fieldOfView: float) -> None: ...
-    def fieldOfView(self) -> float: ...
-    def setLightSources(self, lights: collections.abc.Iterable['QgsLightSource']) -> None: ...
-    def lightSources(self) -> list['QgsLightSource']: ...
-    def debugDepthMapSize(self) -> float: ...
-    def debugDepthMapCorner(self) -> QtCore.Qt.Corner: ...
-    def debugDepthMapEnabled(self) -> bool: ...
-    def setDebugDepthMapSettings(self, enabled: bool, corner: QtCore.Qt.Corner, size: float) -> None: ...
+    def isSkyboxEnabled(self) -> bool:
+        """Returns whether the skybox is enabled.
+
+        .. seealso:: `setIsSkyboxEnabled`
+
+        .. versionadded:: 3.16
+
+        .. deprecated:: 4.2
+
+           Use `Qgs3DMapSettings.backgroundSettings` instead.
+        """
+    def outputDpi(self) -> float:
+        """Returns DPI used for conversion between real world units (e.g. mm) and
+        pixels Default value is 96
+
+        .. versionadded:: 3.10
+        """
+    def setOutputDpi(self, dpi: float) -> None:
+        """Sets DPI used for conversion between real world units (e.g. mm) and
+        pixels
+
+        :param dpi: the number of dot per inch
+
+        .. versionadded:: 3.10
+        """
+    def setCameraMovementSpeed(self, movementSpeed: float) -> None:
+        """Sets the camera movement speed
+
+        .. versionadded:: 3.18
+        """
+    def cameraMovementSpeed(self) -> float:
+        """Returns the camera movement speed
+
+        .. versionadded:: 3.18
+        """
+    def setProjectionType(self, projectionType: _core.Qgis.Map3DProjectionType) -> None:
+        """Sets the camera lens' projection type
+
+        .. versionadded:: 4.2
+        """
+    def projectionType(self) -> _core.Qgis.Map3DProjectionType:
+        """Returns the camera lens' projection type
+
+        .. versionadded:: 4.2
+        """
+    def setFieldOfView(self, fieldOfView: float) -> None:
+        """Sets the camera lens' field of view
+
+        .. versionadded:: 3.8
+        """
+    def fieldOfView(self) -> float:
+        """Returns the camera lens' field of view
+
+        .. versionadded:: 3.8
+        """
+    def setLightSources(self, lights: collections.abc.Iterable['QgsLightSource']) -> None:
+        """Sets the list of ``light`` sources defined in the scene.
+
+        Ownership of the lights is transferred to the settings.
+
+        .. seealso:: `lightSources`
+
+        .. versionadded:: 3.26
+        """
+    def lightSources(self) -> list['QgsLightSource']:
+        """Returns list of directional light sources defined in the scene.
+
+        .. seealso:: `setLightSources`
+
+        .. versionadded:: 3.26
+        """
+    def debugDepthMapSize(self) -> float:
+        """Returns the size of the shadow map preview"""
+    def debugDepthMapCorner(self) -> QtCore.Qt.Corner:
+        """Returns the corner where the shadow map preview is displayed"""
+    def debugDepthMapEnabled(self) -> bool:
+        """Returns whether the shadow map debugging is enabled"""
+    def setDebugDepthMapSettings(self, enabled: bool, corner: QtCore.Qt.Corner, size: float) -> None:
+        """Sets the debugging settings of the depth map
+
+        .. seealso:: `debugDepthMapEnabled`
+
+        .. seealso:: `debugDepthMapCorner`
+
+        .. seealso:: `debugDepthMapSize`
+
+        .. versionadded:: 3.18
+        """
     @deprecated("""Since 4.2. Shadow debugging is no longer supported.""")
-    def debugShadowMapSize(self) -> float: ...
+    def debugShadowMapSize(self) -> float:
+        """Returns the size of the shadow map preview.
+
+        .. deprecated:: 4.2
+
+           Shadow debugging is no longer supported.
+        """
     @deprecated("""Since 4.2. Shadow debugging is no longer supported.""")
-    def debugShadowMapCorner(self) -> QtCore.Qt.Corner: ...
+    def debugShadowMapCorner(self) -> QtCore.Qt.Corner:
+        """Returns the corner where the shadow map preview is displayed
+
+        .. deprecated:: 4.2
+
+           Shadow debugging is no longer supported.
+        """
     @deprecated("""Since 4.2. Shadow debugging is no longer supported.""")
-    def debugShadowMapEnabled(self) -> bool: ...
+    def debugShadowMapEnabled(self) -> bool:
+        """Returns whether the shadow map debugging is enabled.
+
+        .. deprecated:: 4.2
+
+           Shadow debugging is no longer supported.
+        """
     @deprecated("""Since 4.2. Shadow debugging is no longer supported.""")
-    def setDebugShadowMapSettings(self, enabled: bool, corner: QtCore.Qt.Corner, size: float) -> None: ...
-    def stopUpdates(self) -> bool: ...
-    def setStopUpdates(self, enabled: bool) -> None: ...
-    def eyeDomeLightingDistance(self) -> int: ...
-    def setEyeDomeLightingDistance(self, distance: int) -> None: ...
-    def eyeDomeLightingStrength(self) -> float: ...
-    def setEyeDomeLightingStrength(self, strength: float) -> None: ...
-    def eyeDomeLightingEnabled(self) -> bool: ...
-    def setEyeDomeLightingEnabled(self, enabled: bool) -> None: ...
-    def showLabels(self) -> bool: ...
-    def setShowLabels(self, enabled: bool) -> None: ...
+    def setDebugShadowMapSettings(self, enabled: bool, corner: QtCore.Qt.Corner, size: float) -> None:
+        """Sets the debugging settings of the shadow map
+
+        .. seealso:: `debugShadowMapEnabled`
+
+        .. seealso:: `debugShadowMapCorner`
+
+        .. seealso:: `debugShadowMapSize`
+
+        .. deprecated:: 4.2
+
+           Shadow debugging is no longer supported.
+        """
+    def stopUpdates(self) -> bool:
+        """Returns whether the scene updates on camera movement
+
+        .. versionadded:: 3.42
+        """
+    def setStopUpdates(self, enabled: bool) -> None:
+        """Sets whether scene updates on camera movement should be enabled
+
+        .. note::
+
+           By default, scene is updating on camera movement. Useful for debugging purposes.
+
+        .. versionadded:: 3.42
+        """
+    def eyeDomeLightingDistance(self) -> int:
+        """Returns the eye dome lighting distance value (contributes to the
+        contrast of the image)
+        """
+    def setEyeDomeLightingDistance(self, distance: int) -> None:
+        """Sets the eye dome lighting distance value (contributes to the contrast
+        of the image
+
+        .. seealso:: `eyeDomeLightingDistance`
+
+        .. versionadded:: 3.18
+        """
+    def eyeDomeLightingStrength(self) -> float:
+        """Returns the eye dome lighting strength value"""
+    def setEyeDomeLightingStrength(self, strength: float) -> None:
+        """Sets the eye dome lighting strength value
+
+        .. seealso:: `eyeDomeLightingStrength`
+
+        .. versionadded:: 3.18
+        """
+    def eyeDomeLightingEnabled(self) -> bool:
+        """Returns whether eye dome lighting is used"""
+    def setEyeDomeLightingEnabled(self, enabled: bool) -> None:
+        """Sets whether eye dome lighting will be used
+
+        .. seealso:: `eyeDomeLightingEnabled`
+
+        .. versionadded:: 3.18
+        """
+    def showLabels(self) -> bool:
+        """Returns whether to display labels on terrain tiles"""
+    def setShowLabels(self, enabled: bool) -> None:
+        """Sets whether to display labels on terrain tiles"""
     @deprecated("""Since 4.2. Use setDebugFlags() instead.""")
-    def showLightSourceOrigins(self) -> bool: ...
+    def showLightSourceOrigins(self) -> bool:
+        """Returns whether to show light source origins as a sphere (for debugging)
+
+        .. deprecated:: 4.2
+
+           Use `Qgs3DMapSettings.setDebugFlags` instead.
+        """
     @deprecated("""Since 4.2. Use setDebugFlags() instead.""")
-    def setShowLightSourceOrigins(self, enabled: bool) -> None: ...
+    def setShowLightSourceOrigins(self, enabled: bool) -> None:
+        """Sets whether to show light source origins as a sphere (for debugging)
+
+        .. deprecated:: 4.2
+
+           Use `Qgs3DMapSettings.setDebugFlags` instead.
+        """
     @deprecated("""Since 4.2. Use setDebugFlags() instead.""")
-    def showCameraRotationCenter(self) -> bool: ...
+    def showCameraRotationCenter(self) -> bool:
+        """Returns whether to show camera's rotation center as a sphere (for
+        debugging)
+
+        .. deprecated:: 4.2
+
+           Use `Qgs3DMapSettings.setDebugFlags` instead.
+        """
     @deprecated("""Since 4.2. Use setDebugFlags() instead.""")
-    def setShowCameraRotationCenter(self, enabled: bool) -> None: ...
+    def setShowCameraRotationCenter(self, enabled: bool) -> None:
+        """Sets whether to show camera's rotation center as a sphere (for
+        debugging)
+
+        .. deprecated:: 4.2
+
+           Use `Qgs3DMapSettings.setDebugFlags` instead.
+        """
     @deprecated("""Since 4.2. Use setDebugFlags() instead.""")
-    def showCameraViewCenter(self) -> bool: ...
+    def showCameraViewCenter(self) -> bool:
+        """Returns whether to show camera's view center as a sphere (for debugging)
+
+        .. deprecated:: 4.2
+
+           Use `Qgs3DMapSettings.setDebugFlags` instead.
+        """
     @deprecated("""Since 4.2. Use setDebugFlags() instead.""")
-    def setShowCameraViewCenter(self, enabled: bool) -> None: ...
+    def setShowCameraViewCenter(self, enabled: bool) -> None:
+        """Sets whether to show camera's view center as a sphere (for debugging)
+
+        .. deprecated:: 4.2
+
+           Use `Qgs3DMapSettings.setDebugFlags` instead.
+        """
     @deprecated("""Since 4.2. Use debugFlags() instead.""")
-    def showTerrainTilesInfo(self) -> bool: ...
+    def showTerrainTilesInfo(self) -> bool:
+        """Returns whether to display extra tile info on top of terrain tiles (for
+        debugging).
+
+        .. deprecated:: 4.2
+
+           Use `Qgs3DMapSettings.debugFlags` instead.
+        """
     @deprecated("""Since 4.2. Use setDebugFlags() instead.""")
-    def setShowTerrainTilesInfo(self, enabled: bool) -> None: ...
+    def setShowTerrainTilesInfo(self, enabled: bool) -> None:
+        """Sets whether to display extra tile info on top of terrain tiles (for
+        debugging).
+
+        .. deprecated:: 4.2
+
+           Use `Qgs3DMapSettings.setDebugFlags` instead.
+        """
     @deprecated("""Since 4.2. Use debugFlags() instead.""")
-    def showTerrainBoundingBoxes(self) -> bool: ...
+    def showTerrainBoundingBoxes(self) -> bool:
+        """Returns whether to display bounding boxes of terrain tiles (for
+        debugging).
+
+        .. deprecated:: 4.2
+
+           Use `Qgs3DMapSettings.debugFlags` instead.
+        """
     @deprecated("""Since 4.2. Use setDebugFlags() instead.""")
-    def setShowTerrainBoundingBoxes(self, enabled: bool) -> None: ...
-    def debugFlags(self) -> _core.Qgis.Map3DDebugFlag: ...
-    def setDebugFlags(self, flags: _core.Qgis.Map3DDebugFlag) -> None: ...
-    def terrainMapTheme(self) -> str: ...
-    def setTerrainMapTheme(self, theme: typing.Optional[str]) -> None: ...
-    def terrainShadingMaterial(self) -> _core.QgsPhongMaterialSettings: ...
-    def setTerrainShadingMaterial(self, material: _core.QgsPhongMaterialSettings) -> None: ...
-    def isTerrainShadingEnabled(self) -> bool: ...
-    def setTerrainShadingEnabled(self, enabled: bool) -> None: ...
+    def setShowTerrainBoundingBoxes(self, enabled: bool) -> None:
+        """Sets whether to display bounding boxes of terrain tiles (for debugging).
+
+        .. deprecated:: 4.2
+
+           Use `Qgs3DMapSettings.setDebugFlags` instead.
+        """
+    def debugFlags(self) -> _core.Qgis.Map3DDebugFlag:
+        """Returns the flags that control debugging options for the map.
+
+        .. warning::
+
+           These are debugging options only, and are not considered part of stable API.
+
+        .. seealso:: `setDebugFlags`
+
+        .. versionadded:: 4.2
+        """
+    def setDebugFlags(self, flags: _core.Qgis.Map3DDebugFlag) -> None:
+        """Sets flags that control debugging options for the map.
+
+        .. warning::
+
+           These are debugging options only, and are not considered part of stable API.
+
+        .. seealso:: `debugFlags`
+
+        .. versionadded:: 4.2
+        """
+    def terrainMapTheme(self) -> str:
+        """Returns name of the map theme (from the active project) that will be
+        used for terrain's texture. Empty map theme name means that the map
+        theme is not overridden and the current map theme will be used.
+
+        .. note::
+
+           Support for map themes only works if `Qgs3DMapSettings.mapThemeCollection` is a valid object (otherwise it is not possible to resolve map themes from names)
+
+        .. versionadded:: 3.6
+        """
+    def setTerrainMapTheme(self, theme: typing.Optional[str]) -> None:
+        """Sets name of the map theme.
+
+        .. seealso:: `terrainMapTheme`
+
+        .. versionadded:: 3.6
+        """
+    def terrainShadingMaterial(self) -> _core.QgsPhongMaterialSettings:
+        """Returns terrain shading material. Diffuse color component is ignored
+        since the diffuse component is provided by 2D rendered map texture. Only
+        used when `Qgs3DMapSettings.isTerrainShadingEnabled` is
+        ``True``.
+
+        .. versionadded:: 3.6
+        """
+    def setTerrainShadingMaterial(self, material: _core.QgsPhongMaterialSettings) -> None:
+        """Sets terrain shading material.
+
+        .. seealso:: `terrainShadingMaterial`
+
+        .. versionadded:: 3.6
+        """
+    def isTerrainShadingEnabled(self) -> bool:
+        """Returns whether terrain shading is enabled. When enabled, in addition to
+        the terrain texture generated from the map, the terrain rendering will
+        take into account position of the lights, terrain normals and terrain
+        shading material (ambient and specular colors, shininess).
+
+        .. versionadded:: 3.6
+        """
+    def setTerrainShadingEnabled(self, enabled: bool) -> None:
+        """Sets whether terrain shading is enabled.
+
+        .. seealso:: `isTerrainShadingEnabled`
+
+        .. versionadded:: 3.6
+        """
     @deprecated("""Since 3.42. Use terrainSettings() instead.""")
-    def terrainElevationOffset(self) -> float: ...
+    def terrainElevationOffset(self) -> float:
+        """Returns the elevation offset of the terrain (used to move the terrain up
+        or down)
+
+        .. deprecated:: 3.42
+
+           Use `Qgs3DMapSettings.terrainSettings` instead.
+        """
     @deprecated("""Since 3.42. Use terrainSettings() instead.""")
-    def setTerrainElevationOffset(self, offset: float) -> None: ...
+    def setTerrainElevationOffset(self, offset: float) -> None:
+        """Sets the terrain elevation offset (used to move the terrain up or down)
+
+        .. seealso:: `terrainElevationOffset`
+
+        .. deprecated:: 3.42
+
+           Use `Qgs3DMapSettings.terrainSettings` instead.
+        """
     @deprecated("""Since 3.42. Use terrainSettings() instead.""")
-    def maxTerrainGroundError(self) -> float: ...
+    def maxTerrainGroundError(self) -> float:
+        """Returns maximum ground error of terrain tiles in world units. This
+        parameter influences how many zoom levels there will be (together with
+        `Qgs3DMapSettings.mapTileResolution`). This value tells that
+        when the given ground error is reached (e.g. 10 meters), it makes no
+        sense to further split terrain tiles into finer ones because they will
+        not add extra details anymore.
+
+        .. deprecated:: 3.42
+
+           Use `Qgs3DMapSettings.terrainSettings` instead.
+        """
     @deprecated("""Since 3.42. Use terrainSettings() instead.""")
-    def setMaxTerrainGroundError(self, error: float) -> None: ...
+    def setMaxTerrainGroundError(self, error: float) -> None:
+        """Sets the maximum ground error of terrain tiles in world units.
+
+        .. seealso:: `maxTerrainGroundError`
+
+        .. deprecated:: 3.42
+
+           Use `Qgs3DMapSettings.terrainSettings` instead.
+        """
     @deprecated("""Since 3.42. Use terrainSettings() instead.""")
-    def maxTerrainScreenError(self) -> float: ...
+    def maxTerrainScreenError(self) -> float:
+        """Returns maximum allowed screen error of terrain tiles in pixels. This
+        parameter decides how aggressively less detailed terrain tiles are
+        swapped to more detailed ones as camera gets closer. Each tile has its
+        error defined in world units - this error gets projected to screen
+        pixels according to camera view and if the tile's error is greater than
+        the allowed error, it will be swapped by more detailed tiles with lower
+        error.
+
+        .. deprecated:: 3.42
+
+           Use `Qgs3DMapSettings.terrainSettings` instead.
+        """
     @deprecated("""Since 3.42. Use terrainSettings() instead.""")
-    def setMaxTerrainScreenError(self, error: float) -> None: ...
+    def setMaxTerrainScreenError(self, error: float) -> None:
+        """Sets maximum allowed screen error of terrain tiles in pixels.
+
+        .. seealso:: `maxTerrainScreenError`
+
+        .. deprecated:: 3.42
+
+           Use `Qgs3DMapSettings.terrainSettings` instead.
+        """
     @deprecated("""Since 3.42. Use terrainSettings() instead.""")
-    def mapTileResolution(self) -> int: ...
+    def mapTileResolution(self) -> int:
+        """Returns resolution (in pixels) of the texture of a terrain tile. This
+        parameter influences how many zoom levels for terrain tiles there will
+        be (together with `Qgs3DMapSettings.maxTerrainGroundError`)
+
+        .. deprecated:: 3.42
+
+           Use `Qgs3DMapSettings.terrainSettings` instead.
+        """
     @deprecated("""Since 3.42. Use terrainSettings() instead.""")
-    def setMapTileResolution(self, res: int) -> None: ...
+    def setMapTileResolution(self, res: int) -> None:
+        """Sets resolution (in pixels) of the texture of a terrain tile
+
+        .. seealso:: `mapTileResolution`
+
+        .. deprecated:: 3.42
+
+           Use `Qgs3DMapSettings.terrainSettings` instead.
+        """
     @deprecated("""Since 3.42. Use terrainSettings() instead.""")
-    def terrainVerticalScale(self) -> float: ...
+    def terrainVerticalScale(self) -> float:
+        """Returns vertical scale (exaggeration) of terrain
+
+        .. deprecated:: 3.42
+
+           Use `Qgs3DMapSettings.terrainSettings` instead.
+        """
     @deprecated("""Since 3.42. Use terrainSettings() instead.""")
-    def setTerrainVerticalScale(self, zScale: float) -> None: ...
-    def setTerrainSettings(self, settings: typing.Optional['QgsAbstractTerrainSettings']) -> None: ...
-    def terrainSettings(self) -> typing.Optional['QgsAbstractTerrainSettings']: ...
-    def layers(self) -> list[_core.QgsMapLayer]: ...
-    def setLayers(self, layers: collections.abc.Iterable[_core.QgsMapLayer]) -> None: ...
-    def selectionColor(self) -> QtGui.QColor: ...
-    def setSelectionColor(self, color: typing.Union[QtGui.QColor, QtCore.Qt.GlobalColor, int]) -> None: ...
-    def setBackgroundSettings(self, settings: typing.Optional['QgsAbstract3DMapBackgroundSettings']) -> None: ...
-    def backgroundSettings(self) -> typing.Optional['QgsAbstract3DMapBackgroundSettings']: ...
-    def backgroundColor(self) -> QtGui.QColor: ...
-    def setBackgroundColor(self, color: typing.Union[QtGui.QColor, QtCore.Qt.GlobalColor, int]) -> None: ...
-    def setMapThemeCollection(self, mapThemes: typing.Optional[_core.QgsMapThemeCollection]) -> None: ...
-    def mapThemeCollection(self) -> typing.Optional[_core.QgsMapThemeCollection]: ...
-    def setPathResolver(self, resolver: _core.QgsPathResolver) -> None: ...
-    def pathResolver(self) -> _core.QgsPathResolver: ...
-    def setTransformContext(self, context: _core.QgsCoordinateTransformContext) -> None: ...
-    def transformContext(self) -> _core.QgsCoordinateTransformContext: ...
-    def sceneMode(self) -> _core.Qgis.SceneMode: ...
-    def crs(self) -> _core.QgsCoordinateReferenceSystem: ...
-    def setCrs(self, crs: _core.QgsCoordinateReferenceSystem) -> None: ...
-    def worldToMapCoordinates(self, worldCoords: _core.QgsVector3D) -> _core.QgsVector3D: ...
-    def mapToWorldCoordinates(self, mapCoords: _core.QgsVector3D) -> _core.QgsVector3D: ...
-    def origin(self) -> _core.QgsVector3D: ...
-    def setOrigin(self, origin: _core.QgsVector3D) -> None: ...
-    def setExtent(self, extent: _core.QgsRectangle) -> None: ...
-    def extent(self) -> _core.QgsRectangle: ...
-    def resolveReferences(self, project: _core.QgsProject) -> None: ...
-    def writeXml(self, doc: QtXml.QDomDocument, context: _core.QgsReadWriteContext) -> QtXml.QDomElement: ...
-    def readXml(self, elem: QtXml.QDomElement, context: _core.QgsReadWriteContext) -> None: ...
+    def setTerrainVerticalScale(self, zScale: float) -> None:
+        """Sets vertical scale (exaggeration) of terrain (1 = true scale, > 1 =
+        hills get more pronounced)
+
+        .. deprecated:: 3.42
+
+           Use `Qgs3DMapSettings.terrainSettings` instead.
+        """
+    def setTerrainSettings(self, settings: typing.Optional['QgsAbstractTerrainSettings']) -> None:
+        """Sets the terrain settings.
+
+        .. seealso:: `terrainSettings`
+
+        .. versionadded:: 3.42
+        """
+    def terrainSettings(self) -> typing.Optional['QgsAbstractTerrainSettings']:
+        """Returns the terrain settings.
+
+        .. warning::
+
+           Modifications should never be made to the returned object. Instead use `Qgs3DMapSettings.setTerrainSettings`, so that
+           the corresponding changed signals are correctly emitted.
+
+        .. seealso:: `setTerrainSettings`
+
+        .. versionadded:: 3.42
+        """
+    def layers(self) -> list[_core.QgsMapLayer]:
+        """Returns the list of 3D map layers to be rendered in the scene.
+
+        This setting dictates which layers are to be rendered using their 3D
+        rendering configuration, if available.
+
+        .. seealso:: `setLayers`
+
+        .. seealso:: `layersChanged`
+        """
+    def setLayers(self, layers: collections.abc.Iterable[_core.QgsMapLayer]) -> None:
+        """Sets the list of 3D map ``layers`` to be rendered in the scene.
+
+        This setting dictates which layers are to be rendered using their 3D
+        rendering configuration, if available.
+
+        .. seealso:: `layers`
+
+        .. seealso:: `layersChanged`
+        """
+    def selectionColor(self) -> QtGui.QColor:
+        """Returns color used for selected features"""
+    def setSelectionColor(self, color: typing.Union[QtGui.QColor, QtCore.Qt.GlobalColor, int]) -> None:
+        """Sets color used for selected features"""
+    def setBackgroundSettings(self, settings: typing.Optional['QgsAbstract3DMapBackgroundSettings']) -> None:
+        """Sets the background ``settings`` for the 3D scene. Ownership is
+        transferred.
+
+        .. seealso:: `backgroundSettings`
+
+        .. seealso:: `backgroundSettingsChanged`
+
+        .. versionadded:: 4.2
+        """
+    def backgroundSettings(self) -> typing.Optional['QgsAbstract3DMapBackgroundSettings']:
+        """Returns the background settings for the 3D scene, or null if no
+        background is set.
+
+        .. seealso:: `setBackgroundSettings`
+
+        .. versionadded:: 4.2
+        """
+    def backgroundColor(self) -> QtGui.QColor:
+        """Returns background color of the 3D map view"""
+    def setBackgroundColor(self, color: typing.Union[QtGui.QColor, QtCore.Qt.GlobalColor, int]) -> None:
+        """Sets background color of the 3D map view"""
+    def setMapThemeCollection(self, mapThemes: typing.Optional[_core.QgsMapThemeCollection]) -> None:
+        """Sets pointer to the collection of map themes.
+
+        .. seealso:: `mapThemeCollection`
+
+        .. versionadded:: 3.6
+        """
+    def mapThemeCollection(self) -> typing.Optional[_core.QgsMapThemeCollection]:
+        """Returns pointer to the collection of map themes. Normally this would be
+        `QgsProject.mapThemeCollection()` of the currently used
+        project. Without a valid map theme collection object it is not possible
+        to resolve map themes from their names.
+
+        .. versionadded:: 3.6
+        """
+    def setPathResolver(self, resolver: _core.QgsPathResolver) -> None:
+        """Sets the path ``resolver`` for conversion between relative and absolute
+        paths during rendering operations, e.g. for resolving relative symbol
+        paths.
+
+        .. seealso:: `pathResolver`
+        """
+    def pathResolver(self) -> _core.QgsPathResolver:
+        """Returns the path resolver for conversion between relative and absolute
+        paths during rendering operations, e.g. for resolving relative symbol
+        paths.
+
+        .. seealso:: `setPathResolver`
+        """
+    def setTransformContext(self, context: _core.QgsCoordinateTransformContext) -> None:
+        """Sets the coordinate transform ``context``, which stores various
+        information regarding which datum transforms should be used when
+        transforming points from a source to destination coordinate reference
+        system.
+
+        .. seealso:: `transformContext`
+        """
+    def transformContext(self) -> _core.QgsCoordinateTransformContext:
+        """Returns the coordinate transform context, which stores various
+        information regarding which datum transforms should be used when
+        transforming points from a source to destination coordinate reference
+        system.
+
+        .. seealso:: `setTransformContext`
+        """
+    def sceneMode(self) -> _core.Qgis.SceneMode:
+        """Returns mode of the 3D scene - whether it is represented as a globe
+        (when using Geocentric CRS such as EPSG:4978), or whether it is a local
+        scene when using a projected CRS.
+
+        In case of globe scene, we always show the whole globe and
+        `Qgs3DMapSettings.extent` is ignored.
+
+        .. versionadded:: 3.44
+        """
+    def crs(self) -> _core.QgsCoordinateReferenceSystem:
+        """Returns coordinate reference system used in the 3D scene.
+
+        .. seealso:: `setCrs`
+        """
+    def setCrs(self, crs: _core.QgsCoordinateReferenceSystem) -> None:
+        """Sets coordinate reference system used in the 3D scene.
+
+        .. seealso:: `crs`
+        """
+    def worldToMapCoordinates(self, worldCoords: _core.QgsVector3D) -> _core.QgsVector3D:
+        """Converts 3D world coordinates to map coordinates (applies offset and
+        turns (x,y,z) into (x,-z,y))
+        """
+    def mapToWorldCoordinates(self, mapCoords: _core.QgsVector3D) -> _core.QgsVector3D:
+        """Converts map coordinates to 3D world coordinates (applies offset and
+        turns (x,y,z) into (x,-z,y))
+        """
+    def origin(self) -> _core.QgsVector3D:
+        """Returns coordinates in map CRS at which 3D scene has origin (0,0,0).
+
+        .. seealso:: `setOrigin`
+        """
+    def setOrigin(self, origin: _core.QgsVector3D) -> None:
+        """Sets coordinates in map CRS at which our 3D world has origin (0,0,0)
+
+        We move the 3D world origin to the center of the extent of our terrain:
+        this is done to minimize the impact of numerical errors when operating
+        with 32-bit floats. Unfortunately this is not enough when working with a
+        large area (still results in jitter with scenes spanning hundreds of
+        kilometers and zooming in a lot).
+
+        Need to look into more advanced techniques like "relative to center" or
+        "relative to eye" to improve the precision.
+
+        .. seealso:: `origin`
+        """
+    def setExtent(self, extent: _core.QgsRectangle) -> None:
+        """Sets the 3D scene's 2D ``extent`` in the 3D scene's CRS, while also
+        setting the scene's origin to the extent's center
+
+        This needs to be called during initialization, as terrain will only be
+        generated within this extent and layer 3D data will only be loaded
+        within this extent too.
+
+        The extent is ignored in globe scenes (which always show the whole
+        globe).
+
+        .. seealso:: `setOrigin`
+
+        .. seealso:: `setCrs`
+
+        .. versionadded:: 3.30
+        """
+    def extent(self) -> _core.QgsRectangle:
+        """Returns the 3D scene's 2D extent in the 3D scene's CRS
+
+        The extent is ignored in globe scenes (which always show the whole
+        globe).
+
+        .. seealso:: `crs`
+
+        .. versionadded:: 3.30
+        """
+    def resolveReferences(self, project: _core.QgsProject) -> None:
+        """Resolves references to other objects (map layers) after the call to
+        `Qgs3DMapSettings.readXml`
+        """
+    def writeXml(self, doc: QtXml.QDomDocument, context: _core.QgsReadWriteContext) -> QtXml.QDomElement:
+        """Writes configuration to a DOM element, to be used later with
+        `Qgs3DMapSettings.readXml`
+        """
+    def readXml(self, elem: QtXml.QDomElement, context: _core.QgsReadWriteContext) -> None:
+        """Reads configuration from a DOM element previously written by
+        `Qgs3DMapSettings.writeXml`
+        """
 
 
 class Qgs3DMapTool(QtCore.QObject):
+    """Base class for map tools operating on 3D map canvas.
+
+    .. versionadded:: 4.0
+
+    Qgs3DMapTool(canvas: Qgs3DMapCanvas|None)
+    Base constructor for a Qgs3DMapTool for the specified ``canvas``
+    """
 
     def __init__(self, canvas: typing.Optional['Qgs3DMapCanvas']) -> None: ...
 
-    def canvas(self) -> typing.Optional['Qgs3DMapCanvas']: ...
-    def cursor(self) -> QtGui.QCursor: ...
-    def deactivate(self) -> None: ...
-    def activate(self) -> None: ...
-    def mouseWheelEvent(self, event: typing.Optional[QtGui.QWheelEvent]) -> None: ...
-    def keyReleaseEvent(self, event: typing.Optional[QtGui.QKeyEvent]) -> None: ...
-    def keyPressEvent(self, event: typing.Optional[QtGui.QKeyEvent]) -> None: ...
-    def mouseMoveEvent(self, event: typing.Optional[QtGui.QMouseEvent]) -> None: ...
-    def mouseReleaseEvent(self, event: typing.Optional[QtGui.QMouseEvent]) -> None: ...
-    def mousePressEvent(self, event: typing.Optional[QtGui.QMouseEvent]) -> None: ...
+    def canvas(self) -> typing.Optional['Qgs3DMapCanvas']:
+        """Returns the parent Qgs3DMapCanvas"""
+    def cursor(self) -> QtGui.QCursor:
+        """Mouse cursor to be used when the tool is active"""
+    def deactivate(self) -> None:
+        """Called when map tool is being deactivated"""
+    def activate(self) -> None:
+        """Called when set as currently active map tool"""
+    def mouseWheelEvent(self, event: typing.Optional[QtGui.QWheelEvent]) -> None:
+        """Reimplement to handle mouse wheel ``event`` forwarded by the parent
+        Qgs3DMapCanvas
+        """
+    def keyReleaseEvent(self, event: typing.Optional[QtGui.QKeyEvent]) -> None:
+        """Reimplement to handle key release ``event`` forwarded by the parent
+        Qgs3DMapCanvas
+        """
+    def keyPressEvent(self, event: typing.Optional[QtGui.QKeyEvent]) -> None:
+        """Reimplement to handle key press ``event`` forwarded by the parent
+        Qgs3DMapCanvas
+        """
+    def mouseMoveEvent(self, event: typing.Optional[QtGui.QMouseEvent]) -> None:
+        """Reimplement to handle mouse move ``event`` forwarded by the parent
+        Qgs3DMapCanvas
+        """
+    def mouseReleaseEvent(self, event: typing.Optional[QtGui.QMouseEvent]) -> None:
+        """Reimplement to handle mouse release ``event`` forwarded by the parent
+        Qgs3DMapCanvas
+        """
+    def mousePressEvent(self, event: typing.Optional[QtGui.QMouseEvent]) -> None:
+        """Reimplement to handle mouse ``event`` forwarded by the parent
+        Qgs3DMapCanvas
+        """
 
 
 class Qgs3DTypes(PyQt6.sip.wrapper):
+    """Defines enumerations and other auxiliary types for QGIS 3D.
+
+    .. warning::
+
+       This is not considered stable API, and may change in future QGIS releases. It is
+       exposed to the Python bindings as a tech preview only.
+
+    .. versionadded:: 3.4
+    """
 
     class Flag3DRenderer(enum.IntEnum):
         Main3DRenderer = ... # type: Qgs3DTypes.Flag3DRenderer
@@ -343,25 +1184,108 @@ class Qgs3DTypes(PyQt6.sip.wrapper):
 
 
 class Qgs3DMapCanvas(QtGui.QWindow):
+    """Convenience wrapper to simplify the creation of a 3D window ready to be
+    used with QGIS.
+
+    .. note::
+
+       This is a port of qtwindow3d which does not set the default surface when initialized.
+
+    .. note::
+
+       The default surface must be set before the construction of the QApplication when using shared OpenGL context.
+
+    .. note::
+
+       This is required in order to use QT3d and QtWebEngine at the same time.
+
+    .. versionadded:: 3.36
+    """
 
     def __init__(self) -> None: ...
 
     def eventFilter(self, watched: typing.Optional[QtCore.QObject], event: typing.Optional[QtCore.QEvent]) -> bool: ...
-    def resizeEvent(self, a0: typing.Optional[QtGui.QResizeEvent]) -> None: ...
-    def showEvent(self, e: typing.Optional[QtGui.QShowEvent]) -> None: ...
-    def crossSectionEnabledChanged(self, enabled: bool) -> None: ...
-    def crossSection(self) -> 'QgsCrossSection': ...
-    def setCrossSection(self, crossSection: 'QgsCrossSection') -> None: ...
-    def crossSectionEnabled(self) -> bool: ...
-    def castRay(self, screenPoint: QtCore.QPoint, context: 'QgsRayCastContext') -> 'QgsRayCastResult': ...
-    def mapTool(self) -> typing.Optional[Qgs3DMapTool]: ...
-    def setMapTool(self, tool: typing.Optional[Qgs3DMapTool]) -> None: ...
-    def cameraController(self) -> typing.Optional['QgsCameraController']: ...
-    def scene(self) -> typing.Optional[Qgs3DMapScene]: ...
-    def mapSettings(self) -> typing.Optional[Qgs3DMapSettings]: ...
+    def resizeEvent(self, a0: typing.Optional[QtGui.QResizeEvent]) -> None:
+        """Resets the aspect ratio of the 3D window."""
+    def showEvent(self, e: typing.Optional[QtGui.QShowEvent]) -> None:
+        """Manages the display events specified in e."""
+    def crossSectionEnabledChanged(self, enabled: bool) -> None:
+        """Emitted when the cross section mode is enabled or disabled
+
+        .. versionadded:: 4.0
+        """
+    def crossSection(self) -> 'QgsCrossSection':
+        """Returns the current cross section definition for the 3D map canvas.
+
+        .. versionadded:: 4.0
+        """
+    def setCrossSection(self, crossSection: 'QgsCrossSection') -> None:
+        """Sets the cross section definition for the 3D map canvas. The 3D scene
+        will be clipped by four clipping planes, defined by a cross section line
+        segment and two parallel segments at cross section half width to each
+        side. Passing an invalid cross section will disable the clipping.
+
+        :param crossSection: The cross section definition
+
+        .. versionadded:: 4.0
+        """
+    def crossSectionEnabled(self) -> bool:
+        """Returns ``True`` if the cross section mode is enabled or the 3d scene
+        has other clipping planes applied
+
+        .. versionadded:: 4.0
+        """
+    def castRay(self, screenPoint: QtCore.QPoint, context: 'QgsRayCastContext') -> 'QgsRayCastResult':
+        """Casts a ray towards the 3d scene and returns information about the
+        intersected 3d entities.
+
+        :param screenPoint: The ray starts from the current camera center and
+                            goes through this point (in pixel coordinates,
+                            originating at top left corner).
+        :param context: A context object defining parameters for the ray
+                        casting.
+
+        .. versionadded:: 4.0
+        """
+    def mapTool(self) -> typing.Optional[Qgs3DMapTool]:
+        """Returns the active map tool that will receive events from the 3D canvas.
+        If the tool is ``None``, events will be used for camera manipulation.
+
+        .. versionadded:: 4.0
+        """
+    def setMapTool(self, tool: typing.Optional[Qgs3DMapTool]) -> None:
+        """Sets the active map ``tool`` that will receive events from the 3D
+        canvas. Does not transfer ownership. If the tool is ``None``, events
+        will be used for camera manipulation.
+
+        .. versionadded:: 4.0
+        """
+    def cameraController(self) -> typing.Optional['QgsCameraController']:
+        """Returns access to the view's camera controller. Returns ``None`` if the
+        scene has not been initialized yet with
+        `Qgs3DMapCanvas.setMapSettings`
+        """
+    def scene(self) -> typing.Optional[Qgs3DMapScene]:
+        """Returns access to the 3D scene (root 3D entity)"""
+    def mapSettings(self) -> typing.Optional[Qgs3DMapSettings]:
+        """Returns access to the 3D scene configuration"""
 
 
 class QgsCrossSection(PyQt6.sip.wrapper):
+    """Encapsulates the definition of a cross section in 3D map coordinates.
+
+    Defined by a line (p1, p2) and a half-width (extent from the line).
+
+    .. versionadded:: 4.0
+
+    QgsCrossSection()
+    Constructs an invalid cross section
+
+    QgsCrossSection(p1: QgsPoint, p2: QgsPoint, halfWidth: float)
+    Constructs a cross section defined by two points and a half-width
+
+    QgsCrossSection(a0: QgsCrossSection)
+    """
 
     @typing.overload
     def __init__(self) -> None: ...
@@ -370,81 +1294,234 @@ class QgsCrossSection(PyQt6.sip.wrapper):
     @typing.overload
     def __init__(self, a0: 'QgsCrossSection') -> None: ...
 
-    def nudgeRight(self, distance: float) -> None: ...
-    def nudgeLeft(self, distance: float) -> None: ...
-    def asGeometry(self, ct: typing.Optional[_core.QgsCoordinateTransform] = ...) -> _core.QgsGeometry: ...
-    def setHalfWidth(self, halfWidth: float) -> None: ...
-    def halfWidth(self) -> float: ...
-    def endPoint(self) -> _core.QgsPoint: ...
-    def startPoint(self) -> _core.QgsPoint: ...
-    def isValid(self) -> bool: ...
+    def nudgeRight(self, distance: float) -> None:
+        """Nudges the cross section to the right by the specified distance"""
+    def nudgeLeft(self, distance: float) -> None:
+        """Nudges the cross section to the left by the specified distance"""
+    def asGeometry(self, ct: typing.Optional[_core.QgsCoordinateTransform] = ...) -> _core.QgsGeometry:
+        """Returns the cross section extent as a geometry (Polygon or LineString).
+        If a coordinate transform is provided, the geometry is transformed. The
+        transform should be from the cross section CRS (3D map CRS) to the
+        destination CRS (2D map canvas CRS).
+        """
+    def setHalfWidth(self, halfWidth: float) -> None:
+        """Sets the half-width of the cross section"""
+    def halfWidth(self) -> float:
+        """Returns the half-width of the cross section"""
+    def endPoint(self) -> _core.QgsPoint:
+        """Returns the end point of the cross section"""
+    def startPoint(self) -> _core.QgsPoint:
+        """Returns the start point of the cross section"""
+    def isValid(self) -> bool:
+        """Returns cross section validity. A valid cross section has distinct start
+        and end points and a positive half-width.
+        """
 
 
 class QgsVectorLayer3DTilingSettings(PyQt6.sip.wrapper):
+    """Defines configuration of how a vector layer gets tiled for 3D rendering.
+
+    Root node has the layer's extent and geometry error is set as a fraction
+    of the extent (see `maximumLeafExtent`) Child nodes are
+    created using quadtree approach - a node gets four children, each having
+    their width/height (2D extent) and geometry error halved.
+
+    For example a root tile that is 1'000 meters wide will get geometry
+    error set as 10 meters.
+
+    When loading data for each tile, we fetch up to
+    `maximumChunkFeatures` features. If the limit is hit, we will
+    recursively create children, so that user gets to see more features when
+    zoomed in. If the geographical extent is very large (see
+    `maximumLeafExtent`), we would still recursively create
+    children, even if the limit of features is not hit, to avoid jitter due
+    to numerical precision issues.
+
+    .. versionadded:: 3.12
+    """
 
     @typing.overload
     def __init__(self) -> None: ...
     @typing.overload
     def __init__(self, a0: 'QgsVectorLayer3DTilingSettings') -> None: ...
 
-    def readXml(self, elem: QtXml.QDomElement) -> None: ...
-    def writeXml(self, elem: QtXml.QDomElement) -> None: ...
-    def setMaximumChunkFeatures(self, value: int) -> None: ...
-    def maximumChunkFeatures(self) -> int: ...
-    def showBoundingBoxes(self) -> bool: ...
-    def setShowBoundingBoxes(self, enabled: bool) -> None: ...
+    def readXml(self, elem: QtXml.QDomElement) -> None:
+        """Reads content of the object from XML"""
+    def writeXml(self, elem: QtXml.QDomElement) -> None:
+        """Writes content of the object to XML"""
+    def setMaximumChunkFeatures(self, value: int) -> None:
+        """Sets the maximum number of features that will be fetched in any chunk.
+        If more features than the maximum belong to the chunk, further features
+        will become available in child nodes. This is meant as a control for
+        performance - fewer features mean faster load times, but user needs to
+        zoom in more to see everything.
+
+        .. seealso:: `maximumChunkFeatures`
+
+        .. versionadded:: 4.0
+        """
+    def maximumChunkFeatures(self) -> int:
+        """Returns the maximum number of features that will be fetched in any
+        chunk. If more features than the maximum belong to the chunk, further
+        features will become available in child nodes. This is meant as a
+        control for performance - fewer features mean faster load times, but
+        user needs to zoom in more to see everything.
+
+        .. seealso:: `setMaximumChunkFeatures`
+
+        .. versionadded:: 4.0
+        """
+    def showBoundingBoxes(self) -> bool:
+        """Returns whether to display bounding boxes of entity's tiles (for
+        debugging)
+        """
+    def setShowBoundingBoxes(self, enabled: bool) -> None:
+        """Sets whether to display bounding boxes of entity's tiles (for debugging)"""
     @deprecated("""Since 4.0. Tiling is now done based on maximumScreenError() and maximumChunkFeatures().""")
-    def setZoomLevelsCount(self, count: int) -> None: ...
+    def setZoomLevelsCount(self, count: int) -> None:
+        """Sets number of zoom levels. See
+        `QgsVectorLayer3DTilingSettings.zoomLevelsCount` documentation
+        for more details.
+
+        .. deprecated:: 4.0
+
+           Tiling is now done based on `QgsVectorLayer3DTilingSettings.maximumScreenError` and `QgsVectorLayer3DTilingSettings.maximumChunkFeatures`.
+        """
     @deprecated("""Since 4.0. Tiling is now done based on maximumScreenError() and maximumChunkFeatures().""")
-    def zoomLevelsCount(self) -> int: ...
+    def zoomLevelsCount(self) -> int:
+        """Returns number of zoom levels. One zoom level means there will be one
+        tile. Every extra zoom level multiplies number of tiles by four. For
+        example, three zoom levels will produce 16 tiles at the highest zoom
+        level. It is therefore recommended to keep the number of zoom levels low
+        to prevent excessive number of tiles.
+
+        .. deprecated:: 4.0
+
+           Tiling is now done based on `QgsVectorLayer3DTilingSettings.maximumScreenError` and `QgsVectorLayer3DTilingSettings.maximumChunkFeatures`.
+        """
 
 
 class QgsAbstractVectorLayer3DRenderer(_core.QgsAbstract3DRenderer):
+    """Base class for 3D renderers that are based on vector layers.
+
+    .. versionadded:: 3.12
+    """
 
     def __init__(self) -> None: ...
 
-    def readXmlBaseProperties(self, elem: QtXml.QDomElement, context: _core.QgsReadWriteContext) -> None: ...
-    def writeXmlBaseProperties(self, elem: QtXml.QDomElement, context: _core.QgsReadWriteContext) -> None: ...
-    def copyBaseProperties(self, r: typing.Optional['QgsAbstractVectorLayer3DRenderer']) -> None: ...
+    def readXmlBaseProperties(self, elem: QtXml.QDomElement, context: _core.QgsReadWriteContext) -> None:
+        """The type of the None singleton."""
+    def writeXmlBaseProperties(self, elem: QtXml.QDomElement, context: _core.QgsReadWriteContext) -> None:
+        """The type of the None singleton."""
+    def copyBaseProperties(self, r: typing.Optional['QgsAbstractVectorLayer3DRenderer']) -> None:
+        """Copies common properties of this object to another object"""
     def resolveReferences(self, project: _core.QgsProject) -> None: ...
-    def tilingSettings(self) -> QgsVectorLayer3DTilingSettings: ...
-    def setTilingSettings(self, settings: QgsVectorLayer3DTilingSettings) -> None: ...
-    def layer(self) -> typing.Optional[_core.QgsVectorLayer]: ...
-    def setLayer(self, layer: typing.Optional[_core.QgsVectorLayer]) -> None: ...
+    def tilingSettings(self) -> QgsVectorLayer3DTilingSettings:
+        """Returns tiling settings of the renderer"""
+    def setTilingSettings(self, settings: QgsVectorLayer3DTilingSettings) -> None:
+        """Sets tiling settings of the renderer"""
+    def layer(self) -> typing.Optional[_core.QgsVectorLayer]:
+        """Returns vector layer associated with the renderer"""
+    def setLayer(self, layer: typing.Optional[_core.QgsVectorLayer]) -> None:
+        """Sets vector layer associated with the renderer"""
 
 
 class QgsAnnotationLayer3DRendererMetadata(_core.Qgs3DRendererAbstractMetadata):
+    """Metadata for annotation layer 3D renderer to allow creation of its
+    instances from XML.
+
+    .. warning::
+
+       This is not considered stable API, and may change in future QGIS releases. It is
+       exposed to the Python bindings as a tech preview only.
+
+    .. versionadded:: 4.0
+    """
 
     @typing.overload
     def __init__(self) -> None: ...
     @typing.overload
     def __init__(self, a0: 'QgsAnnotationLayer3DRendererMetadata') -> None: ...
 
-    def createRenderer(self, elem: QtXml.QDomElement, context: _core.QgsReadWriteContext) -> typing.Optional[_core.QgsAbstract3DRenderer]: ...
+    def createRenderer(self, elem: QtXml.QDomElement, context: _core.QgsReadWriteContext) -> typing.Optional[_core.QgsAbstract3DRenderer]:
+        """Creates an instance of a 3D renderer based on a DOM element with
+        renderer configuration
+        """
 
 
 class QgsAnnotationLayer3DRenderer(_core.QgsAbstract3DRenderer):
+    """3D renderers for annotation layers.
+
+    .. versionadded:: 4.0
+    """
 
     def __init__(self) -> None: ...
 
-    def setTextFormat(self, format: _core.QgsTextFormat) -> None: ...
-    def textFormat(self) -> _core.QgsTextFormat: ...
-    def setShowCalloutLines(self, show: bool) -> None: ...
-    def showCalloutLines(self) -> bool: ...
-    def setZOffset(self, offset: float) -> None: ...
-    def zOffset(self) -> float: ...
-    def setAltitudeClamping(self, clamping: _core.Qgis.AltitudeClamping) -> None: ...
-    def altitudeClamping(self) -> _core.Qgis.AltitudeClamping: ...
+    def setTextFormat(self, format: _core.QgsTextFormat) -> None:
+        """Sets the text ``format`` to use for rendering text annotations in 3D.
+
+        .. seealso:: `textFormat`
+        """
+    def textFormat(self) -> _core.QgsTextFormat:
+        """Returns the text format to use for rendering text annotations in 3D.
+
+        .. seealso:: `setTextFormat`
+        """
+    def setShowCalloutLines(self, show: bool) -> None:
+        """Sets whether callout lines are shown, vertically joining the annotations
+        to the terrain.
+
+        .. seealso:: `showCalloutLines`
+        """
+    def showCalloutLines(self) -> bool:
+        """Returns ``True`` if callout lines are shown, vertically joining the
+        annotations to the terrain.
+
+        .. seealso:: `setShowCalloutLines`
+        """
+    def setZOffset(self, offset: float) -> None:
+        """Sets the z ``offset``, which is a fixed offset amount which will be
+        added to z values for the annotations.
+
+        .. seealso:: `zOffset`
+        """
+    def zOffset(self) -> float:
+        """Returns the z offset, which is a fixed offset amount which should be
+        added to z values for the annotations.
+
+        .. seealso:: `setZOffset`
+        """
+    def setAltitudeClamping(self, clamping: _core.Qgis.AltitudeClamping) -> None:
+        """Sets the altitude ``clamping`` method, which determines the vertical
+        position of annotations.
+
+        .. seealso:: `altitudeClamping`
+        """
+    def altitudeClamping(self) -> _core.Qgis.AltitudeClamping:
+        """Returns the altitude clamping method, which determines the vertical
+        position of annotations.
+
+        .. seealso:: `setAltitudeClamping`
+        """
     def resolveReferences(self, project: _core.QgsProject) -> None: ...
     def readXml(self, elem: QtXml.QDomElement, context: _core.QgsReadWriteContext) -> None: ...
     def writeXml(self, elem: QtXml.QDomElement, context: _core.QgsReadWriteContext) -> None: ...
     def clone(self) -> typing.Optional['QgsAnnotationLayer3DRenderer']: ...
     def type(self) -> str: ...
-    def layer(self) -> typing.Optional[_core.QgsAnnotationLayer]: ...
-    def setLayer(self, layer: typing.Optional[_core.QgsAnnotationLayer]) -> None: ...
+    def layer(self) -> typing.Optional[_core.QgsAnnotationLayer]:
+        """Returns the annotation layer associated with the renderer.
+
+        .. seealso:: `setLayer`
+        """
+    def setLayer(self, layer: typing.Optional[_core.QgsAnnotationLayer]) -> None:
+        """Sets the annotation layer associated with the renderer.
+
+        .. seealso:: `layer`
+        """
 
 
 class QgsCameraController(QtCore.QObject):
+    """Object that controls camera movement based on user input."""
 
     depthBufferReady: typing.ClassVar[QtCore.pyqtSignal]
     cameraRotationCenterChanged: typing.ClassVar[QtCore.pyqtSignal]
@@ -453,63 +1530,278 @@ class QgsCameraController(QtCore.QObject):
     cameraMovementSpeedChanged: typing.ClassVar[QtCore.pyqtSignal]
     navigationModeChanged: typing.ClassVar[QtCore.pyqtSignal]
     cameraChanged: typing.ClassVar[QtCore.pyqtSignal]
-    def sampleDepthBuffer(self, px: int, py: int) -> float: ...
-    def moveCenterPoint(self, posDiff: QtGui.QVector3D) -> None: ...
-    def depthBufferCaptured(self, depthImage: QtGui.QImage) -> None: ...
-    def setCameraNavigationMode(self, navigationMode: _core.Qgis.NavigationMode) -> None: ...
-    def rotateCameraToBottom(self) -> None: ...
-    def rotateCameraToWest(self) -> None: ...
-    def rotateCameraToSouth(self) -> None: ...
-    def rotateCameraToEast(self) -> None: ...
-    def rotateCameraToNorth(self) -> None: ...
-    def rotateCameraToTop(self) -> None: ...
-    def rotateCameraToHome(self) -> None: ...
-    def setCrossSectionSideView(self, crossSection: QgsCrossSection) -> None: ...
-    def origin(self) -> _core.QgsVector3D: ...
-    def resetGlobe(self, distance: float, lat: float = ..., lon: float = ...) -> None: ...
-    def globeUpdateHeadingAngle(self, angleDiff: float) -> None: ...
-    def globeUpdatePitchAngle(self, angleDiff: float) -> None: ...
-    def globeZoom(self, factor: float) -> None: ...
-    def globeMoveCenterPoint(self, latDiff: float, lonDiff: float) -> None: ...
-    def hasInputHandlersEnabled(self) -> bool: ...
-    def setInputHandlersEnabled(self, enable: bool) -> None: ...
-    def setOrigin(self, origin: _core.QgsVector3D) -> None: ...
-    def keyboardEventFilter(self, event: typing.Optional[QtGui.QKeyEvent]) -> bool: ...
+    def sampleDepthBuffer(self, px: int, py: int) -> float:
+        """Returns the minimum depth value in the square [px - 3, px + 3] * [py -
+        3, py + 3] Returned depth is in range [0..1] and it is returned as it
+        was written to the depth buffer (not linearized, see
+        Qgs3DUtils.screenPointToWorldPos() for conversion to linear depth).
+        Returned value 1 means there void around that pixel (no 3D objects).
+
+        .. versionadded:: 4.2
+        """
+    def moveCenterPoint(self, posDiff: QtGui.QVector3D) -> None:
+        """Moves camera position by the given difference vector in world
+        coordinates
+
+        .. versionadded:: 4.0
+        """
+    def depthBufferCaptured(self, depthImage: QtGui.QImage) -> None:
+        """Sets the depth buffer image used by the camera controller to calculate
+        world position from a pixel's coordinates and depth
+
+        .. versionadded:: 3.24
+        """
+    def setCameraNavigationMode(self, navigationMode: _core.Qgis.NavigationMode) -> None:
+        """Sets the navigation mode used by the camera controller.
+
+        .. versionadded:: 3.18
+        """
+    def rotateCameraToBottom(self) -> None:
+        """.. versionadded:: 3.44"""
+    def rotateCameraToWest(self) -> None:
+        """.. versionadded:: 3.44"""
+    def rotateCameraToSouth(self) -> None:
+        """.. versionadded:: 3.44"""
+    def rotateCameraToEast(self) -> None:
+        """.. versionadded:: 3.44"""
+    def rotateCameraToNorth(self) -> None:
+        """.. versionadded:: 3.44"""
+    def rotateCameraToTop(self) -> None:
+        """.. versionadded:: 3.44"""
+    def rotateCameraToHome(self) -> None:
+        """.. versionadded:: 3.44"""
+    def setCrossSectionSideView(self, crossSection: QgsCrossSection) -> None:
+        """Sets the cross section side view definition for the 3D map canvas. The
+        camera will be positioned to look at the cross section from the side.
+
+        .. versionadded:: 4.0
+        """
+    def origin(self) -> _core.QgsVector3D:
+        """Returns the origin of the scene in map coordinates
+
+        .. versionadded:: 3.44
+        """
+    def resetGlobe(self, distance: float, lat: float = ..., lon: float = ...) -> None:
+        """Resets view of the globe to look at a particular location given as
+        latitude and longitude (in degrees) and distance from that point on
+        ellipsoid
+
+        .. versionadded:: 3.44
+        """
+    def globeUpdateHeadingAngle(self, angleDiff: float) -> None:
+        """Updates heading angle by the specified amount given as the angular
+        difference in degrees
+
+        .. versionadded:: 3.44
+        """
+    def globeUpdatePitchAngle(self, angleDiff: float) -> None:
+        """Updates pitch angle by the specified amount given as the angular
+        difference in degrees
+
+        .. versionadded:: 3.44
+        """
+    def globeZoom(self, factor: float) -> None:
+        """Moves camera closer or further away from the globe. Use factor greater
+        than one to zoom in, or less than one to zoom out.
+
+        .. versionadded:: 3.44
+        """
+    def globeMoveCenterPoint(self, latDiff: float, lonDiff: float) -> None:
+        """Orbits camera around the globe by the specified amount given as the
+        difference in latitude/longitude angles (in degrees)
+
+        .. note::
+
+           the final latitude gets clamped to 0-90 degrees, while the longitude does not get clamped
+
+        .. versionadded:: 3.44
+        """
+    def hasInputHandlersEnabled(self) -> bool:
+        """Returns whether the camera controller responds to mouse and keyboard
+        events
+
+        .. versionadded:: 3.44
+        """
+    def setInputHandlersEnabled(self, enable: bool) -> None:
+        """Sets whether the camera controller responds to mouse and keyboard events
+
+        .. versionadded:: 3.42
+        """
+    def setOrigin(self, origin: _core.QgsVector3D) -> None:
+        """Reacts to the shift of origin of the scene, updating camera pose and any
+        other member variables so that the origin stays at the same position
+        relative to other entities.
+
+        .. versionadded:: 3.42
+        """
+    def keyboardEventFilter(self, event: typing.Optional[QtGui.QKeyEvent]) -> bool:
+        """If the event is relevant, handles the event and returns ``True``,
+        otherwise ``False``.
+
+        .. versionadded:: 3.44
+        """
     @typing.overload
     @deprecated("""Since 3.44.4. Use version with oldDistanceFromCenterPoint argument instead.""")
-    def zoomCameraAroundPivot(self, oldCameraPosition: QtGui.QVector3D, zoomFactor: float, pivotPoint: QtGui.QVector3D) -> None: ...
+    def zoomCameraAroundPivot(self, oldCameraPosition: QtGui.QVector3D, zoomFactor: float, pivotPoint: QtGui.QVector3D) -> None:
+        """Zooms camera by given zoom factor (>1 one means zoom in) while keeping
+        the pivot point (given in world coordinates) at the same screen
+        coordinates after the zoom.
+
+        .. versionadded:: 3.42
+
+        .. deprecated:: 3.44.4
+
+           Use version with oldDistanceFromCenterPoint argument instead.
+        """
     @typing.overload
-    def zoomCameraAroundPivot(self, oldCameraPosition: QtGui.QVector3D, oldDistanceFromCenterPoint: float, zoomFactor: float, pivotPoint: QtGui.QVector3D) -> None: ...
-    def rotateCameraAroundPivot(self, newPitch: float, newHeading: float, pivotPoint: QtGui.QVector3D) -> None: ...
-    def rotateCamera(self, diffPitch: float, diffYaw: float) -> None: ...
-    def walkView(self, tx: float, ty: float, tz: float) -> None: ...
-    def moveView(self, tx: float, ty: float) -> None: ...
-    def setCameraHeadingAngle(self, angle: float) -> None: ...
-    def rotateAroundViewCenter(self, deltaYaw: float) -> None: ...
-    def tiltUpAroundViewCenter(self, deltaPitch: float) -> None: ...
-    def zoom(self, factor: float) -> None: ...
-    def readXml(self, elem: QtXml.QDomElement, savedOrigin: _core.QgsVector3D) -> None: ...
-    def writeXml(self, doc: QtXml.QDomDocument) -> QtXml.QDomElement: ...
-    def yaw(self) -> float: ...
-    def pitch(self) -> float: ...
-    def distance(self) -> float: ...
-    def cameraPose(self) -> 'QgsCameraPose': ...
-    def setCameraPose(self, camPose: 'QgsCameraPose', force: bool = ...) -> None: ...
-    def setLookingAtMapPoint(self, point: _core.QgsVector3D, distance: float, pitch: float, yaw: float) -> None: ...
-    def lookingAtMapPoint(self) -> _core.QgsVector3D: ...
-    def setLookingAtPoint(self, point: _core.QgsVector3D, distance: float, pitch: float, yaw: float) -> None: ...
-    def lookingAtPoint(self) -> _core.QgsVector3D: ...
-    def setViewFromTop(self, worldX: float, worldY: float, distance: float, yaw: float = ...) -> None: ...
-    def resetView(self, distance: float) -> None: ...
-    def frameTriggered(self, dt: float) -> None: ...
-    def setVerticalAxisInversion(self, inversion: _core.Qgis.VerticalAxisInversion) -> None: ...
-    def verticalAxisInversion(self) -> _core.Qgis.VerticalAxisInversion: ...
-    def setCameraMovementSpeed(self, movementSpeed: float) -> None: ...
-    def cameraMovementSpeed(self) -> float: ...
-    def cameraNavigationMode(self) -> _core.Qgis.NavigationMode: ...
+    def zoomCameraAroundPivot(self, oldCameraPosition: QtGui.QVector3D, oldDistanceFromCenterPoint: float, zoomFactor: float, pivotPoint: QtGui.QVector3D) -> None:
+        """Zooms camera by given zoom factor (>1 one means zoom in) while keeping
+        the pivot point (given in world coordinates) at the same screen
+        coordinates after the zoom.
+
+        .. versionadded:: 3.44.4
+        """
+    def rotateCameraAroundPivot(self, newPitch: float, newHeading: float, pivotPoint: QtGui.QVector3D) -> None:
+        """Rotates the camera around the pivot point (in world coordinates) to the
+        given new pitch and heading angle.
+
+        .. versionadded:: 3.42
+        """
+    def rotateCamera(self, diffPitch: float, diffYaw: float) -> None:
+        """Rotates the camera on itself.
+
+        :param diffPitch: the pitch difference
+        :param diffYaw: the yaw difference
+
+        .. versionadded:: 3.30
+        """
+    def walkView(self, tx: float, ty: float, tz: float) -> None:
+        """Walks into the map by ``tx``, ``ty``, and ``tz``
+
+        .. versionadded:: 3.30
+        """
+    def moveView(self, tx: float, ty: float) -> None:
+        """Move the map by ``tx`` and ``ty``"""
+    def setCameraHeadingAngle(self, angle: float) -> None:
+        """Set camera heading to ``angle`` (used for rotating the view)"""
+    def rotateAroundViewCenter(self, deltaYaw: float) -> None:
+        """Rotate clockwise the view by ``deltaYaw`` around the view center (camera
+        moves)
+        """
+    def tiltUpAroundViewCenter(self, deltaPitch: float) -> None:
+        """Tilt up the view by ``deltaPitch`` around the view center (camera moves)"""
+    def zoom(self, factor: float) -> None:
+        """Zoom the map by ``factor``"""
+    def readXml(self, elem: QtXml.QDomElement, savedOrigin: _core.QgsVector3D) -> None:
+        """Reads camera configuration from the given DOM element"""
+    def writeXml(self, doc: QtXml.QDomDocument) -> QtXml.QDomElement:
+        """Writes camera configuration to the given DOM element"""
+    def yaw(self) -> float:
+        """Returns yaw angle in degrees. Yaw value of zero means the camera is
+        pointing towards north. The angle should range from 0 to 360.
+
+        .. versionadded:: 3.4
+        """
+    def pitch(self) -> float:
+        """Returns pitch angle in degrees (0 = looking from the top, 90 = looking
+        from the side). The angle should range from 0 to 180.
+
+        .. versionadded:: 3.4
+        """
+    def distance(self) -> float:
+        """Returns distance of the camera from the point it is looking at. The
+        value should not be smaller than 10.
+
+        .. versionadded:: 3.4
+        """
+    def cameraPose(self) -> 'QgsCameraPose':
+        """Returns camera pose
+
+        .. versionadded:: 3.4
+        """
+    def setCameraPose(self, camPose: 'QgsCameraPose', force: bool = ...) -> None:
+        """Sets camera pose
+
+        .. versionadded:: 3.4
+        """
+    def setLookingAtMapPoint(self, point: _core.QgsVector3D, distance: float, pitch: float, yaw: float) -> None:
+        """Sets camera configuration like
+        `QgsCameraController.setLookingAtPoint`, but the point is
+        given in map coordinates
+
+        .. versionadded:: 3.44
+        """
+    def lookingAtMapPoint(self) -> _core.QgsVector3D:
+        """Returns the point in the map coordinates towards which the camera is
+        looking
+
+        .. versionadded:: 3.44
+        """
+    def setLookingAtPoint(self, point: _core.QgsVector3D, distance: float, pitch: float, yaw: float) -> None:
+        """Sets the complete camera configuration: the point towards it is looking
+        (in 3D world coordinates), the distance of the camera from the point,
+        pitch angle in degrees (0 = looking from the top, 90 = looking from the
+        side) and yaw angle in degrees.
+
+        .. versionadded:: 3.4
+        """
+    def lookingAtPoint(self) -> _core.QgsVector3D:
+        """Returns the point in the world coordinates towards which the camera is
+        looking
+        """
+    def setViewFromTop(self, worldX: float, worldY: float, distance: float, yaw: float = ...) -> None:
+        """Sets camera to look down towards given point in world coordinate, in
+        given distance from plane with zero elevation
+        """
+    def resetView(self, distance: float) -> None:
+        """Move camera back to the initial position (looking down towards origin of
+        world's coordinates)
+        """
+    def frameTriggered(self, dt: float) -> None:
+        """Called internally from 3D scene when a new frame is generated. Updates
+        camera according to keyboard/mouse input
+        """
+    def setVerticalAxisInversion(self, inversion: _core.Qgis.VerticalAxisInversion) -> None:
+        """Sets the vertical axis ``inversion`` behavior.
+
+        .. versionadded:: 3.18
+        """
+    def verticalAxisInversion(self) -> _core.Qgis.VerticalAxisInversion:
+        """Returns the vertical axis inversion behavior.
+
+        .. versionadded:: 3.18
+        """
+    def setCameraMovementSpeed(self, movementSpeed: float) -> None:
+        """Sets the camera movement speed
+
+        .. versionadded:: 3.18
+        """
+    def cameraMovementSpeed(self) -> float:
+        """Returns the camera movement speed
+
+        .. versionadded:: 3.18
+        """
+    def cameraNavigationMode(self) -> _core.Qgis.NavigationMode:
+        """Returns the navigation mode used by the camera controller.
+
+        .. versionadded:: 3.18
+        """
 
 
 class QgsCameraPose(PyQt6.sip.wrapper):
+    """Encapsulates camera pose in a 3D scene.
+
+    The pose is defined with the following parameters:
+
+    - center point - towards which point the camera is looking
+    - distance from the center point - how far is the camera from the point
+      towards which it is looking
+    - pitch angle - vertical rotation of the camera (0 degrees = camera
+      looking down, 90 degrees = camera looking from the side)
+    - yaw angle - horizontal rotation of the camera
+
+    .. versionadded:: 3.4
+    """
 
     @typing.overload
     def __init__(self) -> None: ...
@@ -518,29 +1810,80 @@ class QgsCameraPose(PyQt6.sip.wrapper):
 
     def __ne__(self, other: object): ...
     def __eq__(self, other: object): ...
-    def readXml(self, elem: QtXml.QDomElement) -> None: ...
-    def writeXml(self, doc: QtXml.QDomDocument) -> QtXml.QDomElement: ...
-    def setHeadingAngle(self, heading: float) -> None: ...
-    def headingAngle(self) -> float: ...
-    def setPitchAngle(self, pitch: float) -> None: ...
-    def pitchAngle(self) -> float: ...
-    def setDistanceFromCenterPoint(self, distance: float) -> None: ...
-    def distanceFromCenterPoint(self) -> float: ...
-    def setCenterPoint(self, point: _core.QgsVector3D) -> None: ...
-    def centerPoint(self) -> _core.QgsVector3D: ...
+    def readXml(self, elem: QtXml.QDomElement) -> None:
+        """Reads configuration from a DOM element previously written using
+        `QgsCameraPose.writeXml`
+        """
+    def writeXml(self, doc: QtXml.QDomDocument) -> QtXml.QDomElement:
+        """Writes configuration to a new DOM element and returns it"""
+    def setHeadingAngle(self, heading: float) -> None:
+        """Sets heading (yaw) angle in degrees"""
+    def headingAngle(self) -> float:
+        """Returns heading (yaw) angle in degrees"""
+    def setPitchAngle(self, pitch: float) -> None:
+        """Sets pitch angle in degrees"""
+    def pitchAngle(self) -> float:
+        """Returns pitch angle in degrees"""
+    def setDistanceFromCenterPoint(self, distance: float) -> None:
+        """Sets distance of the camera from the center point"""
+    def distanceFromCenterPoint(self) -> float:
+        """Returns distance of the camera from the center point"""
+    def setCenterPoint(self, point: _core.QgsVector3D) -> None:
+        """Sets center point (towards which point the camera is looking)"""
+    def centerPoint(self) -> _core.QgsVector3D:
+        """Returns center point (towards which point the camera is looking)"""
 
 
 class QgsCategorized3DRendererMetadata(_core.Qgs3DRendererAbstractMetadata):
+    """Metadata for Categorized 3D renderer to allow creation of its instances
+    from XML.
+
+    .. warning::
+
+       This is not considered stable API, and may change in future QGIS releases. It is
+       exposed to the Python bindings as a tech preview only.
+
+    .. versionadded:: 4.2
+    """
 
     @typing.overload
     def __init__(self) -> None: ...
     @typing.overload
     def __init__(self, a0: 'QgsCategorized3DRendererMetadata') -> None: ...
 
-    def createRenderer(self, elem: QtXml.QDomElement, context: _core.QgsReadWriteContext) -> typing.Optional[_core.QgsAbstract3DRenderer]: ...
+    def createRenderer(self, elem: QtXml.QDomElement, context: _core.QgsReadWriteContext) -> typing.Optional[_core.QgsAbstract3DRenderer]:
+        """Creates an instance of a 3D renderer Categorized on a DOM element with
+        renderer configuration
+        """
 
 
 class Qgs3DRendererCategory(PyQt6.sip.wrapper):
+    """Represents an individual category (class) from a
+    `QgsCategorized3DRenderer`.
+
+    .. warning::
+
+       This is not considered stable API, and may change in future QGIS releases. It is
+       exposed to the Python bindings as a tech preview only.
+
+    .. versionadded:: 4.2
+
+    Qgs3DRendererCategory()
+
+    Qgs3DRendererCategory(value: Any, symbol: QgsAbstract3DSymbol|None, render: bool = True)
+    Constructor for a new `QgsRendererCategory`, with the
+    specified ``value`` and ``symbol``.
+
+    If ``value`` is a list, then the category will match any of the values
+    from this list.
+
+    The ownership of ``symbol`` is transferred to the category.
+
+    The ``render`` argument indicates whether the category should initially
+    be rendered and appear checked in the layer tree.
+
+    Qgs3DRendererCategory(other: Qgs3DRendererCategory)
+    """
 
     @typing.overload
     def __init__(self) -> None: ...
@@ -549,44 +1892,206 @@ class Qgs3DRendererCategory(PyQt6.sip.wrapper):
     @typing.overload
     def __init__(self, other: 'Qgs3DRendererCategory') -> None: ...
 
-    def setRenderState(self, render: bool) -> None: ...
-    def setSymbol(self, symbol: typing.Optional[_core.QgsAbstract3DSymbol]) -> None: ...
-    def setValue(self, value: typing.Any) -> None: ...
-    def renderState(self) -> bool: ...
-    def symbol(self) -> typing.Optional[_core.QgsAbstract3DSymbol]: ...
-    def value(self) -> typing.Any: ...
+    def setRenderState(self, render: bool) -> None:
+        """Sets whether the category is currently enabled and should be rendered.
+
+        .. seealso:: `renderState`
+        """
+    def setSymbol(self, symbol: typing.Optional[_core.QgsAbstract3DSymbol]) -> None:
+        """Sets the symbol which will be used to render this category.
+
+        Ownership of the symbol is transferred to the category.
+
+        .. seealso:: `symbol`
+        """
+    def setValue(self, value: typing.Any) -> None:
+        """Sets the ``value`` corresponding to this category.
+
+        If ``value`` is a list, then the category will match any of the values
+        from this list.
+
+        .. seealso:: `value`
+        """
+    def renderState(self) -> bool:
+        """Returns ``True`` if the category is currently enabled and should be
+        rendered.
+
+        .. seealso:: `setRenderState`
+        """
+    def symbol(self) -> typing.Optional[_core.QgsAbstract3DSymbol]:
+        """Returns the symbol which will be used to render this category.
+
+        .. seealso:: `setSymbol`
+        """
+    def value(self) -> typing.Any:
+        """Returns the value corresponding to this category.
+
+        If the returned value is a list, then the category will match any of the
+        values from this list.
+
+        .. seealso:: `setValue`
+        """
 
 
 class QgsCategorized3DRenderer(QgsAbstractVectorLayer3DRenderer):
+    """Categorized 3D renderer.
+
+    Similar to Categorized 2D renderer and Categorized labeling, it allows
+    specification of rules for 3D symbols.
+
+    .. warning::
+
+       This is not considered stable API, and may change in future QGIS releases. It is
+       exposed to the Python bindings as a tech preview only.
+
+    .. versionadded:: 4.2
+
+    QgsCategorized3DRenderer(attributeName: str|None = '', categories: Iterable[Qgs3DRendererCategory] = [])
+    Construct renderer with the given categories
+    """
 
     def __init__(self, attributeName: typing.Optional[str] = ..., categories: collections.abc.Iterable[Qgs3DRendererCategory] = ...) -> None: ...
 
     def readXml(self, elem: QtXml.QDomElement, context: _core.QgsReadWriteContext) -> None: ...
     def writeXml(self, elem: QtXml.QDomElement, context: _core.QgsReadWriteContext) -> None: ...
-    def sortByValue(self, order: QtCore.Qt.SortOrder = ...) -> None: ...
+    def sortByValue(self, order: QtCore.Qt.SortOrder = ...) -> None:
+        """Sorts the existing categories by their value."""
     @staticmethod
-    def createCategories(values: collections.abc.Iterable[typing.Any], symbol: typing.Optional[_core.QgsAbstract3DSymbol], layer: typing.Optional[_core.QgsVectorLayer] = ..., attributeName: typing.Optional[str] = ...) -> list[Qgs3DRendererCategory]: ...
-    def moveCategory(self, from_: int, to: int) -> bool: ...
-    def deleteAllCategories(self) -> None: ...
-    def deleteCategory(self, catIndex: int) -> bool: ...
-    def addCategory(self, category: Qgs3DRendererCategory) -> None: ...
-    def updateCategoryRenderState(self, catIndex: int, render: bool) -> bool: ...
-    def updateCategorySymbol(self, catIndex: int, symbol: typing.Optional[_core.QgsAbstract3DSymbol]) -> bool: ...
-    def updateCategoryValue(self, catIndex: int, value: typing.Any) -> bool: ...
-    def updateColorRamp(self, ramp: typing.Optional[_core.QgsColorRamp]) -> None: ...
-    def setSourceColorRamp(self, ramp: typing.Optional[_core.QgsColorRamp]) -> None: ...
-    def sourceColorRamp(self) -> typing.Optional[_core.QgsColorRamp]: ...
-    def setSourceSymbol(self, symbol: typing.Optional[_core.QgsAbstract3DSymbol]) -> None: ...
-    def sourceSymbol(self) -> typing.Optional[_core.QgsAbstract3DSymbol]: ...
-    def setClassAttribute(self, attributeName: typing.Optional[str]) -> None: ...
-    def classAttribute(self) -> str: ...
-    def categories(self) -> list[Qgs3DRendererCategory]: ...
-    def updateSymbols(self, symbol: typing.Optional[_core.QgsAbstract3DSymbol]) -> None: ...
+    def createCategories(values: collections.abc.Iterable[typing.Any], symbol: typing.Optional[_core.QgsAbstract3DSymbol], layer: typing.Optional[_core.QgsVectorLayer] = ..., attributeName: typing.Optional[str] = ...) -> list[Qgs3DRendererCategory]:
+        """Create categories for a list of ``values``. The returned symbols in the
+        category list will be a modification of ``symbol``.
+
+        If ``layer`` and ``fieldName`` are specified it will try to find nicer
+        values to represent the description for the categories based on the
+        respective field configuration.
+        """
+    def moveCategory(self, from_: int, to: int) -> bool:
+        """Moves an existing category at index position from to index position to."""
+    def deleteAllCategories(self) -> None:
+        """Deletes all existing categories from the renderer.
+
+        .. seealso:: `deleteCategory`
+        """
+    def deleteCategory(self, catIndex: int) -> bool:
+        """Deletes the category with the specified index from the renderer.
+
+        .. seealso:: `deleteAllCategories`
+        """
+    def addCategory(self, category: Qgs3DRendererCategory) -> None:
+        """Adds a new ``category`` to the renderer.
+
+        .. seealso:: `categories`
+        """
+    def updateCategoryRenderState(self, catIndex: int, render: bool) -> bool:
+        """Changes the render state for the category with the specified index.
+
+        The render state indicates whether or not the category will be rendered,
+        and is reflected in whether the category is checked with the project's
+        layer tree.
+
+        .. seealso:: `updateCategoryValue`
+
+        .. seealso:: `updateCategorySymbol`
+        """
+    def updateCategorySymbol(self, catIndex: int, symbol: typing.Optional[_core.QgsAbstract3DSymbol]) -> bool:
+        """Changes the ``symbol`` for the category with the specified index.
+
+        Ownership of ``symbol`` is transferred to the renderer.
+
+        .. seealso:: `updateCategoryValue`
+
+        .. seealso:: `updateCategoryRenderState`
+        """
+    def updateCategoryValue(self, catIndex: int, value: typing.Any) -> bool:
+        """Changes the value for the category with the specified index.
+
+        If ``value`` is a list, then the category will match any of the values
+        from this list.
+
+        .. seealso:: `updateCategorySymbol`
+
+        .. seealso:: `updateCategoryRenderState`
+        """
+    def updateColorRamp(self, ramp: typing.Optional[_core.QgsColorRamp]) -> None:
+        """Update the color ramp used and all symbols colors.
+
+        :param ramp: color ramp. Ownership is transferred to the renderer
+        """
+    def setSourceColorRamp(self, ramp: typing.Optional[_core.QgsColorRamp]) -> None:
+        """Sets the source color ramp.
+
+        :param ramp: color ramp. Ownership is transferred to the renderer
+
+        .. seealso:: `sourceColorRamp`
+
+        .. seealso:: `setSourceSymbol`
+        """
+    def sourceColorRamp(self) -> typing.Optional[_core.QgsColorRamp]:
+        """Returns the source color ramp, from which each categories' color is
+        derived.
+
+        .. seealso:: `setSourceColorRamp`
+
+        .. seealso:: `sourceSymbol`
+        """
+    def setSourceSymbol(self, symbol: typing.Optional[_core.QgsAbstract3DSymbol]) -> None:
+        """Sets the source symbol for the renderer, which is the base symbol used
+        for the each categories' symbol before applying the categories' color.
+
+        :param symbol: source symbol, ownership is transferred to the renderer
+
+        .. seealso:: `sourceSymbol`
+
+        .. seealso:: `setSourceColorRamp`
+        """
+    def sourceSymbol(self) -> typing.Optional[_core.QgsAbstract3DSymbol]:
+        """Returns the renderer's source symbol, which is the base symbol used for
+        the each categories' symbol before applying the categories' color.
+
+        .. seealso:: `setSourceSymbol`
+
+        .. seealso:: `sourceColorRamp`
+        """
+    def setClassAttribute(self, attributeName: typing.Optional[str]) -> None:
+        """Sets the class attribute for the renderer, which is the field name or
+        expression string from the layer which will be matched against the
+        renderer categories.
+
+        .. seealso:: `classAttribute`
+        """
+    def classAttribute(self) -> str:
+        """Returns the class attribute for the renderer, which is the field name or
+        expression string from the layer which will be matched against the
+        renderer categories.
+
+        .. seealso:: `setClassAttribute`
+        """
+    def categories(self) -> list[Qgs3DRendererCategory]:
+        """Returns a list of all categories recognized by the renderer."""
+    def updateSymbols(self, symbol: typing.Optional[_core.QgsAbstract3DSymbol]) -> None:
+        """Update all the symbols but leave categories and colors. This method also
+        sets the source symbol for the renderer.
+
+        :param symbol: source symbol to use for categories. Ownership is not
+                       transferred.
+
+        .. seealso:: `setSourceSymbol`
+        """
     def clone(self) -> typing.Optional['QgsCategorized3DRenderer']: ...
     def type(self) -> str: ...
 
 
 class QgsFontTextureAtlas(PyQt6.sip.wrapper):
+    """Encapsulates a font texture atlas.
+
+    `QgsFontTextureAtlas` contains the packed texture atlas for a
+    font, along with the associated text metrics for rendering.
+
+    See `QgsFontTextureAtlasGenerator` for a class which
+    automatically creates texture atlases.
+
+    .. versionadded:: 4.0
+    """
 
     @typing.overload
     def __init__(self) -> None: ...
@@ -594,19 +2099,65 @@ class QgsFontTextureAtlas(PyQt6.sip.wrapper):
     def __init__(self, other: 'QgsFontTextureAtlas') -> None: ...
 
     def __len__(self) -> int: ...
-    def count(self) -> int: ...
-    def renderDebugTexture(self) -> QtGui.QImage: ...
-    def renderAtlasTexture(self) -> QtGui.QImage: ...
-    def textureRectForGrapheme(self, string: typing.Optional[str], graphemeIndex: int) -> QtCore.QRect: ...
-    def pixelOffsetForGrapheme(self, string: typing.Optional[str], graphemeIndex: int) -> QtCore.QPoint: ...
-    def totalWidth(self, string: typing.Optional[str]) -> int: ...
-    def graphemeCount(self, string: typing.Optional[str]) -> int: ...
-    def rect(self, grapheme: typing.Optional[str]) -> QtCore.QRect: ...
-    def atlasSize(self) -> QtCore.QSize: ...
-    def isValid(self) -> bool: ...
+    def count(self) -> int:
+        """Returns the number of textures in the atlas."""
+    def renderDebugTexture(self) -> QtGui.QImage:
+        """Renders a debug texture.
+
+        The debug texture renders all packed character rectangles with a unique
+        color, and can be used to visualize the solution.
+        """
+    def renderAtlasTexture(self) -> QtGui.QImage:
+        """Renders the combined texture atlas, containing all required characters."""
+    def textureRectForGrapheme(self, string: typing.Optional[str], graphemeIndex: int) -> QtCore.QRect:
+        """Returns the packed rectangle for the texture for the matching grapheme.
+
+        The ``string`` must match one of the strings passed to
+        `QgsFontTextureAtlasGenerator` when creating the texture
+        atlas.
+        """
+    def pixelOffsetForGrapheme(self, string: typing.Optional[str], graphemeIndex: int) -> QtCore.QPoint:
+        """Returns the pixel offset at which the texture for the matching grapheme
+        should be placed.
+
+        The ``string`` must match one of the strings passed to
+        `QgsFontTextureAtlasGenerator` when creating the texture
+        atlas.
+        """
+    def totalWidth(self, string: typing.Optional[str]) -> int:
+        """Returns the total width (in pixels) required for a given ``string``.
+
+        The ``string`` must match one of the strings passed to
+        `QgsFontTextureAtlasGenerator` when creating the texture
+        atlas.
+        """
+    def graphemeCount(self, string: typing.Optional[str]) -> int:
+        """Returns the number of graphemes to render for a given ``string``.
+
+        The ``string`` must match one of the strings passed to
+        `QgsFontTextureAtlasGenerator` when creating the texture
+        atlas.
+        """
+    def rect(self, grapheme: typing.Optional[str]) -> QtCore.QRect:
+        """Returns the packed rectangle for the texture for the specified
+        ``grapheme``.
+
+        :raises KeyError: if no texture for the specified grapheme exists.
+        """
+    def atlasSize(self) -> QtCore.QSize:
+        """Returns the total size required for the atlas, i.e. the total size for
+        the texture.
+        """
+    def isValid(self) -> bool:
+        """Returns ``True`` if the atlas is valid."""
 
 
 class QgsFontTextureAtlasGenerator(PyQt6.sip.wrapper):
+    """Generates texture atlases for a font by efficiently packing the
+    characters required for a set of strings.
+
+    .. versionadded:: 4.0
+    """
 
     @typing.overload
     def __init__(self) -> None: ...
@@ -614,10 +2165,23 @@ class QgsFontTextureAtlasGenerator(PyQt6.sip.wrapper):
     def __init__(self, a0: 'QgsFontTextureAtlasGenerator') -> None: ...
 
     @staticmethod
-    def create(format: _core.QgsTextFormat, strings: collections.abc.Iterable[typing.Optional[str]]) -> QgsFontTextureAtlas: ...
+    def create(format: _core.QgsTextFormat, strings: collections.abc.Iterable[typing.Optional[str]]) -> QgsFontTextureAtlas:
+        """Creates the texture atlas for a set of ``strings``, using the specified
+        text ``format``.
+        """
 
 
 class QgsLayoutItem3DMap(_core.QgsLayoutItem, _core.QgsTemporalRangeObject):
+    """Implements support of 3D map views in print layouts.
+
+    .. versionadded:: 3.4
+
+    QgsLayoutItem3DMap(layout: QgsLayout|None)
+    Constructor for QgsLayoutItem3DMap, with the specified parent
+    ``layout``.
+
+    Ownership is transferred to the layout.
+    """
 
     def __init__(self, layout: typing.Optional[_core.QgsLayout]) -> None: ...
 
@@ -626,79 +2190,200 @@ class QgsLayoutItem3DMap(_core.QgsLayoutItem, _core.QgsTemporalRangeObject):
     def draw(self, context: _core.QgsLayoutItemRenderContext) -> None: ...
     def refresh(self) -> None: ...
     def finalizeRestoreFromXml(self) -> None: ...
-    def displayName(self) -> str: ...
-    def assignFreeId(self) -> None: ...
-    def mapSettings(self) -> typing.Optional[Qgs3DMapSettings]: ...
-    def setMapSettings(self, settings: typing.Optional[Qgs3DMapSettings]) -> None: ...
-    def cameraPose(self) -> QgsCameraPose: ...
-    def setCameraPose(self, pose: QgsCameraPose) -> None: ...
+    def displayName(self) -> str:
+        """overridden to show "3D Map 1" type names"""
+    def assignFreeId(self) -> None:
+        """Sets the map `QgsLayoutItem3DMap.id` to a number not yet used
+        in the layout. The existing `QgsLayoutItem3DMap.id` is kept if
+        it is not in use.
+        """
+    def mapSettings(self) -> typing.Optional[Qgs3DMapSettings]:
+        """Returns map scene. May be ``None`` if not yet configured."""
+    def setMapSettings(self, settings: typing.Optional[Qgs3DMapSettings]) -> None:
+        """Configures map scene
+
+        Ownership is transferred to the item.
+        """
+    def cameraPose(self) -> QgsCameraPose:
+        """Returns camera view"""
+    def setCameraPose(self, pose: QgsCameraPose) -> None:
+        """Configures camera view"""
     def icon(self) -> QtGui.QIcon: ...
     def type(self) -> int: ...
     @staticmethod
-    def create(layout: typing.Optional[_core.QgsLayout]) -> typing.Optional['QgsLayoutItem3DMap']: ...
+    def create(layout: typing.Optional[_core.QgsLayout]) -> typing.Optional['QgsLayoutItem3DMap']:
+        """Returns a new 3D map item for the specified ``layout``.
+
+        The caller takes responsibility for deleting the returned object.
+        """
 
 
 class QgsRayCastContext(PyQt6.sip.wrapper):
+    """Responsible for defining parameters of the ray casting operations in 3D
+    map canvases.
+
+    .. versionadded:: 4.0
+    """
 
     @typing.overload
     def __init__(self) -> None: ...
     @typing.overload
     def __init__(self, a0: 'QgsRayCastContext') -> None: ...
 
-    def angleThreshold(self) -> float: ...
-    def setAngleThreshold(self, angle: float) -> None: ...
-    def maximumDistance(self) -> float: ...
-    def setMaximumDistance(self, distance: float) -> None: ...
-    def singleResult(self) -> bool: ...
-    def setSingleResult(self, enable: bool) -> None: ...
+    def angleThreshold(self) -> float:
+        """Sets an ``angle`` threshold in degrees for ray intersections,
+        effectively turning a ray into a cone.
+        """
+    def setAngleThreshold(self, angle: float) -> None:
+        """Sets an ``angle`` threshold in degrees for ray intersections,
+        effectively turning a ray into a cone.
+
+        .. note::
+
+           Currently only supported for point cloud layers.
+        """
+    def maximumDistance(self) -> float:
+        """The maximum distance from ray origin to look for hits when casting a
+        ray. Default value is -1, meaning that the far plane will be used as a
+        maximum distance.
+        """
+    def setMaximumDistance(self, distance: float) -> None:
+        """Sets the maximum ``distance`` from ray origin to look for hits when
+        casting a ray. Setting to -1 will set the maximum distance to the
+        camera's far plane.
+        """
+    def singleResult(self) -> bool:
+        """Returns whether to fetch only the closest hit for each layer or entity
+        type. If not set it defaults to ``True``.
+        """
+    def setSingleResult(self, enable: bool) -> None:
+        """Sets whether to fetch only the closest hit for each layer or entity
+        type. Setting this to ``False`` will return all ray hits.
+
+        .. note::
+
+           Currently only point cloud layers support ``False``.
+        """
 
 
 class QgsRayCastHit(PyQt6.sip.wrapper):
+    """Contains details about the ray intersecting entities when ray casting in
+    a 3D map canvas.
+
+    .. versionadded:: 4.0
+    """
 
     @typing.overload
     def __init__(self) -> None: ...
     @typing.overload
     def __init__(self, a0: 'QgsRayCastHit') -> None: ...
 
-    def setProperties(self, attributes: dict[typing.Optional[str], typing.Any]) -> None: ...
-    def setMapCoordinates(self, point: _core.QgsVector3D) -> None: ...
-    def setDistance(self, distance: float) -> None: ...
-    def properties(self) -> dict[str, typing.Any]: ...
-    def mapCoordinates(self) -> _core.QgsVector3D: ...
-    def distance(self) -> float: ...
+    def setProperties(self, attributes: dict[typing.Optional[str], typing.Any]) -> None:
+        """Sets the point cloud point ``attributes``, empty map if hit was not on a
+        point cloud point
+        """
+    def setMapCoordinates(self, point: _core.QgsVector3D) -> None:
+        """Sets the hit ``point`` position in 3d map coordinates"""
+    def setDistance(self, distance: float) -> None:
+        """Sets the hit's ``distance`` from the ray's origin"""
+    def properties(self) -> dict[str, typing.Any]:
+        """Returns a map with the properties of the intersected entity. For vector
+        layer hits, the FID value is stored in key "fid". For point cloud layer
+        hits, it contains the point attributes keys/values. For tiled scene
+        layer hits, it contains the intersecting node details.
+        """
+    def mapCoordinates(self) -> _core.QgsVector3D:
+        """Returns the hit position in 3d map coordinates"""
+    def distance(self) -> float:
+        """Returns the hit's distance from the ray's origin"""
 
 
 class QgsRayCastResult(PyQt6.sip.wrapper):
+    """Contains the results of ray casting operations in a 3D map canvas.
+
+    .. versionadded:: 4.0
+
+    QgsRayCastResult()
+    Ctor
+
+    QgsRayCastResult(a0: QgsRayCastResult)
+    """
 
     @typing.overload
     def __init__(self) -> None: ...
     @typing.overload
     def __init__(self, a0: 'QgsRayCastResult') -> None: ...
 
-    def addTerrainHits(self, hits: collections.abc.Iterable[QgsRayCastHit]) -> None: ...
-    def addLayerHits(self, layer: typing.Optional[_core.QgsMapLayer], hits: collections.abc.Iterable[QgsRayCastHit]) -> None: ...
-    def allHits(self) -> list[QgsRayCastHit]: ...
-    def terrainHits(self) -> list[QgsRayCastHit]: ...
-    def hasTerrainHits(self) -> bool: ...
-    def layerHits(self, layer: typing.Optional[_core.QgsMapLayer]) -> list[QgsRayCastHit]: ...
-    def layers(self) -> list[_core.QgsMapLayer]: ...
-    def hasLayerHits(self) -> bool: ...
-    def isEmpty(self) -> bool: ...
+    def addTerrainHits(self, hits: collections.abc.Iterable[QgsRayCastHit]) -> None:
+        """Adds all terrain ``hits`` to the result"""
+    def addLayerHits(self, layer: typing.Optional[_core.QgsMapLayer], hits: collections.abc.Iterable[QgsRayCastHit]) -> None:
+        """Adds all ``hits`` from ``layer`` to the result"""
+    def allHits(self) -> list[QgsRayCastHit]:
+        """Returns all the hits from both layer and terrain intersections"""
+    def terrainHits(self) -> list[QgsRayCastHit]:
+        """Returns all terrain intersection hits"""
+    def hasTerrainHits(self) -> bool:
+        """Returns ``True`` is the ray intersected the terrain"""
+    def layerHits(self, layer: typing.Optional[_core.QgsMapLayer]) -> list[QgsRayCastHit]:
+        """Returns all hits from entities of the specific ``layer``"""
+    def layers(self) -> list[_core.QgsMapLayer]:
+        """Returns pointers to the map layers of entities that were intersected by
+        the ray
+        """
+    def hasLayerHits(self) -> bool:
+        """Returns ``True`` is ray hit at least one entity from a layer"""
+    def isEmpty(self) -> bool:
+        """Returns ``True`` is ray did not intersect any layer or terrain entity"""
 
 
 class QgsRuleBased3DRendererMetadata(_core.Qgs3DRendererAbstractMetadata):
+    """Metadata for rule-based 3D renderer to allow creation of its instances
+    from XML.
+
+    .. warning::
+
+       This is not considered stable API, and may change in future QGIS releases. It is
+       exposed to the Python bindings as a tech preview only.
+
+    .. versionadded:: 3.6
+    """
 
     @typing.overload
     def __init__(self) -> None: ...
     @typing.overload
     def __init__(self, a0: 'QgsRuleBased3DRendererMetadata') -> None: ...
 
-    def createRenderer(self, elem: QtXml.QDomElement, context: _core.QgsReadWriteContext) -> typing.Optional[_core.QgsAbstract3DRenderer]: ...
+    def createRenderer(self, elem: QtXml.QDomElement, context: _core.QgsReadWriteContext) -> typing.Optional[_core.QgsAbstract3DRenderer]:
+        """Creates an instance of a 3D renderer based on a DOM element with
+        renderer configuration
+        """
 
 
 class QgsRuleBased3DRenderer(QgsAbstractVectorLayer3DRenderer):
+    """Rule-based 3D renderer.
+
+    Similar to rule-based 2D renderer and rule-based labeling, it allows
+    specification of rules for 3D symbols.
+
+    .. warning::
+
+       This is not considered stable API, and may change in future QGIS releases. It is
+       exposed to the Python bindings as a tech preview only.
+
+    .. versionadded:: 3.6
+
+    QgsRuleBased3DRenderer(root: QgsRuleBased3DRenderer.Rule|None)
+    Construct renderer with the given root rule (takes ownership)
+    """
 
     class Rule(PyQt6.sip.wrapper):
+        """A child rule for a QgsRuleBased3DRenderer.
+
+        .. versionadded:: 3.6
+
+        QgsRuleBased3DRenderer.Rule(symbol: QgsAbstract3DSymbol|None, filterExp: str|None = '', description: str|None = '', elseRule: bool = False)
+        takes ownership of symbol, symbol may be ``None``
+        """
 
         class RegisterResult(enum.IntEnum):
             Filtered = ... # type: QgsRuleBased3DRenderer.Rule.RegisterResult
@@ -707,52 +2392,139 @@ class QgsRuleBased3DRenderer(QgsAbstractVectorLayer3DRenderer):
 
         def __init__(self, symbol: typing.Optional[_core.QgsAbstract3DSymbol], filterExp: typing.Optional[str] = ..., description: typing.Optional[str] = ..., elseRule: bool = ...) -> None: ...
 
-        def save(self, doc: QtXml.QDomDocument, context: _core.QgsReadWriteContext) -> QtXml.QDomElement: ...
+        def save(self, doc: QtXml.QDomDocument, context: _core.QgsReadWriteContext) -> QtXml.QDomElement:
+            """store labeling info to XML element"""
         @staticmethod
-        def create(ruleElem: QtXml.QDomElement, context: _core.QgsReadWriteContext) -> typing.Optional['QgsRuleBased3DRenderer.Rule']: ...
-        def clone(self) -> typing.Optional['QgsRuleBased3DRenderer.Rule']: ...
-        def findRuleByKey(self, key: typing.Optional[str]) -> typing.Optional['QgsRuleBased3DRenderer.Rule']: ...
-        def removeChildAt(self, i: int) -> None: ...
-        def insertChild(self, i: int, rule: typing.Optional['QgsRuleBased3DRenderer.Rule']) -> None: ...
-        def appendChild(self, rule: typing.Optional['QgsRuleBased3DRenderer.Rule']) -> None: ...
-        def parent(self) -> typing.Optional['QgsRuleBased3DRenderer.Rule']: ...
-        def descendants(self) -> list['QgsRuleBased3DRenderer.Rule']: ...
-        def children(self) -> list['QgsRuleBased3DRenderer.Rule']: ...
-        def setRuleKey(self, key: typing.Optional[str]) -> None: ...
-        def setIsElse(self, iselse: bool) -> None: ...
-        def setActive(self, state: bool) -> None: ...
-        def setDescription(self, description: typing.Optional[str]) -> None: ...
-        def setFilterExpression(self, filterExp: typing.Optional[str]) -> None: ...
-        def setSymbol(self, symbol: typing.Optional[_core.QgsAbstract3DSymbol]) -> None: ...
-        def ruleKey(self) -> str: ...
-        def isElse(self) -> bool: ...
-        def active(self) -> bool: ...
-        def description(self) -> str: ...
-        def filterExpression(self) -> str: ...
-        def symbol(self) -> typing.Optional[_core.QgsAbstract3DSymbol]: ...
+        def create(ruleElem: QtXml.QDomElement, context: _core.QgsReadWriteContext) -> typing.Optional['QgsRuleBased3DRenderer.Rule']:
+            """Create a rule from an XML definition
+
+            :param ruleElem: The XML rule element
+            :param context: reading context
+
+            :return: A new rule
+            """
+        def clone(self) -> typing.Optional['QgsRuleBased3DRenderer.Rule']:
+            """clone this rule, return new instance"""
+        def findRuleByKey(self, key: typing.Optional[str]) -> typing.Optional['QgsRuleBased3DRenderer.Rule']:
+            """Try to find a rule given its unique key"""
+        def removeChildAt(self, i: int) -> None:
+            """delete child rule"""
+        def insertChild(self, i: int, rule: typing.Optional['QgsRuleBased3DRenderer.Rule']) -> None:
+            """add child rule, take ownership, sets this as parent"""
+        def appendChild(self, rule: typing.Optional['QgsRuleBased3DRenderer.Rule']) -> None:
+            """add child rule, take ownership, sets this as parent"""
+        def parent(self) -> typing.Optional['QgsRuleBased3DRenderer.Rule']:
+            """The parent rule
+
+            :return: Parent rule
+            """
+        def descendants(self) -> list['QgsRuleBased3DRenderer.Rule']:
+            """Returns all children, grand-children, grand-grand-children, grand-gra...
+            you get it
+
+            :return: A list of descendant rules
+            """
+        def children(self) -> list['QgsRuleBased3DRenderer.Rule']:
+            """Returns all children rules of this rule
+
+            :return: A list of rules
+            """
+        def setRuleKey(self, key: typing.Optional[str]) -> None:
+            """Override the assigned rule key (should be used just internally by
+            rule-based renderer)
+            """
+        def setIsElse(self, iselse: bool) -> None:
+            """Sets if this rule is an ELSE rule
+
+            :param iselse: If ``True``, this rule is an ELSE rule
+            """
+        def setActive(self, state: bool) -> None:
+            """Sets if this rule is active
+
+            :param state: Determines if the rule should be activated or deactivated
+            """
+        def setDescription(self, description: typing.Optional[str]) -> None:
+            """Set a human readable description for this rule
+
+            :param description: Description
+            """
+        def setFilterExpression(self, filterExp: typing.Optional[str]) -> None:
+            """Set the expression used to check if a given feature shall be rendered
+            with this rule
+
+            :param filterExp: An expression
+            """
+        def setSymbol(self, symbol: typing.Optional[_core.QgsAbstract3DSymbol]) -> None:
+            """Sets new symbol (or ``None``). Deletes old symbol if any."""
+        def ruleKey(self) -> str:
+            """Unique rule identifier (for identification of rule within labeling, used
+            as provider ID)
+            """
+        def isElse(self) -> bool:
+            """Check if this rule is an ELSE rule
+
+            :return: ``True`` if this rule is an else rule
+            """
+        def active(self) -> bool:
+            """Returns if this rule is active
+
+            :return: ``True`` if the rule is active
+            """
+        def description(self) -> str:
+            """A human readable description for this rule
+
+            :return: Description
+            """
+        def filterExpression(self) -> str:
+            """A filter that will check if this rule applies
+
+            :return: An expression
+            """
+        def symbol(self) -> typing.Optional[_core.QgsAbstract3DSymbol]:
+            """Returns the labeling settings. May return ``None``."""
 
     def __init__(self, root: typing.Optional['QgsRuleBased3DRenderer.Rule']) -> None: ...
 
     @staticmethod
-    def convertFromRenderer(renderer: typing.Optional[QgsAbstractVectorLayer3DRenderer], layer: typing.Optional[_core.QgsVectorLayer] = ...) -> typing.Optional['QgsRuleBased3DRenderer']: ...
+    def convertFromRenderer(renderer: typing.Optional[QgsAbstractVectorLayer3DRenderer], layer: typing.Optional[_core.QgsVectorLayer] = ...) -> typing.Optional['QgsRuleBased3DRenderer']:
+        """Creates a new QgsRuleBased3DRenderer from an existing ``renderer``.
+
+        :return: a new renderer if the conversion was possible, otherwise
+                 ``None``.
+
+        .. versionadded:: 4.2
+        """
     def readXml(self, elem: QtXml.QDomElement, context: _core.QgsReadWriteContext) -> None: ...
     def writeXml(self, elem: QtXml.QDomElement, context: _core.QgsReadWriteContext) -> None: ...
     def clone(self) -> typing.Optional['QgsRuleBased3DRenderer']: ...
     def type(self) -> str: ...
-    def rootRule(self) -> typing.Optional['QgsRuleBased3DRenderer.Rule']: ...
+    def rootRule(self) -> typing.Optional['QgsRuleBased3DRenderer.Rule']:
+        """Returns pointer to the root rule"""
 
 
 class QgsTiledSceneLayer3DRendererMetadata(_core.Qgs3DRendererAbstractMetadata):
+    """Metadata for tiled scene layer 3D renderer to allow creation of its
+    instances from XML.
+
+    .. versionadded:: 3.34
+    """
 
     @typing.overload
     def __init__(self) -> None: ...
     @typing.overload
     def __init__(self, a0: 'QgsTiledSceneLayer3DRendererMetadata') -> None: ...
 
-    def createRenderer(self, elem: QtXml.QDomElement, context: _core.QgsReadWriteContext) -> typing.Optional[_core.QgsAbstract3DRenderer]: ...
+    def createRenderer(self, elem: QtXml.QDomElement, context: _core.QgsReadWriteContext) -> typing.Optional[_core.QgsAbstract3DRenderer]:
+        """Creates an instance of a 3D renderer based on a DOM element with
+        renderer configuration
+        """
 
 
 class QgsTiledSceneLayer3DRenderer(_core.QgsAbstract3DRenderer):
+    """3D renderer that renders content of a tiled scene layer.
+
+    .. versionadded:: 3.34
+    """
 
     def __init__(self) -> None: ...
 
@@ -761,62 +2533,156 @@ class QgsTiledSceneLayer3DRenderer(_core.QgsAbstract3DRenderer):
     def writeXml(self, elem: QtXml.QDomElement, context: _core.QgsReadWriteContext) -> None: ...
     def clone(self) -> typing.Optional[_core.QgsAbstract3DRenderer]: ...
     def type(self) -> str: ...
-    def setShowBoundingBoxes(self, showBoundingBoxes: bool) -> None: ...
-    def showBoundingBoxes(self) -> bool: ...
-    def setMaximumScreenError(self, error: float) -> None: ...
-    def maximumScreenError(self) -> float: ...
-    def layer(self) -> typing.Optional[_core.QgsTiledSceneLayer]: ...
-    def setLayer(self, layer: typing.Optional[_core.QgsTiledSceneLayer]) -> None: ...
+    def setShowBoundingBoxes(self, showBoundingBoxes: bool) -> None:
+        """Sets whether bounding boxes will be visible when rendering the tiled
+        scene.
+
+        .. seealso:: `showBoundingBoxes`
+        """
+    def showBoundingBoxes(self) -> bool:
+        """Returns whether bounding boxes will be visible when rendering the tiled
+        scene.
+
+        .. seealso:: `setShowBoundingBoxes`
+        """
+    def setMaximumScreenError(self, error: float) -> None:
+        """Sets the maximum screen ``error`` allowed when rendering the tiled
+        scene.
+
+        Larger values result in a faster render with less content rendered.
+
+        .. seealso:: `maximumScreenError`
+        """
+    def maximumScreenError(self) -> float:
+        """Returns the maximum screen error allowed when rendering the tiled scene.
+
+        Larger values result in a faster render with less content rendered.
+
+        .. seealso:: `setMaximumScreenError`
+        """
+    def layer(self) -> typing.Optional[_core.QgsTiledSceneLayer]:
+        """Returns tiled scene layer associated with the renderer"""
+    def setLayer(self, layer: typing.Optional[_core.QgsTiledSceneLayer]) -> None:
+        """Sets tiled scene layer associated with the renderer"""
 
 
 class QgsVectorLayer3DRendererMetadata(_core.Qgs3DRendererAbstractMetadata):
+    """Metadata for vector layer 3D renderer to allow creation of its instances
+    from XML.
+
+    .. warning::
+
+       This is not considered stable API, and may change in future QGIS releases. It is
+       exposed to the Python bindings as a tech preview only.
+    """
 
     @typing.overload
     def __init__(self) -> None: ...
     @typing.overload
     def __init__(self, a0: 'QgsVectorLayer3DRendererMetadata') -> None: ...
 
-    def createRenderer(self, elem: QtXml.QDomElement, context: _core.QgsReadWriteContext) -> typing.Optional[_core.QgsAbstract3DRenderer]: ...
+    def createRenderer(self, elem: QtXml.QDomElement, context: _core.QgsReadWriteContext) -> typing.Optional[_core.QgsAbstract3DRenderer]:
+        """Creates an instance of a 3D renderer based on a DOM element with
+        renderer configuration
+        """
 
 
 class QgsVectorLayer3DRenderer(QgsAbstractVectorLayer3DRenderer):
+    """3D renderer that renders all features of a vector layer with the same 3D
+    symbol.
+
+    The appearance is completely defined by the symbol.
+
+    QgsVectorLayer3DRenderer(s: QgsAbstract3DSymbol|None = None)
+    Takes ownership of the symbol object
+    """
 
     def __init__(self, s: typing.Optional[_core.QgsAbstract3DSymbol] = ...) -> None: ...
 
     @staticmethod
-    def convertFromRenderer(renderer: typing.Optional[QgsAbstractVectorLayer3DRenderer], layer: typing.Optional[_core.QgsVectorLayer] = ...) -> typing.Optional['QgsVectorLayer3DRenderer']: ...
+    def convertFromRenderer(renderer: typing.Optional[QgsAbstractVectorLayer3DRenderer], layer: typing.Optional[_core.QgsVectorLayer] = ...) -> typing.Optional['QgsVectorLayer3DRenderer']:
+        """Creates a new QgsVectorLayer3DRenderer from an existing ``renderer``.
+
+        :return: a new renderer if the conversion was possible, otherwise
+                 ``None``.
+
+        .. versionadded:: 4.2
+        """
     def readXml(self, elem: QtXml.QDomElement, context: _core.QgsReadWriteContext) -> None: ...
     def writeXml(self, elem: QtXml.QDomElement, context: _core.QgsReadWriteContext) -> None: ...
     def clone(self) -> typing.Optional['QgsVectorLayer3DRenderer']: ...
     def type(self) -> str: ...
-    def symbol(self) -> typing.Optional[_core.QgsAbstract3DSymbol]: ...
-    def setSymbol(self, symbol: typing.Optional[_core.QgsAbstract3DSymbol]) -> None: ...
+    def symbol(self) -> typing.Optional[_core.QgsAbstract3DSymbol]:
+        """Returns 3D symbol associated with the renderer"""
+    def setSymbol(self, symbol: typing.Optional[_core.QgsAbstract3DSymbol]) -> None:
+        """Sets 3D symbol associated with the renderer. Takes ownership of the
+        symbol
+        """
 
 
 class QgsAbstract3DMapBackgroundSettings(PyQt6.sip.wrapper):
+    """Base class for all background settings classes used in a 3D map view.
+
+    `QgsAbstract3DMapBackgroundSettings` subclasses are
+    responsible for storing the configuration of different background types
+    (skybox, gradient).
+
+    .. versionadded:: 4.2
+    """
 
     @typing.overload
     def __init__(self) -> None: ...
     @typing.overload
     def __init__(self, a0: 'QgsAbstract3DMapBackgroundSettings') -> None: ...
 
-    def writeXml(self, element: QtXml.QDomElement, context: _core.QgsReadWriteContext) -> None: ...
-    def readXml(self, element: QtXml.QDomElement, context: _core.QgsReadWriteContext) -> None: ...
-    def clone(self) -> typing.Optional['QgsAbstract3DMapBackgroundSettings']: ...
-    def type(self) -> _core.Qgis.Map3DBackgroundType: ...
+    def writeXml(self, element: QtXml.QDomElement, context: _core.QgsReadWriteContext) -> None:
+        """Writes settings to a DOM ``element``.
+
+        .. seealso:: `readXml`
+        """
+    def readXml(self, element: QtXml.QDomElement, context: _core.QgsReadWriteContext) -> None:
+        """Reads settings from a DOM ``element``.
+
+        .. seealso:: `writeXml`
+        """
+    def clone(self) -> typing.Optional['QgsAbstract3DMapBackgroundSettings']:
+        """Returns a deep copy of this background settings object."""
+    def type(self) -> _core.Qgis.Map3DBackgroundType:
+        """Returns the unique type for this background settings class."""
 
 
 class QgsFixedGradientBackgroundSettings(QgsAbstract3DMapBackgroundSettings):
+    """Background settings for a two-color vertical gradient rendered behind
+    the 3D scene.
+
+    .. versionadded:: 4.2
+    """
 
     @typing.overload
     def __init__(self) -> None: ...
     @typing.overload
     def __init__(self, a0: 'QgsFixedGradientBackgroundSettings') -> None: ...
 
-    def setBottomColor(self, color: typing.Union[QtGui.QColor, QtCore.Qt.GlobalColor, int]) -> None: ...
-    def bottomColor(self) -> QtGui.QColor: ...
-    def setTopColor(self, color: typing.Union[QtGui.QColor, QtCore.Qt.GlobalColor, int]) -> None: ...
-    def topColor(self) -> QtGui.QColor: ...
+    def setBottomColor(self, color: typing.Union[QtGui.QColor, QtCore.Qt.GlobalColor, int]) -> None:
+        """Sets the ``color`` at the bottom of the gradient.
+
+        .. seealso:: `bottomColor`
+        """
+    def bottomColor(self) -> QtGui.QColor:
+        """Returns the color at the bottom of the gradient.
+
+        .. seealso:: `setBottomColor`
+        """
+    def setTopColor(self, color: typing.Union[QtGui.QColor, QtCore.Qt.GlobalColor, int]) -> None:
+        """Sets the ``color`` at the top of the gradient.
+
+        .. seealso:: `topColor`
+        """
+    def topColor(self) -> QtGui.QColor:
+        """Returns the color at the top of the gradient.
+
+        .. seealso:: `setTopColor`
+        """
     def writeXml(self, element: QtXml.QDomElement, context: _core.QgsReadWriteContext) -> None: ...
     def readXml(self, element: QtXml.QDomElement, context: _core.QgsReadWriteContext) -> None: ...
     def clone(self) -> typing.Optional['QgsFixedGradientBackgroundSettings']: ...
@@ -824,32 +2690,102 @@ class QgsFixedGradientBackgroundSettings(QgsAbstract3DMapBackgroundSettings):
 
 
 class QgsPointCloudLayer3DRenderer(_core.QgsAbstractPointCloud3DRenderer):
+    """3D renderer that renders all points from a point cloud layer.
+
+    .. versionadded:: 3.18
+
+    QgsPointCloudLayer3DRenderer()
+    Takes ownership of the symbol object
+    """
 
     def __init__(self) -> None: ...
 
-    def overviewSwitchingScale(self) -> float: ...
-    def setOverviewSwitchingScale(self, scale: float) -> None: ...
-    def zoomOutBehavior(self) -> _core.Qgis.PointCloudZoomOutRenderBehavior: ...
-    def setZoomOutBehavior(self, behavior: _core.Qgis.PointCloudZoomOutRenderBehavior) -> None: ...
+    def overviewSwitchingScale(self) -> float:
+        """Returns the overview switching scale
+
+        .. versionadded:: 4.0
+        """
+    def setOverviewSwitchingScale(self, scale: float) -> None:
+        """Sets the overview switching scale
+
+        Used to determine when point clouds switch from rendering bounding boxes
+        to displaying full point data. The value is compared against screen
+        space error (SSE) calculated from camera distance and node size.
+
+        .. versionadded:: 4.0
+        """
+    def zoomOutBehavior(self) -> _core.Qgis.PointCloudZoomOutRenderBehavior:
+        """Returns the renderer behavior when zoomed out
+
+        .. versionadded:: 3.42
+        """
+    def setZoomOutBehavior(self, behavior: _core.Qgis.PointCloudZoomOutRenderBehavior) -> None:
+        """Sets the renderer behavior when zoomed out
+
+        .. versionadded:: 3.42
+        """
     def convertFrom2DRenderer(self, renderer: typing.Optional[_core.QgsPointCloudRenderer]) -> bool: ...
-    def setPointRenderingBudget(self, budget: int) -> None: ...
-    def pointRenderingBudget(self) -> int: ...
-    def setShowBoundingBoxes(self, showBoundingBoxes: bool) -> None: ...
-    def showBoundingBoxes(self) -> bool: ...
-    def setMaximumScreenError(self, error: float) -> None: ...
-    def maximumScreenError(self) -> float: ...
+    def setPointRenderingBudget(self, budget: int) -> None:
+        """Sets the maximum number of points to be rendered in the scene"""
+    def pointRenderingBudget(self) -> int:
+        """Returns the maximum number of points that will be rendered to the scene"""
+    def setShowBoundingBoxes(self, showBoundingBoxes: bool) -> None:
+        """Sets whether bounding boxes will be visible when rendering the point
+        cloud.
+
+        .. seealso:: `showBoundingBoxes`
+        """
+    def showBoundingBoxes(self) -> bool:
+        """Returns whether bounding boxes will be visible when rendering the point
+        cloud.
+
+        .. seealso:: `setShowBoundingBoxes`
+        """
+    def setMaximumScreenError(self, error: float) -> None:
+        """Sets the maximum screen ``error`` allowed when rendering the point
+        cloud.
+
+        Larger values result in a faster render with less points rendered.
+
+        .. seealso:: `maximumScreenError`
+        """
+    def maximumScreenError(self) -> float:
+        """Returns the maximum screen error allowed when rendering the point cloud.
+
+        Larger values result in a faster render with less points rendered.
+
+        .. seealso:: `setMaximumScreenError`
+        """
     def resolveReferences(self, project: _core.QgsProject) -> None: ...
     def readXml(self, elem: QtXml.QDomElement, context: _core.QgsReadWriteContext) -> None: ...
     def writeXml(self, elem: QtXml.QDomElement, context: _core.QgsReadWriteContext) -> None: ...
-    def symbol(self) -> typing.Optional['QgsPointCloud3DSymbol']: ...
-    def setSymbol(self, symbol: typing.Optional['QgsPointCloud3DSymbol']) -> None: ...
+    def symbol(self) -> typing.Optional['QgsPointCloud3DSymbol']:
+        """Returns 3D symbol associated with the renderer"""
+    def setSymbol(self, symbol: typing.Optional['QgsPointCloud3DSymbol']) -> None:
+        """Sets the 3D ``symbol`` associated with the renderer. Ownership of
+        ``symbol`` is transferred to the renderer.
+
+        .. seealso:: `symbol`
+        """
     def clone(self) -> typing.Optional['QgsPointCloudLayer3DRenderer']: ...
     def type(self) -> str: ...
-    def layer(self) -> typing.Optional[_core.QgsPointCloudLayer]: ...
-    def setLayer(self, layer: typing.Optional[_core.QgsPointCloudLayer]) -> None: ...
+    def layer(self) -> typing.Optional[_core.QgsPointCloudLayer]:
+        """Returns point cloud layer associated with the renderer"""
+    def setLayer(self, layer: typing.Optional[_core.QgsPointCloudLayer]) -> None:
+        """Sets point cloud layer associated with the renderer"""
 
 
 class QgsTextureAtlas(PyQt6.sip.wrapper):
+    """Encapsulates a texture atlas.
+
+    `QgsTextureAtlas` contains the packed regions for aggregated
+    texture atlases, and optionally the packed texture map.
+
+    See `QgsTextureAtlasGenerator` for a class which automatically
+    creates texture atlases.
+
+    .. versionadded:: 4.0
+    """
 
     @typing.overload
     def __init__(self) -> None: ...
@@ -857,15 +2793,47 @@ class QgsTextureAtlas(PyQt6.sip.wrapper):
     def __init__(self, other: 'QgsTextureAtlas') -> None: ...
 
     def __len__(self) -> int: ...
-    def count(self) -> int: ...
-    def renderDebugTexture(self) -> QtGui.QImage: ...
-    def renderAtlasTexture(self) -> QtGui.QImage: ...
-    def rect(self, index: int) -> QtCore.QRect: ...
-    def atlasSize(self) -> QtCore.QSize: ...
-    def isValid(self) -> bool: ...
+    def count(self) -> int:
+        """Returns the number of textures in the atlas."""
+    def renderDebugTexture(self) -> QtGui.QImage:
+        """Renders a debug texture.
+
+        The debug texture renders all packed rectangles with a unique color, and
+        can be used to visualize the solution.
+        """
+    def renderAtlasTexture(self) -> QtGui.QImage:
+        """Renders the combined texture atlas, containing all source images.
+
+        .. note::
+
+           This may be a null image if the atlas was created with rectangles alone.
+        """
+    def rect(self, index: int) -> QtCore.QRect:
+        """Returns the packed rectangle for the texture with the specified
+        ``index``.
+
+        :raises IndexError: if no texture with the specified index exists.
+        """
+    def atlasSize(self) -> QtCore.QSize:
+        """Returns the total size required for the atlas, i.e. the total size for
+        the packed images and rectangles.
+        """
+    def isValid(self) -> bool:
+        """Returns ``True`` if the atlas is valid."""
 
 
 class QgsTextureAtlasGenerator(PyQt6.sip.wrapper):
+    """Generates texture atlases by efficient packing of multiple input
+    rectangles/images.
+
+    `QgsTextureAtlasGenerator` can be used to pack either images
+    or raw rectangles. The static `createFromRects` or
+    `createFromImages` methods should be called with the source
+    images or rectangles, which will return a `QgsTextureAtlas`
+    containing the results.
+
+    .. versionadded:: 4.0
+    """
 
     @typing.overload
     def __init__(self) -> None: ...
@@ -873,12 +2841,37 @@ class QgsTextureAtlasGenerator(PyQt6.sip.wrapper):
     def __init__(self, a0: 'QgsTextureAtlasGenerator') -> None: ...
 
     @staticmethod
-    def createFromImages(images: collections.abc.Iterable[QtGui.QImage], maxSide: int = ...) -> QgsTextureAtlas: ...
+    def createFromImages(images: collections.abc.Iterable[QtGui.QImage], maxSide: int = ...) -> QgsTextureAtlas:
+        """Creates a texture atlas for a set of ``images``.
+
+        The ``maxSide`` argument specifies the maximum permitted side size for
+        the atlas. The calculated solution can only be less than or equal to
+        this size - if it cannot fit, then algorithm will gracefully fail and
+        return an invalid `QgsTextureAtlas`.
+
+        .. seealso:: `createFromRects`
+        """
     @staticmethod
-    def createFromRects(rectangles: collections.abc.Iterable[QtCore.QRect], maxSide: int = ...) -> QgsTextureAtlas: ...
+    def createFromRects(rectangles: collections.abc.Iterable[QtCore.QRect], maxSide: int = ...) -> QgsTextureAtlas:
+        """Creates a texture atlas for a set of ``rectangles``.
+
+        This method should be used when the generator is used to pack rectangle
+        shapes only. No image will be associated with the rectangle.
+
+        The ``maxSide`` argument specifies the maximum permitted side size for
+        the atlas. The calculated solution can only be less than or equal to
+        this size - if it cannot fit, then algorithm will gracefully fail and
+        return an invalid `QgsTextureAtlas`.
+
+        .. seealso:: `createFromImages`
+        """
 
 
 class QgsLightSource(PyQt6.sip.wrapper):
+    """Base class for light sources in 3d scenes.
+
+    .. versionadded:: 3.26
+    """
 
     @typing.overload
     def __init__(self) -> None: ...
@@ -886,16 +2879,45 @@ class QgsLightSource(PyQt6.sip.wrapper):
     def __init__(self, a0: 'QgsLightSource') -> None: ...
 
     @staticmethod
-    def createFromXml(element: QtXml.QDomElement, context: _core.QgsReadWriteContext) -> typing.Optional['QgsLightSource']: ...
-    def resolveReferences(self, project: _core.QgsProject) -> None: ...
-    def readXml(self, elem: QtXml.QDomElement, context: _core.QgsReadWriteContext = ...) -> None: ...
-    def writeXml(self, doc: QtXml.QDomDocument, context: _core.QgsReadWriteContext = ...) -> QtXml.QDomElement: ...
-    def id(self) -> str: ...
-    def clone(self) -> typing.Optional['QgsLightSource']: ...
-    def type(self) -> _core.Qgis.LightSourceType: ...
+    def createFromXml(element: QtXml.QDomElement, context: _core.QgsReadWriteContext) -> typing.Optional['QgsLightSource']:
+        """Creates a new light source from an XML element."""
+    def resolveReferences(self, project: _core.QgsProject) -> None:
+        """After reading from XML, resolve references to any layers that have been
+        read as layer IDs.
+        """
+    def readXml(self, elem: QtXml.QDomElement, context: _core.QgsReadWriteContext = ...) -> None:
+        """Reads configuration from a DOM element previously written using
+        `QgsLightSource.writeXml`.
+
+        .. seealso:: `writeXml`
+        """
+    def writeXml(self, doc: QtXml.QDomDocument, context: _core.QgsReadWriteContext = ...) -> QtXml.QDomElement:
+        """Writes the light source's configuration to a new DOM element and returns
+        it.
+
+        .. seealso:: `readXml`
+        """
+    def id(self) -> str:
+        """Returns the unique light ID string.
+
+        .. versionadded:: 4.2
+        """
+    def clone(self) -> typing.Optional['QgsLightSource']:
+        """Returns a copy of the light source."""
+    def type(self) -> _core.Qgis.LightSourceType:
+        """Returns the light source type."""
 
 
 class QgsDirectionalLightSettings(QgsLightSource):
+    """Definition of a directional light in a 3D map scene.
+
+    .. versionadded:: 3.16
+
+    QgsDirectionalLightSettings()
+    Construct a directional light with default values
+
+    QgsDirectionalLightSettings(a0: QgsDirectionalLightSettings)
+    """
 
     @typing.overload
     def __init__(self) -> None: ...
@@ -904,12 +2926,18 @@ class QgsDirectionalLightSettings(QgsLightSource):
 
     def __ne__(self, other: object): ...
     def __eq__(self, other: object): ...
-    def setIntensity(self, intensity: float) -> None: ...
-    def intensity(self) -> float: ...
-    def setColor(self, color: typing.Union[QtGui.QColor, QtCore.Qt.GlobalColor, int]) -> None: ...
-    def color(self) -> QtGui.QColor: ...
-    def setDirection(self, direction: _core.QgsVector3D) -> None: ...
-    def direction(self) -> _core.QgsVector3D: ...
+    def setIntensity(self, intensity: float) -> None:
+        """Sets intensity of the light"""
+    def intensity(self) -> float:
+        """Returns intensity of the light"""
+    def setColor(self, color: typing.Union[QtGui.QColor, QtCore.Qt.GlobalColor, int]) -> None:
+        """Sets color of the light"""
+    def color(self) -> QtGui.QColor:
+        """Returns color of the light"""
+    def setDirection(self, direction: _core.QgsVector3D) -> None:
+        """Sets the direction of the light in degrees"""
+    def direction(self) -> _core.QgsVector3D:
+        """Returns the direction of the light in degrees"""
     def readXml(self, elem: QtXml.QDomElement, context: _core.QgsReadWriteContext = ...) -> None: ...
     def writeXml(self, doc: QtXml.QDomDocument, context: _core.QgsReadWriteContext = ...) -> QtXml.QDomElement: ...
     def clone(self) -> typing.Optional['QgsDirectionalLightSettings']: ...
@@ -917,6 +2945,20 @@ class QgsDirectionalLightSettings(QgsLightSource):
 
 
 class QgsPointLightSettings(QgsLightSource):
+    """Definition of a point light in a 3D map scene.
+
+    Total light at the distance D from a point light with intensity I is (I
+    / TA) where TA is total attenuation which is calculated as (A_0 + A_1 *
+    D + A_2 * D^2). The terms A_0, A_1 and A_2 stand for constant, linear
+    and quadratic attenuation.
+
+    .. versionadded:: 3.6
+
+    QgsPointLightSettings()
+    Construct a point light with default values
+
+    QgsPointLightSettings(a0: QgsPointLightSettings)
+    """
 
     @typing.overload
     def __init__(self) -> None: ...
@@ -925,18 +2967,30 @@ class QgsPointLightSettings(QgsLightSource):
 
     def __ne__(self, other: object): ...
     def __eq__(self, other: object): ...
-    def setQuadraticAttenuation(self, value: float) -> None: ...
-    def quadraticAttenuation(self) -> float: ...
-    def setLinearAttenuation(self, value: float) -> None: ...
-    def linearAttenuation(self) -> float: ...
-    def setConstantAttenuation(self, value: float) -> None: ...
-    def constantAttenuation(self) -> float: ...
-    def setIntensity(self, intensity: float) -> None: ...
-    def intensity(self) -> float: ...
-    def setColor(self, color: typing.Union[QtGui.QColor, QtCore.Qt.GlobalColor, int]) -> None: ...
-    def color(self) -> QtGui.QColor: ...
-    def setPosition(self, pos: _core.QgsVector3D) -> None: ...
-    def position(self) -> _core.QgsVector3D: ...
+    def setQuadraticAttenuation(self, value: float) -> None:
+        """Sets quadratic attenuation (A_2)"""
+    def quadraticAttenuation(self) -> float:
+        """Returns quadratic attenuation (A_2)"""
+    def setLinearAttenuation(self, value: float) -> None:
+        """Sets linear attenuation (A_1)"""
+    def linearAttenuation(self) -> float:
+        """Returns linear attenuation (A_1)"""
+    def setConstantAttenuation(self, value: float) -> None:
+        """Sets constant attenuation (A_0)"""
+    def constantAttenuation(self) -> float:
+        """Returns constant attenuation (A_0)"""
+    def setIntensity(self, intensity: float) -> None:
+        """Sets intensity of the light"""
+    def intensity(self) -> float:
+        """Returns intensity of the light"""
+    def setColor(self, color: typing.Union[QtGui.QColor, QtCore.Qt.GlobalColor, int]) -> None:
+        """Sets color of the light"""
+    def color(self) -> QtGui.QColor:
+        """Returns color of the light"""
+    def setPosition(self, pos: _core.QgsVector3D) -> None:
+        """Sets position of the light (in 3D map coordinates)"""
+    def position(self) -> _core.QgsVector3D:
+        """Returns position of the light (in 3D map coordinates)"""
     def readXml(self, elem: QtXml.QDomElement, context: _core.QgsReadWriteContext = ...) -> None: ...
     def writeXml(self, doc: QtXml.QDomDocument, context: _core.QgsReadWriteContext = ...) -> QtXml.QDomElement: ...
     def clone(self) -> typing.Optional['QgsPointLightSettings']: ...
@@ -944,6 +2998,12 @@ class QgsPointLightSettings(QgsLightSource):
 
 
 class QgsSunLightSettings(QgsLightSource):
+    """Definition of a sun light in a 3D map scene.
+
+    A light source based on the real-world sun position.
+
+    .. versionadded:: 4.2
+    """
 
     @typing.overload
     def __init__(self) -> None: ...
@@ -952,19 +3012,74 @@ class QgsSunLightSettings(QgsLightSource):
 
     def __ne__(self, other: object): ...
     def __eq__(self, other: object): ...
-    def setReferenceElevation(self, elevation: float) -> None: ...
-    def referenceElevation(self) -> float: ...
-    def setTemperature(self, temperature: float) -> None: ...
-    def temperature(self) -> float: ...
-    def setAtmosphericPressure(self, pressure: float) -> None: ...
-    def atmosphericPressure(self) -> float: ...
-    def setIntensity(self, intensity: float) -> None: ...
-    def intensity(self) -> float: ...
-    def setColor(self, color: typing.Union[QtGui.QColor, QtCore.Qt.GlobalColor, int]) -> None: ...
-    def color(self) -> QtGui.QColor: ...
-    def setSunTime(self, time: typing.Union[QtCore.QDateTime, datetime.datetime]) -> None: ...
-    def sunTime(self) -> QtCore.QDateTime: ...
-    def direction(self, map: Qgs3DMapSettings) -> _core.QgsVector3D: ...
+    def setReferenceElevation(self, elevation: float) -> None:
+        """Sets the reference ``elevation`` (in meters above sea level) for the
+        solar position calculation.
+
+        .. seealso:: `referenceElevation`
+        """
+    def referenceElevation(self) -> float:
+        """Returns the reference elevation (in meters above sea level) used for the
+        solar position calculation.
+
+        .. seealso:: `setReferenceElevation`
+        """
+    def setTemperature(self, temperature: float) -> None:
+        """Sets the ambient ``temperature`` (in Celsius) for the solar refraction
+        calculation.
+
+        .. seealso:: `temperature`
+        """
+    def temperature(self) -> float:
+        """Returns the ambient temperature (in Celsius) used for the solar
+        refraction calculation.
+
+        .. seealso:: `setTemperature`
+        """
+    def setAtmosphericPressure(self, pressure: float) -> None:
+        """Sets the atmospheric ``pressure`` (in millibars/hPa) for the solar
+        refraction calculation.
+
+        .. seealso:: `atmosphericPressure`
+        """
+    def atmosphericPressure(self) -> float:
+        """Returns the atmospheric pressure (in millibars/hPa) used for the solar
+        refraction calculation.
+
+        .. seealso:: `setAtmosphericPressure`
+        """
+    def setIntensity(self, intensity: float) -> None:
+        """Sets the base ``intensity`` of the sunlight.
+
+        .. seealso:: `intensity`
+        """
+    def intensity(self) -> float:
+        """Returns the base intensity of the sunlight.
+
+        .. seealso:: `setIntensity`
+        """
+    def setColor(self, color: typing.Union[QtGui.QColor, QtCore.Qt.GlobalColor, int]) -> None:
+        """Sets the base ``color`` of the sunlight.
+
+        .. seealso:: `color`
+        """
+    def color(self) -> QtGui.QColor:
+        """Returns the base color of the sunlight.
+
+        .. seealso:: `setColor`
+        """
+    def setSunTime(self, time: typing.Union[QtCore.QDateTime, datetime.datetime]) -> None:
+        """Sets the date and ``time`` for the sun position calculation.
+
+        .. seealso:: `sunTime`
+        """
+    def sunTime(self) -> QtCore.QDateTime:
+        """Returns the configured date and time for the sun position calculation.
+
+        .. seealso:: `setSunTime`
+        """
+    def direction(self, map: Qgs3DMapSettings) -> _core.QgsVector3D:
+        """Returns the calculated direction of the light"""
     def readXml(self, elem: QtXml.QDomElement, context: _core.QgsReadWriteContext = ...) -> None: ...
     def writeXml(self, doc: QtXml.QDomDocument, context: _core.QgsReadWriteContext = ...) -> QtXml.QDomElement: ...
     def clone(self) -> typing.Optional['QgsSunLightSettings']: ...
@@ -972,27 +3087,80 @@ class QgsSunLightSettings(QgsLightSource):
 
 
 class QgsLine3DSymbol(_core.QgsAbstract3DSymbol):
+    """3D symbol that draws linestring geometries as planar polygons (created
+    from lines using a buffer with given thickness).
+
+    .. warning::
+
+       This is not considered stable API, and may change in future QGIS releases. It is
+       exposed to the Python bindings as a tech preview only.
+    """
 
     def __init__(self) -> None: ...
 
-    def setMaterialSettings(self, materialSettings: typing.Optional[_core.QgsAbstractMaterialSettings]) -> None: ...
-    def materialSettings(self) -> typing.Optional[_core.QgsAbstractMaterialSettings]: ...
-    def setRenderAsSimpleLines(self, enabled: bool) -> None: ...
-    def renderAsSimpleLines(self) -> bool: ...
-    def setExtrusionHeight(self, extrusionHeight: float) -> None: ...
-    def extrusionHeight(self) -> float: ...
-    def setOffset(self, offset: float) -> None: ...
-    def offset(self) -> float: ...
+    def setMaterialSettings(self, materialSettings: typing.Optional[_core.QgsAbstractMaterialSettings]) -> None:
+        """Sets the ``material`` settings used for shading of the symbol.
+
+        Ownership of ``material`` is transferred to the symbol.
+        """
+    def materialSettings(self) -> typing.Optional[_core.QgsAbstractMaterialSettings]:
+        """Returns material settings used for shading of the symbol"""
+    def setRenderAsSimpleLines(self, enabled: bool) -> None:
+        """Sets whether the renderer will render data with simple lines (otherwise
+        it uses buffer)
+        """
+    def renderAsSimpleLines(self) -> bool:
+        """Returns whether the renderer will render data with simple lines
+        (otherwise it uses buffer)
+        """
+    def setExtrusionHeight(self, extrusionHeight: float) -> None:
+        """Sets extrusion height (in map units)"""
+    def extrusionHeight(self) -> float:
+        """Returns extrusion height (in map units)"""
+    def setOffset(self, offset: float) -> None:
+        """Sets vertical offset of the symbol (in map units)
+
+        .. versionadded:: 3.36
+        """
+    def offset(self) -> float:
+        """Returns vertical offset of the symbol (in map units)
+
+        .. versionadded:: 3.36
+        """
     @deprecated("""Since 3.36. Use setOffset() instead.""")
-    def setHeight(self, height: float) -> None: ...
+    def setHeight(self, height: float) -> None:
+        """Sets height (altitude) of the symbol (in map units)
+
+        .. deprecated:: 3.36
+
+           Use `QgsLine3DSymbol.setOffset` instead.
+        """
     @deprecated("""Since 3.36. Use offset() instead.""")
-    def height(self) -> float: ...
-    def setWidth(self, width: float) -> None: ...
-    def width(self) -> float: ...
-    def setAltitudeBinding(self, altBinding: _core.Qgis.AltitudeBinding) -> None: ...
-    def altitudeBinding(self) -> _core.Qgis.AltitudeBinding: ...
-    def setAltitudeClamping(self, altClamping: _core.Qgis.AltitudeClamping) -> None: ...
-    def altitudeClamping(self) -> _core.Qgis.AltitudeClamping: ...
+    def height(self) -> float:
+        """Returns height (altitude) of the symbol (in map units)
+
+        .. deprecated:: 3.36
+
+           Use `QgsLine3DSymbol.offset` instead.
+        """
+    def setWidth(self, width: float) -> None:
+        """Sets width of the line symbol (in map units)"""
+    def width(self) -> float:
+        """Returns width of the line symbol (in map units)"""
+    def setAltitudeBinding(self, altBinding: _core.Qgis.AltitudeBinding) -> None:
+        """Sets method that determines how altitude is bound to individual vertices"""
+    def altitudeBinding(self) -> _core.Qgis.AltitudeBinding:
+        """Returns method that determines how altitude is bound to individual
+        vertices
+        """
+    def setAltitudeClamping(self, altClamping: _core.Qgis.AltitudeClamping) -> None:
+        """Sets method that determines altitude (whether to clamp to feature to
+        terrain)
+        """
+    def altitudeClamping(self) -> _core.Qgis.AltitudeClamping:
+        """Returns method that determines altitude (whether to clamp to feature to
+        terrain)
+        """
     def setDefaultPropertiesFromLayer(self, layer: typing.Optional[_core.QgsVectorLayer]) -> None: ...
     def compatibleGeometryTypes(self) -> list[_core.Qgis.GeometryType]: ...
     def readXml(self, elem: QtXml.QDomElement, context: _core.QgsReadWriteContext) -> None: ...
@@ -1000,66 +3168,273 @@ class QgsLine3DSymbol(_core.QgsAbstract3DSymbol):
     def clone(self) -> typing.Optional[_core.QgsAbstract3DSymbol]: ...
     def type(self) -> str: ...
     @staticmethod
-    def create() -> typing.Optional[_core.QgsAbstract3DSymbol]: ...
+    def create() -> typing.Optional[_core.QgsAbstract3DSymbol]:
+        """Creates a new QgsLine3DSymbol.
+
+        Caller takes ownership of the returned symbol.
+        """
 
 
 class QgsMesh3DSymbol(_core.QgsAbstract3DSymbol):
+    """3D symbol that draws mesh geometry as planar triangles.
+
+    .. warning::
+
+       This is not considered stable API, and may change in future QGIS releases. It is
+       exposed to the Python bindings as a tech preview only.
+
+    .. versionadded:: 3.6
+
+    QgsMesh3DSymbol()
+    Constructor for QgsMesh3DSymbol
+    """
 
     class ZValueType(enum.IntEnum):
+        """How to render the Z value of the mesh
+
+        .. versionadded:: 3.14
+
+        * ``VerticesZValue``: Use the Z value of the vertices
+        * ``ScalarDatasetZvalue``: Use the value from a dataset (for example, water surface value)
+        """
         VerticesZValue = ... # type: QgsMesh3DSymbol.ZValueType
+        """Use the Z value of the vertices"""
         ScalarDatasetZvalue = ... # type: QgsMesh3DSymbol.ZValueType
+        """Use the value from a dataset (for example, water surface value)"""
 
     class RenderingStyle(enum.IntEnum):
+        """How to render the color of the mesh
+
+        .. versionadded:: 3.12
+
+        * ``SingleColor``: Render the mesh with a single color
+        * ``ColorRamp``: Render the mesh with a color ramp
+        * ``ColorRamp2DRendering``: Render the mesh with the color ramp shader of the 2D rendering
+        """
         SingleColor = ... # type: QgsMesh3DSymbol.RenderingStyle
+        """Render the mesh with a single color"""
         ColorRamp = ... # type: QgsMesh3DSymbol.RenderingStyle
+        """Render the mesh with a color ramp"""
         ColorRamp2DRendering = ... # type: QgsMesh3DSymbol.RenderingStyle
+        """Render the mesh with the color ramp shader of the 2D rendering"""
 
     def __init__(self) -> None: ...
 
     def __ne__(self, other: object): ...
     def __eq__(self, other: object): ...
-    def setLevelOfDetailIndex(self, lod: int) -> None: ...
-    def levelOfDetailIndex(self) -> int: ...
-    def setArrowsFixedSize(self, arrowsFixedSize: bool) -> None: ...
-    def arrowsFixedSize(self) -> bool: ...
-    def setMaximumTextureSize(self, maximumTextureSize: int) -> None: ...
-    def maximumTextureSize(self) -> int: ...
-    def setArrowsSpacing(self, arrowsSpacing: float) -> None: ...
-    def arrowsSpacing(self) -> float: ...
-    def setArrowsEnabled(self, arrowsEnabled: bool) -> None: ...
-    def arrowsEnabled(self) -> bool: ...
-    def setIsVerticalMagnitudeRelative(self, isVerticalMagnitudeRelative: bool) -> None: ...
-    def isVerticalMagnitudeRelative(self) -> bool: ...
-    def setVerticalDatasetGroupIndex(self, verticalDatasetGroupIndex: int) -> None: ...
-    def verticalDatasetGroupIndex(self) -> int: ...
-    def setRenderingStyle(self, textureType: 'QgsMesh3DSymbol.RenderingStyle') -> None: ...
-    def renderingStyle(self) -> 'QgsMesh3DSymbol.RenderingStyle': ...
-    def setSingleMeshColor(self, singleMeshColor: typing.Union[QtGui.QColor, QtCore.Qt.GlobalColor, int]) -> None: ...
-    def singleMeshColor(self) -> QtGui.QColor: ...
-    def setColorRampShader(self, colorRampShader: _core.QgsColorRampShader) -> None: ...
-    def colorRampShader(self) -> _core.QgsColorRampShader: ...
-    def setVerticalScale(self, verticalScale: float) -> None: ...
-    def verticalScale(self) -> float: ...
-    def setWireframeLineColor(self, wireframeLineColor: typing.Union[QtGui.QColor, QtCore.Qt.GlobalColor, int]) -> None: ...
-    def wireframeLineColor(self) -> QtGui.QColor: ...
-    def setWireframeLineWidth(self, wireframeLineWidth: float) -> None: ...
-    def wireframeLineWidth(self) -> float: ...
-    def setWireframeEnabled(self, wireframeEnabled: bool) -> None: ...
-    def wireframeEnabled(self) -> bool: ...
-    def setSmoothedTriangles(self, smoothTriangles: bool) -> None: ...
-    def smoothedTriangles(self) -> bool: ...
-    def setAddBackFaces(self, add: bool) -> None: ...
-    def addBackFaces(self) -> bool: ...
-    def setMaterialSettings(self, materialSettings: typing.Optional[_core.QgsAbstractMaterialSettings]) -> None: ...
-    def materialSettings(self) -> typing.Optional[_core.QgsAbstractMaterialSettings]: ...
-    def setHeight(self, height: float) -> None: ...
-    def height(self) -> float: ...
-    def setAltitudeClamping(self, altClamping: _core.Qgis.AltitudeClamping) -> None: ...
-    def altitudeClamping(self) -> _core.Qgis.AltitudeClamping: ...
-    def setCullingMode(self, mode: Qgs3DTypes.CullingMode) -> None: ...
-    def cullingMode(self) -> Qgs3DTypes.CullingMode: ...
-    def setEnabled(self, enabled: bool) -> None: ...
-    def isEnabled(self) -> bool: ...
+    def setLevelOfDetailIndex(self, lod: int) -> None:
+        """Returns the index of the level of detail of the mesh that is the
+        position of the simplified mesh that will be rendered (0 is the original
+        mesh)
+
+        .. seealso:: `QgsMeshSimplificationSettings`
+
+        .. versionadded:: 3.18
+        """
+    def levelOfDetailIndex(self) -> int:
+        """Returns the index of the level of detail of the mesh that is the
+        position of the simplified mesh that will be rendered (0 is the original
+        mesh)
+
+        .. seealso:: `QgsMeshSimplificationSettings`
+
+        .. versionadded:: 3.18
+        """
+    def setArrowsFixedSize(self, arrowsFixedSize: bool) -> None:
+        """Sets if the arrow size is fixed
+
+        .. versionadded:: 3.14
+        """
+    def arrowsFixedSize(self) -> bool:
+        """Returns if the arrow size is fixed
+
+        .. versionadded:: 3.14
+        """
+    def setMaximumTextureSize(self, maximumTextureSize: int) -> None:
+        """Sets the maximum texture size supported by the hardware Used to store
+        the GL_MAX_TEXTURE_SIZE value that comes from the 3D engine before
+        creating the entity
+
+        .. versionadded:: 3.14
+        """
+    def maximumTextureSize(self) -> int:
+        """Returns the maximum texture size supported by the hardware Used to store
+        the GL_MAX_TEXTURE_SIZE value that comes from the 3D engine before
+        creating the entity
+
+        .. versionadded:: 3.14
+        """
+    def setArrowsSpacing(self, arrowsSpacing: float) -> None:
+        """Sets the arrow spacing
+
+        .. versionadded:: 3.14
+        """
+    def arrowsSpacing(self) -> float:
+        """Returns the arrow spacing
+
+        .. versionadded:: 3.14
+        """
+    def setArrowsEnabled(self, arrowsEnabled: bool) -> None:
+        """Sets if arrows are enabled for 3D rendering
+
+        .. versionadded:: 3.14
+        """
+    def arrowsEnabled(self) -> bool:
+        """Returns if arrows are enabled for 3D rendering
+
+        .. versionadded:: 3.14
+        """
+    def setIsVerticalMagnitudeRelative(self, isVerticalMagnitudeRelative: bool) -> None:
+        """Sets if the vertical component of the mesh is relative to the mesh
+        vertices Z value
+
+        .. versionadded:: 3.14
+        """
+    def isVerticalMagnitudeRelative(self) -> bool:
+        """Returns if the vertical component of the mesh is relative to the mesh
+        vertices Z value
+
+        .. versionadded:: 3.14
+        """
+    def setVerticalDatasetGroupIndex(self, verticalDatasetGroupIndex: int) -> None:
+        """Sets the index of the dataset group that will be used to render the
+        vertical component of the 3D mesh geometry
+
+        .. versionadded:: 3.14
+        """
+    def verticalDatasetGroupIndex(self) -> int:
+        """Returns the index of the dataset group that will be used to render the
+        vertical component of the 3D mesh geometry
+
+        .. versionadded:: 3.14
+        """
+    def setRenderingStyle(self, textureType: 'QgsMesh3DSymbol.RenderingStyle') -> None:
+        """Sets the rendering style
+
+        .. versionadded:: 3.12
+        """
+    def renderingStyle(self) -> 'QgsMesh3DSymbol.RenderingStyle':
+        """Returns the rendering style
+
+        .. versionadded:: 3.12
+        """
+    def setSingleMeshColor(self, singleMeshColor: typing.Union[QtGui.QColor, QtCore.Qt.GlobalColor, int]) -> None:
+        """Sets the single color
+
+        .. versionadded:: 3.12
+        """
+    def singleMeshColor(self) -> QtGui.QColor:
+        """Returns the single color
+
+        .. versionadded:: 3.12
+        """
+    def setColorRampShader(self, colorRampShader: _core.QgsColorRampShader) -> None:
+        """Sets the color ramp shader used to render the color
+
+        .. versionadded:: 3.12
+        """
+    def colorRampShader(self) -> _core.QgsColorRampShader:
+        """Returns the color ramp shader used to render the color
+
+        .. versionadded:: 3.12
+        """
+    def setVerticalScale(self, verticalScale: float) -> None:
+        """Sets mesh vertical scale
+
+        .. versionadded:: 3.12
+        """
+    def verticalScale(self) -> float:
+        """Returns mesh vertical scale
+
+        .. versionadded:: 3.12
+        """
+    def setWireframeLineColor(self, wireframeLineColor: typing.Union[QtGui.QColor, QtCore.Qt.GlobalColor, int]) -> None:
+        """Sets wireframe line color
+
+        .. versionadded:: 3.12
+        """
+    def wireframeLineColor(self) -> QtGui.QColor:
+        """Returns wireframe line color
+
+        .. versionadded:: 3.12
+        """
+    def setWireframeLineWidth(self, wireframeLineWidth: float) -> None:
+        """Sets wireframe line width
+
+        .. versionadded:: 3.12
+        """
+    def wireframeLineWidth(self) -> float:
+        """Returns wireframe line width
+
+        .. versionadded:: 3.12
+        """
+    def setWireframeEnabled(self, wireframeEnabled: bool) -> None:
+        """Sets if the mesh wireframe
+
+        .. versionadded:: 3.12
+        """
+    def wireframeEnabled(self) -> bool:
+        """Returns if the mesh wireframe
+
+        .. versionadded:: 3.12
+        """
+    def setSmoothedTriangles(self, smoothTriangles: bool) -> None:
+        """Sets if the mesh triangles have to been smoothed
+
+        .. versionadded:: 3.12
+        """
+    def smoothedTriangles(self) -> bool:
+        """Returns if mesh triangle are smoothed
+
+        .. versionadded:: 3.12
+        """
+    def setAddBackFaces(self, add: bool) -> None:
+        """Sets whether also triangles facing the other side will be created.
+        Useful if input data have inconsistent order of vertices
+        """
+    def addBackFaces(self) -> bool:
+        """Returns whether also triangles facing the other side will be created.
+        Useful if input data have inconsistent order of vertices
+        """
+    def setMaterialSettings(self, materialSettings: typing.Optional[_core.QgsAbstractMaterialSettings]) -> None:
+        """Sets the ``material`` settings used for shading of the symbol.
+
+        Ownership of ``material`` is transferred to the symbol.
+        """
+    def materialSettings(self) -> typing.Optional[_core.QgsAbstractMaterialSettings]:
+        """Returns material settings used for shading of the symbol"""
+    def setHeight(self, height: float) -> None:
+        """Sets height (altitude) of the symbol (in map units)"""
+    def height(self) -> float:
+        """Returns height (altitude) of the symbol (in map units)"""
+    def setAltitudeClamping(self, altClamping: _core.Qgis.AltitudeClamping) -> None:
+        """Sets method that determines altitude (whether to clamp to feature to
+        terrain)
+        """
+    def altitudeClamping(self) -> _core.Qgis.AltitudeClamping:
+        """Returns method that determines altitude (whether to clamp to feature to
+        terrain)
+        """
+    def setCullingMode(self, mode: Qgs3DTypes.CullingMode) -> None:
+        """Sets culling mode
+
+        .. versionadded:: 3.34
+        """
+    def cullingMode(self) -> Qgs3DTypes.CullingMode:
+        """Returns culling mode
+
+        .. versionadded:: 3.34
+        """
+    def setEnabled(self, enabled: bool) -> None:
+        """Sets if the 3d rendering is enabled
+
+        .. versionadded:: 3.14
+        """
+    def isEnabled(self) -> bool:
+        """Returns if the 3d rendering is enabled
+
+        .. versionadded:: 3.14
+        """
     def readXml(self, elem: QtXml.QDomElement, context: _core.QgsReadWriteContext) -> None: ...
     def writeXml(self, elem: QtXml.QDomElement, context: _core.QgsReadWriteContext) -> None: ...
     def clone(self) -> typing.Optional['QgsMesh3DSymbol']: ...
@@ -1067,30 +3442,140 @@ class QgsMesh3DSymbol(_core.QgsAbstract3DSymbol):
 
 
 class QgsPoint3DSymbol(_core.QgsAbstract3DSymbol):
+    """3D symbol that draws point geometries as 3D objects using one of the
+    predefined shapes.
+
+    .. warning::
+
+       This is not considered stable API, and may change in future QGIS releases. It is
+       exposed to the Python bindings as a tech preview only.
+
+    QgsPoint3DSymbol()
+    Constructor for QgsPoint3DSymbol with default QgsMarkerSymbol as the
+    billboardSymbol
+
+    QgsPoint3DSymbol(other: QgsPoint3DSymbol)
+    """
 
     @typing.overload
     def __init__(self) -> None: ...
     @typing.overload
     def __init__(self, other: 'QgsPoint3DSymbol') -> None: ...
 
-    def billboardHeight(self) -> float: ...
-    def setTransform(self, transform: QtGui.QMatrix4x4) -> None: ...
-    def transform(self) -> QtGui.QMatrix4x4: ...
-    def setBillboardSymbol(self, symbol: typing.Optional[_core.QgsMarkerSymbol]) -> None: ...
-    def billboardSymbol(self) -> typing.Optional[_core.QgsMarkerSymbol]: ...
-    def setShapeProperties(self, properties: dict[typing.Optional[str], typing.Any]) -> None: ...
-    def shapeProperty(self, property: typing.Optional[str]) -> typing.Any: ...
-    def shapeProperties(self) -> dict[str, typing.Any]: ...
-    def setShape(self, shape: _core.Qgis.Point3DShape) -> None: ...
-    def shape(self) -> _core.Qgis.Point3DShape: ...
+    def billboardHeight(self) -> float:
+        """Returns how much the billboard should be elevated upwards"""
+    def setTransform(self, transform: QtGui.QMatrix4x4) -> None:
+        """Sets transform for individual objects represented by the symbol"""
+    def transform(self) -> QtGui.QMatrix4x4:
+        """Returns transform for individual objects represented by the symbol"""
+    def setBillboardSymbol(self, symbol: typing.Optional[_core.QgsMarkerSymbol]) -> None:
+        """Set symbol for billboard and the ownership is transferred"""
+    def billboardSymbol(self) -> typing.Optional[_core.QgsMarkerSymbol]:
+        """Returns a symbol for billboard"""
+    def setShapeProperties(self, properties: dict[typing.Optional[str], typing.Any]) -> None:
+        """Sets a key-value dictionary of point shape ``properties``.
+
+        The available properties depend on the point
+        `QgsPoint3DSymbol.shape`.
+
+        Cylinders (`Qgis`.Point3DShape.Cylinder)
+        --------------------------------------------------------------------
+
+        - ``radius``
+        - ``length``
+
+        Spheres (`Qgis`.Point3DShape.Sphere)
+        ----------------------------------------------------------------
+
+        - ``radius``
+
+        Cones (`Qgis`.Point3DShape.Cone)
+        ------------------------------------------------------------
+
+        - ``length``
+        - ``topRadius``
+        - ``bottomRadius``
+
+        Cubes (`Qgis`.Point3DShape.Cube)
+        ------------------------------------------------------------
+
+        - ``size``
+
+        Torus (`Qgis`.Point3DShape.Torus)
+        -------------------------------------------------------------
+
+        - ``radius``
+        - ``minorRadius``
+
+        Flat Planes (`Qgis`.Point3DShape.Plane)
+        -------------------------------------------------------------------
+
+        - ``size``
+
+        Extruded Text (`Qgis`.Point3DShape.ExtrudedText)
+        ----------------------------------------------------------------------------
+
+        - ``depth``
+        - ``text`` (string)
+
+        Models (`Qgis`.Point3DShape.Model)
+        --------------------------------------------------------------
+
+        - ``model`` (path to model file)
+        - ``upAxis`` (up axis for model, either "x", "y", "z" or "-x", "-y",
+          "-z")
+        - ``forwardAxis`` (forward axis for model, either "x", "y", "z" or "-x",
+          "-y", "-z")
+
+        .. seealso:: `shapeProperty`
+        """
+    def shapeProperty(self, property: typing.Optional[str]) -> typing.Any:
+        """Returns the value for a specific shape ``property``.
+
+        This method accounts for default property values for the symbol's
+        `QgsPoint3DSymbol.shape`, used when the property has not been
+        explicitly set.
+
+        .. seealso:: `setShapeProperties` for a description of available properties.
+
+        .. versionadded:: 3.36
+        """
+    def shapeProperties(self) -> dict[str, typing.Any]:
+        """Returns a key-value dictionary of point shape properties.
+
+        In most cases callers should use
+        `QgsPoint3DSymbol.shapeProperty` instead, to correctly handle
+        default values when a property has not been explicitly set.
+
+        .. seealso:: `setShapeProperties` for a description of available properties.
+
+        .. seealso:: `shapeProperty`
+        """
+    def setShape(self, shape: _core.Qgis.Point3DShape) -> None:
+        """Sets 3D shape for points"""
+    def shape(self) -> _core.Qgis.Point3DShape:
+        """Returns 3D shape for points"""
     @staticmethod
-    def shapeToString(shape: _core.Qgis.Point3DShape) -> str: ...
+    def shapeToString(shape: _core.Qgis.Point3DShape) -> str:
+        """Returns string from a shape enum value"""
     @staticmethod
-    def shapeFromString(shape: typing.Optional[str]) -> _core.Qgis.Point3DShape: ...
-    def setMaterialSettings(self, materialSettings: typing.Optional[_core.QgsAbstractMaterialSettings]) -> None: ...
-    def materialSettings(self) -> typing.Optional[_core.QgsAbstractMaterialSettings]: ...
-    def setAltitudeClamping(self, altClamping: _core.Qgis.AltitudeClamping) -> None: ...
-    def altitudeClamping(self) -> _core.Qgis.AltitudeClamping: ...
+    def shapeFromString(shape: typing.Optional[str]) -> _core.Qgis.Point3DShape:
+        """Returns shape enum value from a string"""
+    def setMaterialSettings(self, materialSettings: typing.Optional[_core.QgsAbstractMaterialSettings]) -> None:
+        """Sets the ``material`` settings used for shading of the symbol.
+
+        Ownership of ``material`` is transferred to the symbol.
+        """
+    def materialSettings(self) -> typing.Optional[_core.QgsAbstractMaterialSettings]:
+        """Returns material settings used for shading of the symbol"""
+    def setAltitudeClamping(self, altClamping: _core.Qgis.AltitudeClamping) -> None:
+        """Sets method that determines altitude (whether to clamp to feature to
+        terrain)
+        """
+    def altitudeClamping(self) -> _core.Qgis.AltitudeClamping:
+        """Returns method that determines altitude (whether to clamp to feature to
+        terrain)
+        """
     def setDefaultPropertiesFromLayer(self, layer: typing.Optional[_core.QgsVectorLayer]) -> None: ...
     def compatibleGeometryTypes(self) -> list[_core.Qgis.GeometryType]: ...
     def readXml(self, elem: QtXml.QDomElement, context: _core.QgsReadWriteContext) -> None: ...
@@ -1098,7 +3583,11 @@ class QgsPoint3DSymbol(_core.QgsAbstract3DSymbol):
     def clone(self) -> typing.Optional[_core.QgsAbstract3DSymbol]: ...
     def type(self) -> str: ...
     @staticmethod
-    def create() -> typing.Optional[_core.QgsAbstract3DSymbol]: ...
+    def create() -> typing.Optional[_core.QgsAbstract3DSymbol]:
+        """Creates a new QgsPoint3DSymbol.
+
+        Caller takes ownership of the returned symbol.
+        """
     Shape: typing.Type[_core.Qgis.Point3DShape]
     Cylinder: _core.Qgis.Point3DShape
     Sphere: _core.Qgis.Point3DShape
@@ -1112,43 +3601,160 @@ class QgsPoint3DSymbol(_core.QgsAbstract3DSymbol):
 
 
 class QgsPolygon3DSymbol(_core.QgsAbstract3DSymbol):
+    """3D symbol that draws polygon geometries as planar polygons, optionally
+    extruded (with added walls).
+
+    .. warning::
+
+       This is not considered stable API, and may change in future QGIS releases. It is
+       exposed to the Python bindings as a tech preview only.
+    """
 
     def __init__(self) -> None: ...
 
-    def extrusionFaces(self) -> _core.Qgis.ExtrusionFace: ...
+    def extrusionFaces(self) -> _core.Qgis.ExtrusionFace:
+        """Returns the building extrusion sides to be rendered.
+
+        .. versionadded:: 4.0
+        """
     @deprecated("""Since 4.0. Use extrusionFaces() instead.""")
-    def renderedFacade(self) -> int: ...
-    def setExtrusionFaces(self, side: _core.Qgis.ExtrusionFace) -> None: ...
+    def renderedFacade(self) -> int:
+        """Returns which facade of the buildings is rendered (0 for None, 1 for
+        Walls, 2 for Roof, 3 for WallsAndRoof)
+
+        .. versionadded:: 3.16
+
+        .. deprecated:: 4.0
+
+           Use `QgsPolygon3DSymbol.extrusionFaces` instead.
+        """
+    def setExtrusionFaces(self, side: _core.Qgis.ExtrusionFace) -> None:
+        """Sets the building extrusion sides to be rendered.
+
+        .. versionadded:: 4.0
+        """
     @deprecated("""Since 4.0. Use setExtrusionFaces() instead.""")
-    def setRenderedFacade(self, side: int) -> None: ...
-    def setEdgeColor(self, color: typing.Union[QtGui.QColor, QtCore.Qt.GlobalColor, int]) -> None: ...
-    def edgeColor(self) -> QtGui.QColor: ...
-    def setEdgeWidth(self, width: float) -> None: ...
-    def edgeWidth(self) -> float: ...
-    def setEdgesEnabled(self, enabled: bool) -> None: ...
-    def edgesEnabled(self) -> bool: ...
-    def setAddBackFaces(self, add: bool) -> None: ...
-    def addBackFaces(self) -> bool: ...
-    def setInvertNormals(self, invert: bool) -> None: ...
-    def invertNormals(self) -> bool: ...
-    def setCullingMode(self, mode: Qgs3DTypes.CullingMode) -> None: ...
-    def cullingMode(self) -> Qgs3DTypes.CullingMode: ...
-    def setMaterialSettings(self, materialSettings: typing.Optional[_core.QgsAbstractMaterialSettings]) -> None: ...
-    def materialSettings(self) -> typing.Optional[_core.QgsAbstractMaterialSettings]: ...
-    def setExtrusionHeight(self, extrusionHeight: float) -> None: ...
-    def extrusionHeight(self) -> float: ...
-    def setOffset(self, offset: float) -> None: ...
-    def offset(self) -> float: ...
+    def setRenderedFacade(self, side: int) -> None:
+        """Sets which facade of the buildings is rendered (0 for None, 1 for Walls,
+        2 for Roof, 3 for WallsAndRoof)
+
+        .. versionadded:: 3.16
+
+        .. deprecated:: 4.0
+
+           Use `QgsPolygon3DSymbol.setExtrusionFaces` instead.
+        """
+    def setEdgeColor(self, color: typing.Union[QtGui.QColor, QtCore.Qt.GlobalColor, int]) -> None:
+        """Sets edge lines color
+
+        .. versionadded:: 3.8
+        """
+    def edgeColor(self) -> QtGui.QColor:
+        """Returns edge lines color
+
+        .. versionadded:: 3.8
+        """
+    def setEdgeWidth(self, width: float) -> None:
+        """Sets width of edge lines (in pixels)
+
+        .. versionadded:: 3.8
+        """
+    def edgeWidth(self) -> float:
+        """Returns width of edge lines (in pixels)
+
+        .. versionadded:: 3.8
+        """
+    def setEdgesEnabled(self, enabled: bool) -> None:
+        """Sets whether edge highlighting is enabled
+
+        .. versionadded:: 3.8
+        """
+    def edgesEnabled(self) -> bool:
+        """Returns whether edge highlighting is enabled
+
+        .. versionadded:: 3.8
+        """
+    def setAddBackFaces(self, add: bool) -> None:
+        """Sets whether also triangles facing the other side will be created.
+        Useful if input data have inconsistent order of vertices
+
+        .. versionadded:: 3.2
+        """
+    def addBackFaces(self) -> bool:
+        """Returns whether also triangles facing the other side will be created.
+        Useful if input data have inconsistent order of vertices
+
+        .. versionadded:: 3.2
+        """
+    def setInvertNormals(self, invert: bool) -> None:
+        """Sets whether the normals of triangles will be inverted (useful for
+        fixing clockwise / counter-clockwise face vertex orders)
+        """
+    def invertNormals(self) -> bool:
+        """Returns whether the normals of triangles will be inverted (useful for
+        fixing clockwise / counter-clockwise face vertex orders)
+        """
+    def setCullingMode(self, mode: Qgs3DTypes.CullingMode) -> None:
+        """Sets front/back culling mode"""
+    def cullingMode(self) -> Qgs3DTypes.CullingMode:
+        """Returns front/back culling mode"""
+    def setMaterialSettings(self, materialSettings: typing.Optional[_core.QgsAbstractMaterialSettings]) -> None:
+        """Sets the ``material`` settings used for shading of the symbol.
+
+        Ownership of ``material`` is transferred to the symbol.
+        """
+    def materialSettings(self) -> typing.Optional[_core.QgsAbstractMaterialSettings]:
+        """Returns material settings used for shading of the symbol"""
+    def setExtrusionHeight(self, extrusionHeight: float) -> None:
+        """Sets extrusion height (in map units)"""
+    def extrusionHeight(self) -> float:
+        """Returns extrusion height (in map units)"""
+    def setOffset(self, offset: float) -> None:
+        """Sets vertical offset of the symbol (in map units)
+
+        .. versionadded:: 3.36
+        """
+    def offset(self) -> float:
+        """Returns vertical offset of the symbol (in map units)
+
+        .. versionadded:: 3.36
+        """
     @deprecated("""Since 3.36. Use setOffset() instead.""")
-    def setHeight(self, height: float) -> None: ...
+    def setHeight(self, height: float) -> None:
+        """Sets height (altitude) of the symbol (in map units)
+
+        .. deprecated:: 3.36
+
+           Use `QgsPolygon3DSymbol.setOffset` instead.
+        """
     @deprecated("""Since 3.36. Use offset() instead.""")
-    def height(self) -> float: ...
-    def setAltitudeBinding(self, altBinding: _core.Qgis.AltitudeBinding) -> None: ...
-    def altitudeBinding(self) -> _core.Qgis.AltitudeBinding: ...
-    def setAltitudeClamping(self, altClamping: _core.Qgis.AltitudeClamping) -> None: ...
-    def altitudeClamping(self) -> _core.Qgis.AltitudeClamping: ...
+    def height(self) -> float:
+        """Returns height (altitude) of the symbol (in map units)
+
+        .. deprecated:: 3.36
+
+           Use `QgsPolygon3DSymbol.offset` instead.
+        """
+    def setAltitudeBinding(self, altBinding: _core.Qgis.AltitudeBinding) -> None:
+        """Sets method that determines how altitude is bound to individual vertices"""
+    def altitudeBinding(self) -> _core.Qgis.AltitudeBinding:
+        """Returns method that determines how altitude is bound to individual
+        vertices
+        """
+    def setAltitudeClamping(self, altClamping: _core.Qgis.AltitudeClamping) -> None:
+        """Sets method that determines altitude (whether to clamp to feature to
+        terrain)
+        """
+    def altitudeClamping(self) -> _core.Qgis.AltitudeClamping:
+        """Returns method that determines altitude (whether to clamp to feature to
+        terrain)
+        """
     @staticmethod
-    def create() -> typing.Optional[_core.QgsAbstract3DSymbol]: ...
+    def create() -> typing.Optional[_core.QgsAbstract3DSymbol]:
+        """Creates a new QgsPolygon3DSymbol.
+
+        Caller takes ownership of the returned symbol.
+        """
     def setDefaultPropertiesFromLayer(self, layer: typing.Optional[_core.QgsVectorLayer]) -> None: ...
     def compatibleGeometryTypes(self) -> list[_core.Qgis.GeometryType]: ...
     def readXml(self, elem: QtXml.QDomElement, context: _core.QgsReadWriteContext) -> None: ...
@@ -1158,6 +3764,15 @@ class QgsPolygon3DSymbol(_core.QgsAbstract3DSymbol):
 
 
 class QgsPointCloud3DSymbol(_core.QgsAbstract3DSymbol):
+    """3D symbol that draws point cloud geometries as 3D objects.
+
+    .. warning::
+
+       This is not considered stable API, and may change in future QGIS releases. It is
+       exposed to the Python bindings as a tech preview only.
+
+    .. versionadded:: 3.18
+    """
 
     class RenderingStyle(enum.IntEnum):
         NoRendering = ... # type: QgsPointCloud3DSymbol.RenderingStyle
@@ -1171,23 +3786,102 @@ class QgsPointCloud3DSymbol(_core.QgsAbstract3DSymbol):
     @typing.overload
     def __init__(self, a0: 'QgsPointCloud3DSymbol') -> None: ...
 
-    def readBaseXml(self, elem: QtXml.QDomElement, context: _core.QgsReadWriteContext) -> None: ...
-    def writeBaseXml(self, elem: QtXml.QDomElement, context: _core.QgsReadWriteContext) -> None: ...
+    def readBaseXml(self, elem: QtXml.QDomElement, context: _core.QgsReadWriteContext) -> None:
+        """The type of the None singleton."""
+    def writeBaseXml(self, elem: QtXml.QDomElement, context: _core.QgsReadWriteContext) -> None:
+        """The type of the None singleton."""
     def copyBaseSettings(self, destination: typing.Optional[_core.QgsAbstract3DSymbol]) -> None: ...
-    def setVerticalFilterThreshold(self, verticalFilterThreshold: float) -> None: ...
-    def verticalFilterThreshold(self) -> float: ...
-    def setVerticalTriangleFilter(self, verticalTriangleFilter: bool) -> None: ...
-    def verticalTriangleFilter(self) -> bool: ...
-    def setHorizontalFilterThreshold(self, horizontalFilterThreshold: float) -> None: ...
-    def horizontalFilterThreshold(self) -> float: ...
-    def setHorizontalTriangleFilter(self, horizontalTriangleFilter: bool) -> None: ...
-    def horizontalTriangleFilter(self) -> bool: ...
-    def setRenderAsTriangles(self, asTriangles: bool) -> None: ...
-    def renderAsTriangles(self) -> bool: ...
-    def byteStride(self) -> int: ...
-    def setPointSize(self, size: float) -> None: ...
-    def pointSize(self) -> float: ...
-    def symbolType(self) -> str: ...
+    def setVerticalFilterThreshold(self, verticalFilterThreshold: float) -> None:
+        """Sets the threshold vertical height value for filtering triangles. If the
+        triangles are filtered vertically, triangles with a vertical height
+        greater than this threshold value will not be rendered, see
+        `QgsPointCloud3DSymbol.setVerticalTriangleFilter`.
+
+        .. versionadded:: 3.26
+        """
+    def verticalFilterThreshold(self) -> float:
+        """Returns the threshold vertical height value for filtering triangles. If
+        the triangles are filtered vertically, triangles with a vertical height
+        greater than this threshold value will not be rendered, see
+        `QgsPointCloud3DSymbol.verticalTriangleFilter`.
+
+        .. versionadded:: 3.26
+        """
+    def setVerticalTriangleFilter(self, verticalTriangleFilter: bool) -> None:
+        """Sets whether triangles are filtered by vertical height for rendering. If
+        the triangles are vertically filtered, triangles with a vertical height
+        greater than a threshold value will not be rendered, see
+        `QgsPointCloud3DSymbol.setVerticalFilterThreshold`.
+
+        .. versionadded:: 3.26
+        """
+    def verticalTriangleFilter(self) -> bool:
+        """Returns whether triangles are filtered by vertical height for rendering.
+        If the triangles are vertically filtered, triangles with a vertical
+        height greater than a threshold value will not be rendered, see
+        `QgsPointCloud3DSymbol.verticalFilterThreshold`.
+
+        .. versionadded:: 3.26
+        """
+    def setHorizontalFilterThreshold(self, horizontalFilterThreshold: float) -> None:
+        """Sets the threshold horizontal size value for filtering triangles. If the
+        triangles are horizontally filtered by size, triangles with a horizontal
+        side size greater than a threshold value will not be rendered, see
+        `QgsPointCloud3DSymbol.setHorizontalTriangleFilter`.
+
+        .. versionadded:: 3.26
+        """
+    def horizontalFilterThreshold(self) -> float:
+        """Returns the threshold horizontal size value for filtering triangles. If
+        the triangles are horizontally filtered by size, triangles with a
+        horizontal side size greater than a threshold value will not be
+        rendered, see
+        `QgsPointCloud3DSymbol.horizontalTriangleFilter`.
+
+        .. versionadded:: 3.26
+        """
+    def setHorizontalTriangleFilter(self, horizontalTriangleFilter: bool) -> None:
+        """Sets whether whether triangles are filtered by horizontal size for
+        rendering. If the triangles are horizontally filtered by size, triangles
+        with a horizontal side size greater than a threshold value will not be
+        rendered, see
+        `QgsPointCloud3DSymbol.setHorizontalFilterThreshold`.
+
+        .. versionadded:: 3.26
+        """
+    def horizontalTriangleFilter(self) -> bool:
+        """Returns whether triangles are filtered by horizontal size for rendering.
+        If the triangles are horizontally filtered by size, triangles with a
+        horizontal side size greater than a threshold value will not be
+        rendered, see
+        `QgsPointCloud3DSymbol.horizontalFilterThreshold`.
+
+        .. versionadded:: 3.26
+        """
+    def setRenderAsTriangles(self, asTriangles: bool) -> None:
+        """Sets whether points are triangulated to render solid surface
+
+        .. versionadded:: 3.26
+        """
+    def renderAsTriangles(self) -> bool:
+        """Returns whether points are triangulated to render solid surface
+
+        .. versionadded:: 3.26
+        """
+    def byteStride(self) -> int:
+        """Returns the byte stride for the geometries used to for the vertex buffer"""
+    def setPointSize(self, size: float) -> None:
+        """Sets the point size
+
+        .. seealso:: `pointSize`
+        """
+    def pointSize(self) -> float:
+        """Returns the point size of the point cloud
+
+        .. seealso:: `setPointSize`
+        """
+    def symbolType(self) -> str:
+        """Returns a unique string identifier of the symbol type."""
     def clone(self) -> typing.Optional['QgsPointCloud3DSymbol']: ...
     def type(self) -> str: ...
     NoRendering: QgsPointCloud3DSymbol.RenderingStyle
@@ -1198,6 +3892,16 @@ class QgsPointCloud3DSymbol(_core.QgsAbstract3DSymbol):
 
 
 class QgsSingleColorPointCloud3DSymbol(QgsPointCloud3DSymbol):
+    """3D symbol that draws point cloud geometries as 3D objects using one
+    color.
+
+    .. warning::
+
+       This is not considered stable API, and may change in future QGIS releases. It is
+       exposed to the Python bindings as a tech preview only.
+
+    .. versionadded:: 3.18
+    """
 
     @typing.overload
     def __init__(self) -> None: ...
@@ -1205,8 +3909,18 @@ class QgsSingleColorPointCloud3DSymbol(QgsPointCloud3DSymbol):
     def __init__(self, a0: 'QgsSingleColorPointCloud3DSymbol') -> None: ...
 
     def byteStride(self) -> int: ...
-    def setSingleColor(self, color: typing.Union[QtGui.QColor, QtCore.Qt.GlobalColor, int]) -> None: ...
-    def singleColor(self) -> QtGui.QColor: ...
+    def setSingleColor(self, color: typing.Union[QtGui.QColor, QtCore.Qt.GlobalColor, int]) -> None:
+        """Sets the color used by the renderer when using SingleColor rendering
+        mode
+
+        .. seealso:: `singleColor`
+        """
+    def singleColor(self) -> QtGui.QColor:
+        """Returns the color used by the renderer when using SingleColor rendering
+        mode
+
+        .. seealso:: `setSingleColor`
+        """
     def readXml(self, elem: QtXml.QDomElement, context: _core.QgsReadWriteContext) -> None: ...
     def writeXml(self, elem: QtXml.QDomElement, context: _core.QgsReadWriteContext) -> None: ...
     def clone(self) -> typing.Optional['QgsSingleColorPointCloud3DSymbol']: ...
@@ -1214,6 +3928,16 @@ class QgsSingleColorPointCloud3DSymbol(QgsPointCloud3DSymbol):
 
 
 class QgsColorRampPointCloud3DSymbol(QgsPointCloud3DSymbol):
+    """3D symbol that draws point cloud geometries as 3D objects using color
+    ramp shader.
+
+    .. warning::
+
+       This is not considered stable API, and may change in future QGIS releases. It is
+       exposed to the Python bindings as a tech preview only.
+
+    .. versionadded:: 3.18
+    """
 
     @typing.overload
     def __init__(self) -> None: ...
@@ -1221,13 +3945,46 @@ class QgsColorRampPointCloud3DSymbol(QgsPointCloud3DSymbol):
     def __init__(self, a0: 'QgsColorRampPointCloud3DSymbol') -> None: ...
 
     def byteStride(self) -> int: ...
-    def setColorRampShaderMinMax(self, min: float, max: float) -> None: ...
-    def colorRampShaderMax(self) -> float: ...
-    def colorRampShaderMin(self) -> float: ...
-    def setColorRampShader(self, colorRampShader: _core.QgsColorRampShader) -> None: ...
-    def colorRampShader(self) -> _core.QgsColorRampShader: ...
-    def setAttribute(self, attribute: typing.Optional[str]) -> None: ...
-    def attribute(self) -> str: ...
+    def setColorRampShaderMinMax(self, min: float, max: float) -> None:
+        """Sets the minimum and maximum values used when classifying colors in the
+        color ramp shader
+
+        .. seealso:: `colorRampShaderMin`
+
+        .. seealso:: `colorRampShaderMax`
+        """
+    def colorRampShaderMax(self) -> float:
+        """Returns the maximum value used when classifying colors in the color ramp
+        shader
+
+        .. seealso:: `setColorRampShaderMinMax`
+        """
+    def colorRampShaderMin(self) -> float:
+        """Returns the minimum value used when classifying colors in the color ramp
+        shader
+
+        .. seealso:: `setColorRampShaderMinMax`
+        """
+    def setColorRampShader(self, colorRampShader: _core.QgsColorRampShader) -> None:
+        """Sets the color ramp shader used to render the point cloud
+
+        .. seealso:: `colorRampShader`
+        """
+    def colorRampShader(self) -> _core.QgsColorRampShader:
+        """Returns the color ramp shader used to render the color
+
+        .. seealso:: `setColorRampShader`
+        """
+    def setAttribute(self, attribute: typing.Optional[str]) -> None:
+        """Sets the ``attribute`` used to select the color of the point cloud.
+
+        .. seealso:: `attribute`
+        """
+    def attribute(self) -> str:
+        """Returns the attribute used to select the color of the point cloud.
+
+        .. seealso:: `setAttribute`
+        """
     def readXml(self, elem: QtXml.QDomElement, context: _core.QgsReadWriteContext) -> None: ...
     def writeXml(self, elem: QtXml.QDomElement, context: _core.QgsReadWriteContext) -> None: ...
     def symbolType(self) -> str: ...
@@ -1235,21 +3992,133 @@ class QgsColorRampPointCloud3DSymbol(QgsPointCloud3DSymbol):
 
 
 class QgsRgbPointCloud3DSymbol(QgsPointCloud3DSymbol):
+    """3D symbol that draws point cloud geometries as 3D objects using RGB
+    colors in the dataset.
+
+    .. warning::
+
+       This is not considered stable API, and may change in future QGIS releases. It is
+       exposed to the Python bindings as a tech preview only.
+
+    .. versionadded:: 3.18
+    """
 
     def __init__(self) -> None: ...
 
-    def setBlueContrastEnhancement(self, enhancement: typing.Optional[_core.QgsContrastEnhancement]) -> None: ...
-    def blueContrastEnhancement(self) -> typing.Optional[_core.QgsContrastEnhancement]: ...
-    def setGreenContrastEnhancement(self, enhancement: typing.Optional[_core.QgsContrastEnhancement]) -> None: ...
-    def greenContrastEnhancement(self) -> typing.Optional[_core.QgsContrastEnhancement]: ...
-    def setRedContrastEnhancement(self, enhancement: typing.Optional[_core.QgsContrastEnhancement]) -> None: ...
-    def redContrastEnhancement(self) -> typing.Optional[_core.QgsContrastEnhancement]: ...
-    def setBlueAttribute(self, attribute: typing.Optional[str]) -> None: ...
-    def blueAttribute(self) -> str: ...
-    def setGreenAttribute(self, attribute: typing.Optional[str]) -> None: ...
-    def greenAttribute(self) -> str: ...
-    def setRedAttribute(self, attribute: typing.Optional[str]) -> None: ...
-    def redAttribute(self) -> str: ...
+    def setBlueContrastEnhancement(self, enhancement: typing.Optional[_core.QgsContrastEnhancement]) -> None:
+        """Sets the contrast ``enhancement`` to use for the blue channel.
+
+        Ownership of ``enhancement`` is transferred.
+
+        .. seealso:: `blueContrastEnhancement`
+
+        .. seealso:: `setRedContrastEnhancement`
+
+        .. seealso:: `setGreenContrastEnhancement`
+        """
+    def blueContrastEnhancement(self) -> typing.Optional[_core.QgsContrastEnhancement]:
+        """Returns the contrast enhancement to use for the blue channel.
+
+        .. seealso:: `setBlueContrastEnhancement`
+
+        .. seealso:: `redContrastEnhancement`
+
+        .. seealso:: `greenContrastEnhancement`
+        """
+    def setGreenContrastEnhancement(self, enhancement: typing.Optional[_core.QgsContrastEnhancement]) -> None:
+        """Sets the contrast ``enhancement`` to use for the green channel.
+
+        Ownership of ``enhancement`` is transferred.
+
+        .. seealso:: `greenContrastEnhancement`
+
+        .. seealso:: `setRedContrastEnhancement`
+
+        .. seealso:: `setBlueContrastEnhancement`
+        """
+    def greenContrastEnhancement(self) -> typing.Optional[_core.QgsContrastEnhancement]:
+        """Returns the contrast enhancement to use for the green channel.
+
+        .. seealso:: `setGreenContrastEnhancement`
+
+        .. seealso:: `redContrastEnhancement`
+
+        .. seealso:: `blueContrastEnhancement`
+        """
+    def setRedContrastEnhancement(self, enhancement: typing.Optional[_core.QgsContrastEnhancement]) -> None:
+        """Sets the contrast ``enhancement`` to use for the red channel.
+
+        Ownership of ``enhancement`` is transferred.
+
+        .. seealso:: `redContrastEnhancement`
+
+        .. seealso:: `setGreenContrastEnhancement`
+
+        .. seealso:: `setBlueContrastEnhancement`
+        """
+    def redContrastEnhancement(self) -> typing.Optional[_core.QgsContrastEnhancement]:
+        """Returns the contrast enhancement to use for the red channel.
+
+        .. seealso:: `setRedContrastEnhancement`
+
+        .. seealso:: `greenContrastEnhancement`
+
+        .. seealso:: `blueContrastEnhancement`
+        """
+    def setBlueAttribute(self, attribute: typing.Optional[str]) -> None:
+        """Sets the ``attribute`` to use for the blue channel.
+
+        .. seealso:: `setRedAttribute`
+
+        .. seealso:: `setGreenAttribute`
+
+        .. seealso:: `blueAttribute`
+        """
+    def blueAttribute(self) -> str:
+        """Returns the attribute to use for the blue channel.
+
+        .. seealso:: `greenAttribute`
+
+        .. seealso:: `redAttribute`
+
+        .. seealso:: `setBlueAttribute`
+        """
+    def setGreenAttribute(self, attribute: typing.Optional[str]) -> None:
+        """Sets the ``attribute`` to use for the green channel.
+
+        .. seealso:: `setRedAttribute`
+
+        .. seealso:: `setBlueAttribute`
+
+        .. seealso:: `greenAttribute`
+        """
+    def greenAttribute(self) -> str:
+        """Returns the attribute to use for the green channel.
+
+        .. seealso:: `redAttribute`
+
+        .. seealso:: `blueAttribute`
+
+        .. seealso:: `setGreenAttribute`
+        """
+    def setRedAttribute(self, attribute: typing.Optional[str]) -> None:
+        """Sets the ``attribute`` to use for the red channel.
+
+        .. seealso:: `setGreenAttribute`
+
+        .. seealso:: `setBlueAttribute`
+
+        .. seealso:: `redAttribute`
+        """
+    def redAttribute(self) -> str:
+        """Returns the attribute to use for the red channel.
+
+        .. seealso:: `greenAttribute`
+
+        .. seealso:: `blueAttribute`
+
+        .. seealso:: `setRedAttribute`
+        """
     def byteStride(self) -> int: ...
     def readXml(self, elem: QtXml.QDomElement, context: _core.QgsReadWriteContext) -> None: ...
     def writeXml(self, elem: QtXml.QDomElement, context: _core.QgsReadWriteContext) -> None: ...
@@ -1258,6 +4127,16 @@ class QgsRgbPointCloud3DSymbol(QgsPointCloud3DSymbol):
 
 
 class QgsClassificationPointCloud3DSymbol(QgsPointCloud3DSymbol):
+    """3D symbol that draws point cloud geometries as 3D objects using
+    classification of the dataset.
+
+    .. warning::
+
+       This is not considered stable API, and may change in future QGIS releases. It is
+       exposed to the Python bindings as a tech preview only.
+
+    .. versionadded:: 3.18
+    """
 
     @typing.overload
     def __init__(self) -> None: ...
@@ -1265,11 +4144,34 @@ class QgsClassificationPointCloud3DSymbol(QgsPointCloud3DSymbol):
     def __init__(self, a0: 'QgsClassificationPointCloud3DSymbol') -> None: ...
 
     def byteStride(self) -> int: ...
-    def getFilteredOutCategories(self) -> list[_core.QgsPointCloudCategory]: ...
-    def setCategoriesList(self, categories: collections.abc.Iterable[_core.QgsPointCloudCategory]) -> None: ...
-    def categoriesList(self) -> list[_core.QgsPointCloudCategory]: ...
-    def setAttribute(self, attribute: typing.Optional[str]) -> None: ...
-    def attribute(self) -> str: ...
+    def getFilteredOutCategories(self) -> list[_core.QgsPointCloudCategory]:
+        """Gets the list of categories of the classification that should not be
+        rendered
+
+        .. seealso:: `categoriesList`
+
+        .. seealso:: `setCategoriesList`
+        """
+    def setCategoriesList(self, categories: collections.abc.Iterable[_core.QgsPointCloudCategory]) -> None:
+        """Sets the list of categories of the classification
+
+        .. seealso:: `categoriesList`
+        """
+    def categoriesList(self) -> list[_core.QgsPointCloudCategory]:
+        """Returns the list of categories of the classification
+
+        .. seealso:: `setCategoriesList`
+        """
+    def setAttribute(self, attribute: typing.Optional[str]) -> None:
+        """Sets the ``attribute`` used to select the color of the point cloud.
+
+        .. seealso:: `attribute`
+        """
+    def attribute(self) -> str:
+        """Returns the attribute used to select the color of the point cloud.
+
+        .. seealso:: `setAttribute`
+        """
     def readXml(self, elem: QtXml.QDomElement, context: _core.QgsReadWriteContext) -> None: ...
     def writeXml(self, elem: QtXml.QDomElement, context: _core.QgsReadWriteContext) -> None: ...
     def symbolType(self) -> str: ...
@@ -1277,71 +4179,270 @@ class QgsClassificationPointCloud3DSymbol(QgsPointCloud3DSymbol):
 
 
 class Qgs3DTerrainAbstractMetadata(PyQt6.sip.wrapper):
+    """Stores metadata about one 3D terrain class.
+
+    .. note::
+
+       It's necessary to implement `createTerrainSettings` function.
+       In C++ you can use Qgs3DTerrainMetadata convenience class.
+
+    .. versionadded:: 3.42
+
+    Qgs3DTerrainAbstractMetadata(type: str|None, visibleName: str|None, icon: QIcon = QIcon())
+    Constructor for Qgs3DTerrainAbstractMetadata, with the specified
+    ``type`` and ``visibleName``.
+
+    An optional ``icon`` can be specified to represent the material type.
+
+    Qgs3DTerrainAbstractMetadata(a0: Qgs3DTerrainAbstractMetadata)
+    """
 
     @typing.overload
     def __init__(self, type: typing.Optional[str], visibleName: typing.Optional[str], icon: QtGui.QIcon = ...) -> None: ...
     @typing.overload
     def __init__(self, a0: 'Qgs3DTerrainAbstractMetadata') -> None: ...
 
-    def createTerrainSettings(self) -> typing.Optional['QgsAbstractTerrainSettings']: ...
-    def icon(self) -> QtGui.QIcon: ...
-    def visibleName(self) -> str: ...
-    def type(self) -> str: ...
+    def createTerrainSettings(self) -> typing.Optional['QgsAbstractTerrainSettings']:
+        """Creates a new instance of this terrain settings type.
+
+        Caller takes ownership of the returned object.
+        """
+    def icon(self) -> QtGui.QIcon:
+        """Returns an icon representing the terrain type, if available."""
+    def visibleName(self) -> str:
+        """Returns the terrain's visible (translated) name."""
+    def type(self) -> str:
+        """Returns the unique terrain type string."""
 
 
 class Qgs3DTerrainRegistry(PyQt6.sip.wrapper):
+    """Registry of available 3d terrain classes.
+
+    Qgs3DTerrainRegistry is not usually directly created, but rather
+    accessed through Qgs3D.terrainRegistry().
+
+    .. versionadded:: 3.42
+    """
 
     def __init__(self) -> None: ...
 
-    def configureTerrainFromProject(self, properties: typing.Optional[_core.QgsProjectElevationProperties]) -> typing.Optional['QgsAbstractTerrainSettings']: ...
-    def createTerrainSettings(self, type: typing.Optional[str]) -> typing.Optional['QgsAbstractTerrainSettings']: ...
-    def addType(self, metadata: typing.Optional[Qgs3DTerrainAbstractMetadata]) -> bool: ...
-    def types(self) -> list[str]: ...
-    def terrainMetadata(self, type: typing.Optional[str]) -> typing.Optional[Qgs3DTerrainAbstractMetadata]: ...
+    def configureTerrainFromProject(self, properties: typing.Optional[_core.QgsProjectElevationProperties]) -> typing.Optional['QgsAbstractTerrainSettings']:
+        """Create terrain settings directly from a project's elevation
+        ``properties``.
+        """
+    def createTerrainSettings(self, type: typing.Optional[str]) -> typing.Optional['QgsAbstractTerrainSettings']:
+        """Creates a new instance of the terrain settings of the specified
+        ``type``.
+
+        The caller takes ownership of the returned object.
+
+        Returns ``None`` if the specified type is not found in the registry.
+        """
+    def addType(self, metadata: typing.Optional[Qgs3DTerrainAbstractMetadata]) -> bool:
+        """Registers a new terrain type. Takes ownership of the ``metadata``
+        instance.
+        """
+    def types(self) -> list[str]:
+        """Returns a list of all available terrain types."""
+    def terrainMetadata(self, type: typing.Optional[str]) -> typing.Optional[Qgs3DTerrainAbstractMetadata]:
+        """Returns metadata for specified terrain ``type``. Returns ``None`` if not
+        found
+        """
 
 
 class QgsAbstractTerrainSettings(PyQt6.sip.wrapper):
+    """Base class for all terrain settings classes.
+
+    `QgsAbstractTerrainSettings` subclasses are responsible for
+    storing the configuration of terrain generators.
+
+    .. warning::
+
+       This is not considered stable API, and may change in future QGIS releases. It is
+       exposed to the Python bindings as a tech preview only.
+
+    .. versionadded:: 3.42
+    """
 
     @typing.overload
     def __init__(self) -> None: ...
     @typing.overload
     def __init__(self, a0: 'QgsAbstractTerrainSettings') -> None: ...
 
-    def equalsCommon(self, other: typing.Optional['QgsAbstractTerrainSettings']) -> bool: ...
-    def copyCommonProperties(self, source: typing.Optional['QgsAbstractTerrainSettings']) -> None: ...
-    def readCommonProperties(self, element: QtXml.QDomElement, context: _core.QgsReadWriteContext) -> None: ...
-    def writeCommonProperties(self, element: QtXml.QDomElement, context: _core.QgsReadWriteContext) -> None: ...
-    def elevationOffset(self) -> float: ...
-    def setElevationOffset(self, offset: float) -> None: ...
-    def maximumGroundError(self) -> float: ...
-    def setMaximumGroundError(self, error: float) -> None: ...
-    def maximumScreenError(self) -> float: ...
-    def setMaximumScreenError(self, error: float) -> None: ...
-    def mapTileResolution(self) -> int: ...
-    def setMapTileResolution(self, resolution: int) -> None: ...
-    def verticalScale(self) -> float: ...
-    def setVerticalScale(self, scale: float) -> None: ...
-    def resolveReferences(self, project: typing.Optional[_core.QgsProject]) -> None: ...
-    def writeXml(self, element: QtXml.QDomElement, context: _core.QgsReadWriteContext) -> None: ...
-    def readXml(self, element: QtXml.QDomElement, context: _core.QgsReadWriteContext) -> None: ...
-    def equals(self, other: typing.Optional['QgsAbstractTerrainSettings']) -> bool: ...
-    def type(self) -> str: ...
-    def clone(self) -> typing.Optional['QgsAbstractTerrainSettings']: ...
+    def equalsCommon(self, other: typing.Optional['QgsAbstractTerrainSettings']) -> bool:
+        """The type of the None singleton."""
+    def copyCommonProperties(self, source: typing.Optional['QgsAbstractTerrainSettings']) -> None:
+        """The type of the None singleton."""
+    def readCommonProperties(self, element: QtXml.QDomElement, context: _core.QgsReadWriteContext) -> None:
+        """The type of the None singleton."""
+    def writeCommonProperties(self, element: QtXml.QDomElement, context: _core.QgsReadWriteContext) -> None:
+        """The type of the None singleton."""
+    def elevationOffset(self) -> float:
+        """Returns the elevation offset of the terrain (used to move the terrain up
+        or down).
+
+        .. seealso:: `setElevationOffset`
+        """
+    def setElevationOffset(self, offset: float) -> None:
+        """Sets the terrain elevation ``offset`` (used to move the terrain up or
+        down).
+
+        .. seealso:: `elevationOffset`
+        """
+    def maximumGroundError(self) -> float:
+        """Returns the maximum ground error of terrain tiles in world units.
+
+        This parameter influences how many zoom levels there will be (together
+        with `QgsAbstractTerrainSettings.mapTileResolution`). This
+        value tells that when the given ground error is reached (e.g. 10
+        meters), it makes no sense to further split terrain tiles into finer
+        ones because they will not add extra details anymore.
+
+        .. seealso:: `setMaximumGroundError`
+        """
+    def setMaximumGroundError(self, error: float) -> None:
+        """Sets the maximum ground ``error`` of terrain tiles in world units.
+
+        .. seealso:: `maximumGroundError`
+        """
+    def maximumScreenError(self) -> float:
+        """Returns the maximum allowed screen error of terrain tiles in pixels.
+
+        This parameter decides how aggressively less detailed terrain tiles are
+        swapped to more detailed ones as camera gets closer. Each tile has its
+        error defined in world units - this error gets projected to screen
+        pixels according to camera view and if the tile's error is greater than
+        the allowed error, it will be swapped by more detailed tiles with lower
+        error.
+
+        see `QgsAbstractTerrainSettings.setMaximumScreenError`
+        """
+    def setMaximumScreenError(self, error: float) -> None:
+        """Sets the maximum allowed screen ``error`` of terrain tiles in pixels.
+
+        .. seealso:: `maximumScreenError`
+        """
+    def mapTileResolution(self) -> int:
+        """Returns the resolution (in pixels) of the texture of a terrain tile.
+
+        This parameter influences how many zoom levels for terrain tiles there
+        will be (together with
+        `QgsAbstractTerrainSettings.maxTerrainGroundError`)
+
+        .. seealso:: `setMapTileResolution`
+        """
+    def setMapTileResolution(self, resolution: int) -> None:
+        """Sets the ``resolution`` (in pixels) of the texture of a terrain tile
+
+        .. seealso:: `mapTileResolution`
+        """
+    def verticalScale(self) -> float:
+        """Returns the vertical scale (exaggeration) for terrain.
+
+        (1 = true scale, > 1 = hills get more pronounced)
+
+        .. seealso:: `setVerticalScale`
+        """
+    def setVerticalScale(self, scale: float) -> None:
+        """Sets the vertical ``scale`` (exaggeration) for terrain.
+
+        (1 = true scale, > 1 = hills get more pronounced)
+
+        .. seealso:: `verticalScale`
+        """
+    def resolveReferences(self, project: typing.Optional[_core.QgsProject]) -> None:
+        """After reading settings from XML, resolves references to any layers in a
+        ``project`` that have been read as layer IDs.
+
+        .. seealso:: `readXml`
+        """
+    def writeXml(self, element: QtXml.QDomElement, context: _core.QgsReadWriteContext) -> None:
+        """Writes settings to a DOM ``element``.
+
+        Subclasses should take care to call
+        `QgsAbstractTerrainSettings.writeCommonProperties` to write
+        common properties to the element.
+
+        .. seealso:: `readXml`
+        """
+    def readXml(self, element: QtXml.QDomElement, context: _core.QgsReadWriteContext) -> None:
+        """Reads settings from a DOM ``element``.
+
+        Subclasses should take care to call
+        `QgsAbstractTerrainSettings.readCommonProperties` to read
+        common properties from the element.
+
+        .. seealso:: `resolveReferences`
+
+        .. seealso:: `writeXml`
+        """
+    def equals(self, other: typing.Optional['QgsAbstractTerrainSettings']) -> bool:
+        """Returns ``True`` if this settings is exactly equal to another ``other``
+        settings.
+        """
+    def type(self) -> str:
+        """Returns the unique type name for the terrain generator."""
+    def clone(self) -> typing.Optional['QgsAbstractTerrainSettings']:
+        """Returns a copy of the terrain settings."""
 
 
 class QgsDemTerrainSettings(QgsAbstractTerrainSettings):
+    """Terrain settings for a terrain generator that uses a raster DEM layer to
+    build terrain.
+
+    .. warning::
+
+       This is not considered stable API, and may change in future QGIS releases. It is
+       exposed to the Python bindings as a tech preview only.
+
+    .. versionadded:: 3.42
+    """
 
     @typing.overload
     def __init__(self) -> None: ...
     @typing.overload
     def __init__(self, a0: 'QgsDemTerrainSettings') -> None: ...
 
-    def skirtHeight(self) -> float: ...
-    def setSkirtHeight(self, height: float) -> None: ...
-    def resolution(self) -> int: ...
-    def setResolution(self, resolution: int) -> None: ...
-    def layer(self) -> typing.Optional[_core.QgsRasterLayer]: ...
-    def setLayer(self, layer: typing.Optional[_core.QgsRasterLayer]) -> None: ...
+    def skirtHeight(self) -> float:
+        """Returns the skirt height (in world units).
+
+        Skirts at the edges of terrain tiles help hide cracks between adjacent
+        tiles.
+
+        .. seealso:: `setSkirtHeight`
+        """
+    def setSkirtHeight(self, height: float) -> None:
+        """Sets the skirt ``height`` (in world units).
+
+        Skirts at the edges of terrain tiles help hide cracks between adjacent
+        tiles.
+
+        .. seealso:: `skirtHeight`
+        """
+    def resolution(self) -> int:
+        """Returns the resolution of the terrain (how many elevation samples are
+        taken on one side of a terrain tile).
+
+        .. seealso:: `resolution`
+        """
+    def setResolution(self, resolution: int) -> None:
+        """Sets the ``resolution`` of the terrain (how many elevation samples are
+        taken on one side of a terrain tile).
+
+        .. seealso:: `resolution`
+        """
+    def layer(self) -> typing.Optional[_core.QgsRasterLayer]:
+        """Returns the raster layer with elevation model to be used for terrain
+        generation.
+
+        .. seealso:: `setLayer`
+        """
+    def setLayer(self, layer: typing.Optional[_core.QgsRasterLayer]) -> None:
+        """Sets the raster ``layer`` with elevation model to be used for terrain
+        generation.
+
+        .. seealso:: `layer`
+        """
     def equals(self, other: typing.Optional[QgsAbstractTerrainSettings]) -> bool: ...
     def resolveReferences(self, project: typing.Optional[_core.QgsProject]) -> None: ...
     def writeXml(self, element: QtXml.QDomElement, context: _core.QgsReadWriteContext) -> None: ...
@@ -1349,10 +4450,20 @@ class QgsDemTerrainSettings(QgsAbstractTerrainSettings):
     def type(self) -> str: ...
     def clone(self) -> typing.Optional['QgsDemTerrainSettings']: ...
     @staticmethod
-    def create() -> typing.Optional[QgsAbstractTerrainSettings]: ...
+    def create() -> typing.Optional[QgsAbstractTerrainSettings]:
+        """Creates a new instance of a QgsDemTerrainSettings object."""
 
 
 class QgsFlatTerrainSettings(QgsAbstractTerrainSettings):
+    """Terrain settings for a simple flat area terrain.
+
+    .. warning::
+
+       This is not considered stable API, and may change in future QGIS releases. It is
+       exposed to the Python bindings as a tech preview only.
+
+    .. versionadded:: 3.42
+    """
 
     @typing.overload
     def __init__(self) -> None: ...
@@ -1365,17 +4476,46 @@ class QgsFlatTerrainSettings(QgsAbstractTerrainSettings):
     def type(self) -> str: ...
     def clone(self) -> typing.Optional['QgsFlatTerrainSettings']: ...
     @staticmethod
-    def create() -> typing.Optional[QgsAbstractTerrainSettings]: ...
+    def create() -> typing.Optional[QgsAbstractTerrainSettings]:
+        """Creates a new instance of a QgsFlatTerrainSettings object."""
 
 
 class QgsMeshTerrainSettings(QgsAbstractTerrainSettings):
+    """Terrain settings for a terrain generator that uses the Z values of a
+    mesh layer to build a terrain.
+
+    .. warning::
+
+       This is not considered stable API, and may change in future QGIS releases. It is
+       exposed to the Python bindings as a tech preview only.
+
+    .. versionadded:: 3.42
+    """
 
     def __init__(self) -> None: ...
 
-    def setSymbol(self, symbol: typing.Optional[QgsMesh3DSymbol]) -> None: ...
-    def symbol(self) -> typing.Optional[QgsMesh3DSymbol]: ...
-    def layer(self) -> typing.Optional[_core.QgsMeshLayer]: ...
-    def setLayer(self, layer: typing.Optional[_core.QgsMeshLayer]) -> None: ...
+    def setSymbol(self, symbol: typing.Optional[QgsMesh3DSymbol]) -> None:
+        """Sets the symbol used to render the mesh as terrain.
+
+        .. seealso:: `symbol`
+        """
+    def symbol(self) -> typing.Optional[QgsMesh3DSymbol]:
+        """Returns the symbol used to render the mesh as terrain.
+
+        .. seealso:: `setSymbol`
+        """
+    def layer(self) -> typing.Optional[_core.QgsMeshLayer]:
+        """Returns the mesh layer with elevation model to be used for terrain
+        generation.
+
+        .. seealso:: `setLayer`
+        """
+    def setLayer(self, layer: typing.Optional[_core.QgsMeshLayer]) -> None:
+        """Sets the mesh ``layer`` with elevation model to be used for terrain
+        generation.
+
+        .. seealso:: `layer`
+        """
     def equals(self, other: typing.Optional[QgsAbstractTerrainSettings]) -> bool: ...
     def resolveReferences(self, project: typing.Optional[_core.QgsProject]) -> None: ...
     def writeXml(self, element: QtXml.QDomElement, context: _core.QgsReadWriteContext) -> None: ...
@@ -1383,38 +4523,94 @@ class QgsMeshTerrainSettings(QgsAbstractTerrainSettings):
     def type(self) -> str: ...
     def clone(self) -> typing.Optional['QgsMeshTerrainSettings']: ...
     @staticmethod
-    def create() -> typing.Optional[QgsAbstractTerrainSettings]: ...
+    def create() -> typing.Optional[QgsAbstractTerrainSettings]:
+        """Creates a new instance of a QgsMeshTerrainSettings object."""
 
 
 class QgsOnlineDemTerrainSettings(QgsAbstractTerrainSettings):
+    """Terrain settings for a terrain generator that uses an online DEM to
+    build terrain.
+
+    .. warning::
+
+       This is not considered stable API, and may change in future QGIS releases. It is
+       exposed to the Python bindings as a tech preview only.
+
+    .. versionadded:: 3.42
+    """
 
     @typing.overload
     def __init__(self) -> None: ...
     @typing.overload
     def __init__(self, a0: 'QgsOnlineDemTerrainSettings') -> None: ...
 
-    def skirtHeight(self) -> float: ...
-    def setSkirtHeight(self, height: float) -> None: ...
-    def resolution(self) -> int: ...
-    def setResolution(self, resolution: int) -> None: ...
+    def skirtHeight(self) -> float:
+        """Returns the skirt height (in world units).
+
+        Skirts at the edges of terrain tiles help hide cracks between adjacent
+        tiles.
+
+        .. seealso:: `setSkirtHeight`
+        """
+    def setSkirtHeight(self, height: float) -> None:
+        """Sets the skirt ``height`` (in world units).
+
+        Skirts at the edges of terrain tiles help hide cracks between adjacent
+        tiles.
+
+        .. seealso:: `skirtHeight`
+        """
+    def resolution(self) -> int:
+        """Returns the resolution of the terrain (how many elevation samples are
+        taken on one side of a terrain tile).
+
+        .. seealso:: `resolution`
+        """
+    def setResolution(self, resolution: int) -> None:
+        """Sets the ``resolution`` of the terrain (how many elevation samples are
+        taken on one side of a terrain tile).
+
+        .. seealso:: `resolution`
+        """
     def equals(self, other: typing.Optional[QgsAbstractTerrainSettings]) -> bool: ...
     def writeXml(self, element: QtXml.QDomElement, context: _core.QgsReadWriteContext) -> None: ...
     def readXml(self, element: QtXml.QDomElement, context: _core.QgsReadWriteContext) -> None: ...
     def type(self) -> str: ...
     def clone(self) -> typing.Optional['QgsOnlineDemTerrainSettings']: ...
     @staticmethod
-    def create() -> typing.Optional[QgsAbstractTerrainSettings]: ...
+    def create() -> typing.Optional[QgsAbstractTerrainSettings]:
+        """Creates a new instance of a QgsOnlineDemTerrainSettings object."""
 
 
 class QgsQuantizedMeshTerrainSettings(QgsAbstractTerrainSettings):
+    """Terrain settings for a terrain generator that uses a quantized mesh tile
+    layer to build a terrain.
+
+    .. warning::
+
+       This is not considered stable API, and may change in future QGIS releases. It is
+       exposed to the Python bindings as a tech preview only.
+
+    .. versionadded:: 3.42
+    """
 
     @typing.overload
     def __init__(self) -> None: ...
     @typing.overload
     def __init__(self, a0: 'QgsQuantizedMeshTerrainSettings') -> None: ...
 
-    def layer(self) -> typing.Optional[_core.QgsTiledSceneLayer]: ...
-    def setLayer(self, layer: typing.Optional[_core.QgsTiledSceneLayer]) -> None: ...
+    def layer(self) -> typing.Optional[_core.QgsTiledSceneLayer]:
+        """Returns the quantized mesh tile layer with elevation model to be used
+        for terrain generation.
+
+        .. seealso:: `setLayer`
+        """
+    def setLayer(self, layer: typing.Optional[_core.QgsTiledSceneLayer]) -> None:
+        """Sets the quantized mesh tile ``layer`` with elevation model to be used
+        for terrain generation.
+
+        .. seealso:: `layer`
+        """
     def equals(self, other: typing.Optional[QgsAbstractTerrainSettings]) -> bool: ...
     def resolveReferences(self, project: typing.Optional[_core.QgsProject]) -> None: ...
     def writeXml(self, element: QtXml.QDomElement, context: _core.QgsReadWriteContext) -> None: ...
@@ -1422,34 +4618,87 @@ class QgsQuantizedMeshTerrainSettings(QgsAbstractTerrainSettings):
     def type(self) -> str: ...
     def clone(self) -> typing.Optional['QgsQuantizedMeshTerrainSettings']: ...
     @staticmethod
-    def create() -> typing.Optional[QgsAbstractTerrainSettings]: ...
+    def create() -> typing.Optional[QgsAbstractTerrainSettings]:
+        """Creates a new instance of a QgsQuantizedMeshTerrainSettings object."""
 
 
 class Qgs3DMapExportSettings(PyQt6.sip.wrapper):
+    """Manages the various settings the user can choose from when exporting a
+    3D scene.
+
+    .. versionadded:: 3.16
+
+    Qgs3DMapExportSettings()
+    Constructor
+
+    Qgs3DMapExportSettings(a0: Qgs3DMapExportSettings)
+    """
 
     @typing.overload
     def __init__(self) -> None: ...
     @typing.overload
     def __init__(self, a0: 'Qgs3DMapExportSettings') -> None: ...
 
-    def setTerrainExportEnabled(self, enabled: bool) -> None: ...
-    def setExportFormat(self, exportFormat: _core.Qgis.Export3DSceneFormat) -> None: ...
-    def setScale(self, scale: float) -> None: ...
-    def setTerrainTextureResolution(self, resolution: int) -> None: ...
-    def setExportTextures(self, exportTextures: bool) -> None: ...
-    def setExportNormals(self, exportNormals: bool) -> None: ...
-    def setSmoothEdges(self, smoothEdges: bool) -> None: ...
-    def setTerrainResolution(self, resolution: int) -> None: ...
-    def setSceneFolderPath(self, sceneFolderPath: typing.Optional[str]) -> None: ...
-    def setSceneName(self, sceneName: typing.Optional[str]) -> None: ...
-    def terrainExportEnabled(self) -> bool: ...
-    def exportFileUri(self) -> str: ...
-    def exportFormat(self) -> _core.Qgis.Export3DSceneFormat: ...
-    def scale(self) -> float: ...
-    def terrainTextureResolution(self) -> int: ...
-    def exportTextures(self) -> bool: ...
-    def exportNormals(self) -> bool: ...
-    def smoothEdges(self) -> bool: ...
-    def terrrainResolution(self) -> int: ...
-    def sceneFolderPath(self) -> str: ...
-    def sceneName(self) -> str: ...
+    def setTerrainExportEnabled(self, enabled: bool) -> None:
+        """Sets whether terrain export is enabled.
+
+        .. seealso:: `terrainExportEnabled`
+
+        .. versionadded:: 4.0
+        """
+    def setExportFormat(self, exportFormat: _core.Qgis.Export3DSceneFormat) -> None:
+        """Sets the export format for the 3D scene.
+
+        .. versionadded:: 4.2
+        """
+    def setScale(self, scale: float) -> None:
+        """Sets the scale of exported model"""
+    def setTerrainTextureResolution(self, resolution: int) -> None:
+        """Sets the terrain texture resolution"""
+    def setExportTextures(self, exportTextures: bool) -> None:
+        """Sets whether textures will be exported"""
+    def setExportNormals(self, exportNormals: bool) -> None:
+        """Sets whether normals should be exported"""
+    def setSmoothEdges(self, smoothEdges: bool) -> None:
+        """Sets whether triangles edges will look smooth"""
+    def setTerrainResolution(self, resolution: int) -> None:
+        """Sets the terrain resolution"""
+    def setSceneFolderPath(self, sceneFolderPath: typing.Optional[str]) -> None:
+        """Sets the folder path where exported 3D scene files will be saved."""
+    def setSceneName(self, sceneName: typing.Optional[str]) -> None:
+        """Sets the scene name"""
+    def terrainExportEnabled(self) -> bool:
+        """Returns whether terrain export is enabled. It terrain export is
+        disabled, the terrain resolution and terrain texture resolution
+        parameters have no effect.
+
+        .. seealso:: `setTerrainExportEnabled`
+
+        .. versionadded:: 4.0
+        """
+    def exportFileUri(self) -> str:
+        """Returns the full file uri where the 3D scene will be exported.
+
+        .. versionadded:: 4.2
+        """
+    def exportFormat(self) -> _core.Qgis.Export3DSceneFormat:
+        """Returns the export format for the 3D scene.
+
+        .. versionadded:: 4.2
+        """
+    def scale(self) -> float:
+        """Returns the scale of the exported model"""
+    def terrainTextureResolution(self) -> int:
+        """Returns the terrain texture resolution"""
+    def exportTextures(self) -> bool:
+        """Returns whether textures will be exported"""
+    def exportNormals(self) -> bool:
+        """Returns whether normals will be exported"""
+    def smoothEdges(self) -> bool:
+        """Returns whether triangles edges will look smooth"""
+    def terrrainResolution(self) -> int:
+        """Returns the terrain resolution"""
+    def sceneFolderPath(self) -> str:
+        """Returns the scene folder path"""
+    def sceneName(self) -> str:
+        """Returns the scene name"""

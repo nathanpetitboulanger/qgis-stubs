@@ -34,31 +34,102 @@ PYQT_SLOT = typing.Union[collections.abc.Callable[..., Any], QtCore.pyqtBoundSig
 
 
 class QgsAnalysis(PyQt6.sip.wrapper):
+    """A singleton class containing various registry and other global members
+    related to analysis classes.
+
+    .. versionadded:: 3.4
+    """
 
     @staticmethod
-    def geometryCheckRegistry() -> typing.Optional['QgsGeometryCheckRegistry']: ...
+    def geometryCheckRegistry() -> typing.Optional['QgsGeometryCheckRegistry']:
+        """Returns the global geometry checker registry, used for managing all
+        geometry check factories.
+        """
     @staticmethod
-    def instance() -> typing.Optional['QgsAnalysis']: ...
+    def instance() -> typing.Optional['QgsAnalysis']:
+        """Returns a pointer to the singleton instance."""
 
 
 class QgsGcpGeometryTransformer(_core.QgsAbstractGeometryTransformer):
+    """A geometry transformer which uses an underlying Ground Control Points
+    (GCP) based transformation to modify geometries.
+
+    .. versionadded:: 3.18
+
+    QgsGcpGeometryTransformer(gcpTransformer: QgsGcpTransformerInterface|None)
+    Constructor for QgsGcpGeometryTransformer, which uses the specified
+    ``gcpTransformer`` to modify geometries.
+
+    Ownership of ``gcpTransformer`` is transferred to the geometry
+    transformer.
+
+    QgsGcpGeometryTransformer(method: QgsGcpTransformerInterface.TransformMethod, sourceCoordinates: Iterable[QgsPointXY], destinationCoordinates: Iterable[QgsPointXY])
+    Constructor for QgsGcpGeometryTransformer, which uses the specified
+    transform ``method`` and list of source and destination coordinates to
+    transform geometries.
+    """
 
     @typing.overload
     def __init__(self, gcpTransformer: typing.Optional['QgsGcpTransformerInterface']) -> None: ...
     @typing.overload
     def __init__(self, method: 'QgsGcpTransformerInterface.TransformMethod', sourceCoordinates: collections.abc.Iterable[_core.QgsPointXY], destinationCoordinates: collections.abc.Iterable[_core.QgsPointXY]) -> None: ...
 
-    def setGcpTransformer(self, transformer: typing.Optional['QgsGcpTransformerInterface']) -> None: ...
-    def gcpTransformer(self) -> typing.Optional['QgsGcpTransformerInterface']: ...
-    def transform(self, geometry: _core.QgsGeometry, feedback: typing.Optional[_core.QgsFeedback] = ...) -> typing.Tuple[_core.QgsGeometry, bool]: ...
+    def setGcpTransformer(self, transformer: typing.Optional['QgsGcpTransformerInterface']) -> None:
+        """Sets the underlying GCP ``transformer`` used to transform geometries.
+
+        Ownership is transferred to this object.
+
+        .. seealso:: `gcpTransformer`
+        """
+    def gcpTransformer(self) -> typing.Optional['QgsGcpTransformerInterface']:
+        """Returns the underlying GCP transformer used to transform geometries.
+
+        .. seealso:: `setGcpTransformer`
+        """
+    def transform(self, geometry: _core.QgsGeometry, feedback: typing.Optional[_core.QgsFeedback] = ...) -> typing.Tuple[_core.QgsGeometry, bool]:
+        """Transforms the specified input ``geometry`` using the GCP based
+        transform.
+
+        :param geometry: Input geometry to transform
+        :param feedback: This optional argument can be used to cancel the
+                         transformation before it completes. If this is done,
+                         the geometry will be left in a semi-transformed state.
+
+        :return: - transformed geometry
+                 - ok: ``True`` if geometry was successfully transformed, or
+                   ``False`` if an error occurred
+        """
     def transformPoint(self, x: float, y: float, z: float, m: float) -> typing.Tuple[bool, float, float, float, float]: ...
 
 
 class QgsGcpPoint(PyQt6.sip.wrapper):
+    """Contains properties of a ground control point (GCP).
+
+    .. versionadded:: 3.26
+
+    QgsGcpPoint(sourcePoint: QgsPointXY, destinationPoint: QgsPointXY, destinationPointCrs: QgsCoordinateReferenceSystem, enabled: bool = True)
+    Constructor for QgsGcpPoint.
+
+    :param sourcePoint: source coordinates. This may either be in pixels
+                        (for completely non-referenced images) OR in the
+                        source layer CRS.
+    :param destinationPoint: destination coordinates
+    :param destinationPointCrs: CRS of destination point
+    :param enabled: whether the point is currently enabled
+
+    QgsGcpPoint(a0: QgsGcpPoint)
+    """
 
     class PointType(enum.Enum):
+        """Coordinate point types
+
+        * ``Source``: Source point
+        * ``Destination``: Destination point
+        """
         Source = ... # type: QgsGcpPoint.PointType
+        """Source point"""
         Destination = ... # type: QgsGcpPoint.PointType
+        """Destination point"""
 
     @typing.overload
     def __init__(self, sourcePoint: _core.QgsPointXY, destinationPoint: _core.QgsPointXY, destinationPointCrs: _core.QgsCoordinateReferenceSystem, enabled: bool = ...) -> None: ...
@@ -67,105 +138,362 @@ class QgsGcpPoint(PyQt6.sip.wrapper):
 
     def __ne__(self, other: object): ...
     def __eq__(self, other: object): ...
-    def setEnabled(self, enabled: bool) -> None: ...
-    def isEnabled(self) -> bool: ...
-    def transformedDestinationPoint(self, targetCrs: _core.QgsCoordinateReferenceSystem, context: _core.QgsCoordinateTransformContext) -> _core.QgsPointXY: ...
-    def setDestinationPointCrs(self, crs: _core.QgsCoordinateReferenceSystem) -> None: ...
-    def destinationPointCrs(self) -> _core.QgsCoordinateReferenceSystem: ...
-    def setDestinationPoint(self, point: _core.QgsPointXY) -> None: ...
-    def destinationPoint(self) -> _core.QgsPointXY: ...
-    def setSourcePoint(self, point: _core.QgsPointXY) -> None: ...
-    def sourcePoint(self) -> _core.QgsPointXY: ...
+    def setEnabled(self, enabled: bool) -> None:
+        """Sets whether the point is currently enabled.
+
+        .. seealso:: `isEnabled`
+        """
+    def isEnabled(self) -> bool:
+        """Returns ``True`` if the point is currently enabled.
+
+        .. seealso:: `setEnabled`
+        """
+    def transformedDestinationPoint(self, targetCrs: _core.QgsCoordinateReferenceSystem, context: _core.QgsCoordinateTransformContext) -> _core.QgsPointXY:
+        """Returns the `QgsGcpPoint.destinationPoint` transformed to the
+        given target CRS.
+        """
+    def setDestinationPointCrs(self, crs: _core.QgsCoordinateReferenceSystem) -> None:
+        """Sets the ``crs`` of the destination point.
+
+        .. seealso:: `destinationPointCrs`
+        """
+    def destinationPointCrs(self) -> _core.QgsCoordinateReferenceSystem:
+        """Returns the CRS of the destination point.
+
+        .. seealso:: `setDestinationPointCrs`
+        """
+    def setDestinationPoint(self, point: _core.QgsPointXY) -> None:
+        """Sets the destination coordinates.
+
+        .. seealso:: `destinationPoint`
+        """
+    def destinationPoint(self) -> _core.QgsPointXY:
+        """Returns the destination coordinates.
+
+        .. seealso:: `setDestinationPoint`
+        """
+    def setSourcePoint(self, point: _core.QgsPointXY) -> None:
+        """Sets the source coordinates.
+
+        This may either be in pixels (for completely non-referenced images) OR
+        in the source layer CRS.
+
+        .. seealso:: `sourcePoint`
+        """
+    def sourcePoint(self) -> _core.QgsPointXY:
+        """Returns the source coordinates.
+
+        This may either be in pixels (for completely non-referenced images) OR
+        in the source layer CRS.
+
+        .. seealso:: `setSourcePoint`
+        """
 
 
 class QgsGcpTransformerInterface(PyQt6.sip.wrapper):
+    """An interface for Ground Control Points (GCP) based transformations.
+
+    `QgsGcpTransformerInterface` implementations are able to
+    transform point locations based on a transformation method and a list of
+    GCPs.
+
+    .. versionadded:: 3.20
+    """
 
     class TransformMethod(enum.IntEnum):
+        """Available transformation methods.
+
+        * ``Linear``: Linear transform
+        * ``Helmert``: Helmert transform
+        * ``PolynomialOrder1``: Polynomial order 1
+        * ``PolynomialOrder2``: Polyonmial order 2
+        * ``PolynomialOrder3``: Polynomial order
+        * ``ThinPlateSpline``: Thin plate splines
+        * ``Projective``: Projective
+        * ``InvalidTransform``: Invalid transform
+        """
         Linear = ... # type: QgsGcpTransformerInterface.TransformMethod
+        """Linear transform"""
         Helmert = ... # type: QgsGcpTransformerInterface.TransformMethod
+        """Helmert transform"""
         PolynomialOrder1 = ... # type: QgsGcpTransformerInterface.TransformMethod
+        """Polynomial order 1"""
         PolynomialOrder2 = ... # type: QgsGcpTransformerInterface.TransformMethod
+        """Polyonmial order 2"""
         PolynomialOrder3 = ... # type: QgsGcpTransformerInterface.TransformMethod
+        """Polynomial order"""
         ThinPlateSpline = ... # type: QgsGcpTransformerInterface.TransformMethod
+        """Thin plate splines"""
         Projective = ... # type: QgsGcpTransformerInterface.TransformMethod
         InvalidTransform = ... # type: QgsGcpTransformerInterface.TransformMethod
+        """Invalid transform"""
 
     staticMetaObject = ... # type: QtCore.QMetaObject
 
     def __init__(self) -> None: ...
 
     @staticmethod
-    def createFromParameters(method: 'QgsGcpTransformerInterface.TransformMethod', sourceCoordinates: collections.abc.Iterable[_core.QgsPointXY], destinationCoordinates: collections.abc.Iterable[_core.QgsPointXY]) -> typing.Optional['QgsGcpTransformerInterface']: ...
+    def createFromParameters(method: 'QgsGcpTransformerInterface.TransformMethod', sourceCoordinates: collections.abc.Iterable[_core.QgsPointXY], destinationCoordinates: collections.abc.Iterable[_core.QgsPointXY]) -> typing.Optional['QgsGcpTransformerInterface']:
+        """Creates a new QgsGcpTransformerInterface subclass representing the
+        specified transform ``method``, initialized using the given lists of
+        source and destination coordinates.
+
+        If the parameters cannot be fit to a transform ``None`` will be
+        returned.
+
+        Caller takes ownership of the returned object.
+        """
     @staticmethod
-    def create(method: 'QgsGcpTransformerInterface.TransformMethod') -> typing.Optional['QgsGcpTransformerInterface']: ...
+    def create(method: 'QgsGcpTransformerInterface.TransformMethod') -> typing.Optional['QgsGcpTransformerInterface']:
+        """Creates a new QgsGcpTransformerInterface subclass representing the
+        specified transform ``method``.
+
+        Caller takes ownership of the returned object.
+        """
     @staticmethod
-    def methodToString(method: 'QgsGcpTransformerInterface.TransformMethod') -> str: ...
-    def transform(self, x: float, y: float, inverseTransform: bool = ...) -> typing.Tuple[bool, float, float]: ...
-    def method(self) -> 'QgsGcpTransformerInterface.TransformMethod': ...
-    def minimumGcpCount(self) -> int: ...
-    def updateParametersFromGcps(self, sourceCoordinates: collections.abc.Iterable[_core.QgsPointXY], destinationCoordinates: collections.abc.Iterable[_core.QgsPointXY], invertYAxis: bool = ...) -> bool: ...
-    def clone(self) -> typing.Optional['QgsGcpTransformerInterface']: ...
+    def methodToString(method: 'QgsGcpTransformerInterface.TransformMethod') -> str:
+        """Returns a translated string representing the specified transform
+        ``method``.
+        """
+    def transform(self, x: float, y: float, inverseTransform: bool = ...) -> typing.Tuple[bool, float, float]:
+        """Transforms the point (``x``, ``y``) from source to destination
+        coordinates.
+
+        If ``inverseTransform`` is set to ``True``, the point will be
+        transformed from the destination to the source.
+
+        :return: ``True`` if transformation was successful.
+        """
+    def method(self) -> 'QgsGcpTransformerInterface.TransformMethod':
+        """Returns the transformation method."""
+    def minimumGcpCount(self) -> int:
+        """Returns the minimum number of Ground Control Points (GCPs) required for
+        parameter fitting.
+        """
+    def updateParametersFromGcps(self, sourceCoordinates: collections.abc.Iterable[_core.QgsPointXY], destinationCoordinates: collections.abc.Iterable[_core.QgsPointXY], invertYAxis: bool = ...) -> bool:
+        """Fits transformation parameters using the specified Ground Control Points
+        (GCPs) lists of source and destination coordinates.
+
+        If ``invertYAxis`` is set to ``True`` then the y-axis of source
+        coordinates will be inverted, e.g. to allow for transformation of raster
+        layers with ascending top-to-bottom vertical axis coordinates.
+
+        :return: ``True`` on success, ``False`` on failure
+        """
+    def clone(self) -> typing.Optional['QgsGcpTransformerInterface']:
+        """Clones the transformer, returning a new copy of the transformer with the
+        same parameters as this one.
+
+        Caller takes ownership of the returned object.
+        """
 
 
 class QgsVectorWarper(PyQt6.sip.wrapper):
+    """Vector layer warper which warps vector layers based on a list of source
+    and destination GCPs.
+
+    .. versionadded:: 3.26
+
+    QgsVectorWarper(method: QgsGcpTransformerInterface.TransformMethod, points: Iterable[QgsGcpPoint], destinationCrs: QgsCoordinateReferenceSystem)
+    Constructor for QgsVectorWarper.
+
+    :param method: specifies the transformation method
+    :param points: list of GCP points to use for the transformation
+    :param destinationCrs: target CRS for transformed features
+
+    QgsVectorWarper(a0: QgsVectorWarper)
+    """
 
     @typing.overload
     def __init__(self, method: QgsGcpTransformerInterface.TransformMethod, points: collections.abc.Iterable[QgsGcpPoint], destinationCrs: _core.QgsCoordinateReferenceSystem) -> None: ...
     @typing.overload
     def __init__(self, a0: 'QgsVectorWarper') -> None: ...
 
-    def error(self) -> str: ...
-    def transformFeatures(self, iterator: _core.QgsFeatureIterator, sink: typing.Optional[_core.QgsFeatureSink], context: _core.QgsCoordinateTransformContext, feedback: typing.Optional[_core.QgsFeedback] = ...) -> bool: ...
+    def error(self) -> str:
+        """Returns the last error obtained during transformation."""
+    def transformFeatures(self, iterator: _core.QgsFeatureIterator, sink: typing.Optional[_core.QgsFeatureSink], context: _core.QgsCoordinateTransformContext, feedback: typing.Optional[_core.QgsFeedback] = ...) -> bool:
+        """Transforms the features from ``iterator`` and adds the results to the
+        specified ``sink``.
+
+        The optional ``feedback`` argument can be used for progress reporting
+        and cancellation.
+
+        :return: ``True`` if all features were successfully transformed
+        """
 
 
 class QgsVectorWarperTask(_core.QgsTask):
+    """A task for warping a vector layer in a background thread.
+
+    .. versionadded:: 3.26
+
+    QgsVectorWarperTask(method: QgsGcpTransformerInterface.TransformMethod, points: Iterable[QgsGcpPoint], destinationCrs: QgsCoordinateReferenceSystem, layer: QgsVectorLayer|None, fileName: str|None)
+    Constructor for QgsVectorWarperTask.
+
+    :param method: transformation method
+    :param points: GCP point list
+    :param destinationCrs: destination layer CRS
+    :param layer: source layer
+    :param fileName: filename for destination layer
+    """
 
     class Result(enum.Enum):
+        """Task results
+
+        * ``Success``: Warping completed successfully
+        * ``Canceled``: Task was canceled before completion
+        * ``Error``: An error occurred while warping
+        """
         Success = ... # type: QgsVectorWarperTask.Result
+        """Warping completed successfully"""
         Canceled = ... # type: QgsVectorWarperTask.Result
+        """Task was canceled before completion"""
         Error = ... # type: QgsVectorWarperTask.Result
+        """An error occurred while warping"""
 
     def __init__(self, method: QgsGcpTransformerInterface.TransformMethod, points: collections.abc.Iterable[QgsGcpPoint], destinationCrs: _core.QgsCoordinateReferenceSystem, layer: typing.Optional[_core.QgsVectorLayer], fileName: typing.Optional[str]) -> None: ...
 
     def run(self) -> bool: ...
-    def errorMessage(self) -> str: ...
-    def result(self) -> 'QgsVectorWarperTask.Result': ...
+    def errorMessage(self) -> str:
+        """Returns the descriptive error message, if an error occurred."""
+    def result(self) -> 'QgsVectorWarperTask.Result':
+        """Returns the result of running the task."""
     def cancel(self) -> None: ...
 
 
 class QgsGridFileWriter(PyQt6.sip.wrapper):
+    """Handles interpolation to a grid and writes the results to a raster grid
+    file.
+
+    QgsGridFileWriter(interpolator: QgsInterpolator|None, outputPath: str|None, extent: QgsRectangle, nCols: int, nRows: int, outputFormat: str|None = '')
+    Constructor for QgsGridFileWriter, for the specified ``interpolator``.
+
+    The ``outputPath`` argument is used to set the output file path.
+
+    The ``extent`` and ``nCols``, ``nRows`` arguments dictate the extent and
+    size of the output raster.
+
+    The ``outputFormat`` (available since QGIS 4.0), if not explicitly set,
+    is inferred from the ``outputPath`` extension.
+
+    QgsGridFileWriter(a0: QgsGridFileWriter)
+    """
 
     @typing.overload
     def __init__(self, interpolator: typing.Optional['QgsInterpolator'], outputPath: typing.Optional[str], extent: _core.QgsRectangle, nCols: int, nRows: int, outputFormat: typing.Optional[str] = ...) -> None: ...
     @typing.overload
     def __init__(self, a0: 'QgsGridFileWriter') -> None: ...
 
-    def noDataValue(self) -> float: ...
-    def setNoDataValue(self, noDataValue: float) -> None: ...
-    def creationOptions(self) -> list[str]: ...
-    def setCreationOptions(self, options: collections.abc.Iterable[typing.Optional[str]]) -> None: ...
-    def writeFile(self, feedback: typing.Optional[_core.QgsFeedback] = ...) -> int: ...
+    def noDataValue(self) -> float:
+        """Returns no data value used for output file.
+
+        .. seealso:: `setNoDataValue`
+
+        .. versionadded:: 3.44
+        """
+    def setNoDataValue(self, noDataValue: float) -> None:
+        """Set no data value for output file.
+
+        .. seealso:: `noDataValue`
+
+        .. versionadded:: 3.44
+        """
+    def creationOptions(self) -> list[str]:
+        """Returns the list of data source creation options which will be used when
+        creating the output raster file.
+
+        .. seealso:: `setCreationOptions`
+
+        .. versionadded:: 3.44
+        """
+    def setCreationOptions(self, options: collections.abc.Iterable[typing.Optional[str]]) -> None:
+        """Sets a list of data source creation options to use when creating the
+        output raster file.
+
+        .. seealso:: `creationOptions`
+
+        .. versionadded:: 3.44
+        """
+    def writeFile(self, feedback: typing.Optional[_core.QgsFeedback] = ...) -> int:
+        """Writes the grid file.
+
+        An optional ``feedback`` object can be set for progress reports and
+        cancellation support
+
+        :return: 0 in case of success
+        """
 
 
 class QgsInterpolator(PyQt6.sip.wrapper):
+    """Interface class for interpolations.
+
+    Interpolators take the vertices of a vector layer as base data. The
+    z-Value can be an attribute or the z-coordinates in case of 3D types.
+    """
 
     class Result(enum.IntEnum):
+        """Result of an interpolation operation
+
+        * ``Success``: Operation was successful
+        * ``Canceled``: Operation was manually canceled
+        * ``InvalidSource``: Operation failed due to invalid source
+        * ``FeatureGeometryError``: Operation failed due to invalid feature geometry
+        """
         Success = ... # type: QgsInterpolator.Result
+        """Operation was successful"""
         Canceled = ... # type: QgsInterpolator.Result
+        """Operation was manually canceled"""
         InvalidSource = ... # type: QgsInterpolator.Result
+        """Operation failed due to invalid source"""
         FeatureGeometryError = ... # type: QgsInterpolator.Result
+        """Operation failed due to invalid feature geometry"""
 
     class ValueSource(enum.IntEnum):
+        """Source for interpolated values from features
+
+        * ``Attribute``: Take value from feature's attribute
+
+          Available as ``QgsInterpolator.ValueAttribute`` in older QGIS releases.
+
+        * ``Z``: Use feature's geometry Z values for interpolation
+
+          Available as ``QgsInterpolator.ValueZ`` in older QGIS releases.
+
+        * ``M``: Use feature's geometry M values for interpolation
+
+          Available as ``QgsInterpolator.ValueM`` in older QGIS releases.
+        """
         Attribute = ... # type: QgsInterpolator.ValueSource
+        """Take value from feature's attribute"""
         Z = ... # type: QgsInterpolator.ValueSource
+        """Use feature's geometry Z values for interpolation"""
         M = ... # type: QgsInterpolator.ValueSource
+        """Use feature's geometry M values for interpolation"""
 
     class SourceType(enum.IntEnum):
+        """Describes the type of input data
+
+        * ``Points``: Point source
+
+          Available as ``QgsInterpolator.SourcePoints`` in older QGIS releases.
+
+        * ``StructureLines``: Structure lines
+
+          Available as ``QgsInterpolator.SourceStructureLines`` in older QGIS releases.
+
+        * ``BreakLines``: Break lines
+
+          Available as ``QgsInterpolator.SourceBreakLines`` in older QGIS releases.
+        """
         Points = ... # type: QgsInterpolator.SourceType
+        """Point source"""
         StructureLines = ... # type: QgsInterpolator.SourceType
+        """Structure lines"""
         BreakLines = ... # type: QgsInterpolator.SourceType
+        """Break lines"""
 
     class LayerData(PyQt6.sip.wrapper):
+        """A source together with the information about interpolation attribute / z-coordinate interpolation and the type (point, structure line, breakline)"""
 
         interpolationAttribute = ... # type: int
         source = ... # type: _core.QgsFeatureSource
@@ -183,8 +511,26 @@ class QgsInterpolator(PyQt6.sip.wrapper):
     @typing.overload
     def __init__(self, a0: 'QgsInterpolator') -> None: ...
 
-    def cacheBaseData(self, feedback: typing.Optional[_core.QgsFeedback] = ...) -> 'QgsInterpolator.Result': ...
-    def interpolatePoint(self, x: float, y: float, feedback: typing.Optional[_core.QgsFeedback] = ...) -> typing.Tuple[int, float]: ...
+    def cacheBaseData(self, feedback: typing.Optional[_core.QgsFeedback] = ...) -> 'QgsInterpolator.Result':
+        """Caches the vertex and value data from the provider. All the vertex data
+        will be held in virtual memory.
+
+        An optional ``feedback`` argument may be specified to allow cancellation
+        and progress reports from the cache operation.
+
+        :return: Success in case of success
+        """
+    def interpolatePoint(self, x: float, y: float, feedback: typing.Optional[_core.QgsFeedback] = ...) -> typing.Tuple[int, float]:
+        """Calculates interpolation value for map coordinates x, y
+
+        :param x: x-coordinate (in map units)
+        :param y: y-coordinate (in map units)
+        :param feedback: optional feedback object for progress and cancellation
+                         support
+
+        :return: - 0 in case of success
+                 - result: interpolation result
+        """
     SourcePoints: QgsInterpolator.SourceType
     SourceStructureLines: QgsInterpolator.SourceType
     SourceBreakLines: QgsInterpolator.SourceType
@@ -194,18 +540,43 @@ class QgsInterpolator(PyQt6.sip.wrapper):
 
 
 class QgsIDWInterpolator(QgsInterpolator):
+    """Inverse distance weight interpolator.
+
+    QgsIDWInterpolator(layerData: Iterable[QgsInterpolator.LayerData])
+    Constructor for QgsIDWInterpolator, with the specified ``layerData``
+    sources.
+
+    QgsIDWInterpolator(a0: QgsIDWInterpolator)
+    """
 
     @typing.overload
     def __init__(self, layerData: collections.abc.Iterable[QgsInterpolator.LayerData]) -> None: ...
     @typing.overload
     def __init__(self, a0: 'QgsIDWInterpolator') -> None: ...
 
-    def distanceCoefficient(self) -> float: ...
-    def setDistanceCoefficient(self, coefficient: float) -> None: ...
+    def distanceCoefficient(self) -> float:
+        """Returns the distance coefficient, the parameter that sets how the values
+        are weighted with distance. Smaller values mean sharper peaks at the
+        data points. The default is a coefficient of 2.
+
+        Point values are weighted by 1 / ( distance ^ coefficient ).
+
+        .. seealso:: `setDistanceCoefficient`
+        """
+    def setDistanceCoefficient(self, coefficient: float) -> None:
+        """Sets the distance ``coefficient``, the parameter that sets how the
+        values are weighted with distance. Smaller values mean sharper peaks at
+        the data points.
+
+        Point values are weighted by 1 / ( distance ^ coefficient ).
+
+        .. seealso:: `distanceCoefficient`
+        """
     def interpolatePoint(self, x: float, y: float, feedback: typing.Optional[_core.QgsFeedback] = ...) -> typing.Tuple[int, float]: ...
 
 
 class QgsInterpolatorVertexData(PyQt6.sip.wrapper):
+    """Interpolation data for an individual source vertex."""
 
     x = ... # type: float
     y = ... # type: float
@@ -220,47 +591,177 @@ class QgsInterpolatorVertexData(PyQt6.sip.wrapper):
 
 
 class QgsTinInterpolator(QgsInterpolator):
+    """Interpolation in a triangular irregular network.
+
+    QgsTinInterpolator(inputData: Iterable[QgsInterpolator.LayerData], interpolation: QgsTinInterpolator.TinInterpolation = QgsTinInterpolator.TinInterpolation.Linear, feedback: QgsFeedback|None = None)
+    Constructor for QgsTinInterpolator. The ``feedback`` object specifies an
+    optional `QgsFeedback` object for progress reports and
+    cancellation support. Ownership of ``feedback`` is not transferred and
+    callers must ensure that it exists for the lifetime of this object.
+
+    QgsTinInterpolator(a0: QgsTinInterpolator)
+    """
 
     class TinInterpolation(enum.IntEnum):
+        """Indicates the type of interpolation to be performed
+
+        * ``Linear``: Linear interpolation
+        * ``CloughTocher``: Clough-Tocher interpolation
+        """
         Linear = ... # type: QgsTinInterpolator.TinInterpolation
+        """Linear interpolation"""
         CloughTocher = ... # type: QgsTinInterpolator.TinInterpolation
+        """Clough-Tocher interpolation"""
 
     @typing.overload
     def __init__(self, inputData: collections.abc.Iterable[QgsInterpolator.LayerData], interpolation: 'QgsTinInterpolator.TinInterpolation' = ..., feedback: typing.Optional[_core.QgsFeedback] = ...) -> None: ...
     @typing.overload
     def __init__(self, a0: 'QgsTinInterpolator') -> None: ...
 
-    def setTriangulationSink(self, sink: typing.Optional[_core.QgsFeatureSink]) -> None: ...
+    def setTriangulationSink(self, sink: typing.Optional[_core.QgsFeatureSink]) -> None:
+        """Sets the optional ``sink`` for saving the triangulation features.
+
+        The sink must be setup to accept LineString features, with fields
+        matching those returned by
+        `QgsTinInterpolator.triangulationFields`.
+
+        .. seealso:: `triangulationFields`
+        """
     @staticmethod
-    def triangulationFields() -> _core.QgsFields: ...
+    def triangulationFields() -> _core.QgsFields:
+        """Returns the fields output by features when saving the triangulation.
+        These fields should be used when creating a suitable feature sink for
+        `QgsTinInterpolator.setTriangulationSink`
+
+        .. seealso:: `setTriangulationSink`
+        """
     def interpolatePoint(self, x: float, y: float, feedback: typing.Optional[_core.QgsFeedback]) -> typing.Tuple[int, float]: ...
     Linear: QgsTinInterpolator.TinInterpolation
     CloughTocher: QgsTinInterpolator.TinInterpolation
 
 
 class QgsMeshContours(PyQt6.sip.wrapper):
+    """Exporter of contours lines or polygons from a mesh layer.
+
+    .. versionadded:: 3.12
+
+    QgsMeshContours(layer: QgsMeshLayer|None)
+    Constructs the mesh contours exporter. Caches the native and triangular
+    mesh from data provider
+
+    :param layer: mesh layer to be associated with this exporter
+
+    QgsMeshContours(a0: QgsMeshContours)
+    """
 
     @typing.overload
     def __init__(self, layer: typing.Optional[_core.QgsMeshLayer]) -> None: ...
     @typing.overload
     def __init__(self, a0: 'QgsMeshContours') -> None: ...
 
-    def exportPolygons(self, index: _core.QgsMeshDatasetIndex, min_value: float, max_value: float, method: _core.QgsMeshRendererScalarSettings.DataResamplingMethod, feedback: typing.Optional[_core.QgsFeedback] = ...) -> _core.QgsGeometry: ...
-    def exportLines(self, index: _core.QgsMeshDatasetIndex, value: float, method: _core.QgsMeshRendererScalarSettings.DataResamplingMethod, feedback: typing.Optional[_core.QgsFeedback] = ...) -> _core.QgsGeometry: ...
+    def exportPolygons(self, index: _core.QgsMeshDatasetIndex, min_value: float, max_value: float, method: _core.QgsMeshRendererScalarSettings.DataResamplingMethod, feedback: typing.Optional[_core.QgsFeedback] = ...) -> _core.QgsGeometry:
+        """Exports multi polygons representing the areas with values in range for
+        particular dataset
+
+        :param index: dataset index
+        :param min_value: minimum of the value interval for contour polygon
+        :param max_value: maximum of the value interval for contour polygon
+        :param method: for datasets defined on faces, the method will be used to
+                       convert data to vertices
+        :param feedback: optional feedback object for progress and cancellation
+                         support
+
+        :return: MultiPolygon geometry containing contour polygons
+
+        .. note::
+
+           not thread safe
+        """
+    def exportLines(self, index: _core.QgsMeshDatasetIndex, value: float, method: _core.QgsMeshRendererScalarSettings.DataResamplingMethod, feedback: typing.Optional[_core.QgsFeedback] = ...) -> _core.QgsGeometry:
+        """Exports multi line string containing the contour line for particular
+        dataset and value.
+
+        :param index: dataset index that is used to update the cache
+        :param value: value of the contour line
+        :param method: for datasets defined on faces, the method will be used to
+                       convert data to vertices
+        :param feedback: optional feedback object for progress and cancellation
+                         support
+
+        :return: MultiLineString geometry containing contour lines
+
+        .. note::
+
+           not thread safe
+        """
 
 
 class QgsMeshTriangulation(QtCore.QObject):
+    """Handles mesh creation with Delaunay constrained triangulation.
+
+    .. versionadded:: 3.16
+    """
 
     def __init__(self) -> None: ...
 
-    def setCrs(self, crs: _core.QgsCoordinateReferenceSystem) -> None: ...
-    def triangulatedMesh(self, feedback: typing.Optional[_core.QgsFeedback] = ...) -> _core.QgsMesh: ...
-    def addVertex(self, vertex: _core.QgsPoint) -> int: ...
-    def addBreakLines(self, lineFeatureIterator: _core.QgsFeatureIterator, valueAttribute: int, transformContext: _core.QgsCoordinateTransform, feedback: typing.Optional[_core.QgsFeedback] = ..., featureCount: int = ...) -> bool: ...
-    def addVertices(self, vertexFeatureIterator: _core.QgsFeatureIterator, valueAttribute: int, transform: _core.QgsCoordinateTransform, feedback: typing.Optional[_core.QgsFeedback] = ..., featureCount: int = ...) -> bool: ...
+    def setCrs(self, crs: _core.QgsCoordinateReferenceSystem) -> None:
+        """Sets the coordinate reference system used for the triangulation"""
+    def triangulatedMesh(self, feedback: typing.Optional[_core.QgsFeedback] = ...) -> _core.QgsMesh:
+        """Returns the triangulated mesh"""
+    def addVertex(self, vertex: _core.QgsPoint) -> int:
+        """Adds a new vertex in the triangulation and returns the index of the new
+        vertex
+
+        .. versionadded:: 3.22
+        """
+    def addBreakLines(self, lineFeatureIterator: _core.QgsFeatureIterator, valueAttribute: int, transformContext: _core.QgsCoordinateTransform, feedback: typing.Optional[_core.QgsFeedback] = ..., featureCount: int = ...) -> bool:
+        """Adds break lines from a vector layer, return ``True`` if successful.
+
+        :param lineFeatureIterator: the feature iterator of break lines to
+                                    insert
+        :param valueAttribute: the index of the attribute that represents the
+                               value of vertices, if -1 uses Z coordinate of
+                               vertices
+        :param transformContext: the coordinates transform context used to
+                                 transform coordinates
+        :param feedback: feedback argument may be specified to allow
+                         cancellation and progress reports
+        :param featureCount: the count of feature to allow progress report of
+                             the feedback
+
+        .. warning::
+
+           if the feature iterator contains only point geometries, the vertices will be added only without treating them as breaklines
+        """
+    def addVertices(self, vertexFeatureIterator: _core.QgsFeatureIterator, valueAttribute: int, transform: _core.QgsCoordinateTransform, feedback: typing.Optional[_core.QgsFeedback] = ..., featureCount: int = ...) -> bool:
+        """Adds vertices to the triangulation from a feature iterator, return
+        ``True`` if successful.
+
+        :param vertexFeatureIterator: the feature iterator of vertices to insert
+        :param valueAttribute: the index of the attribute that represents the
+                               value of vertices, if -1 uses Z coordinate of
+                               vertices
+        :param transform: the coordinates transform used to transform
+                          coordinates
+        :param feedback: feedback argument may be specified to allow
+                         cancellation and progress reports
+        :param featureCount: the count of feature to allow progress report of
+                             the feedback
+        """
 
 
 class QgsMeshZValueDatasetGroup(_core.QgsMeshDatasetGroup):
+    """Convenience class that can be used to obtain a dataset group on vertices
+    that represents the Z value of the mesh vertices.
+
+    .. versionadded:: 3.16
+
+    QgsMeshZValueDatasetGroup(datasetGroupName: str|None, mesh: QgsMesh)
+    Constructor
+
+    :param datasetGroupName: the name of the dataset group
+    :param mesh: the mesh used to create the Z value dataset
+    """
 
     def __init__(self, datasetGroupName: typing.Optional[str], mesh: _core.QgsMesh) -> None: ...
 
@@ -273,6 +774,12 @@ class QgsMeshZValueDatasetGroup(_core.QgsMeshDatasetGroup):
 
 
 class QgsMeshEditingDelaunayTriangulation(_core.QgsMeshAdvancedEditing):
+    """Can be used with `QgsMeshEditor.advancedEdit()` to add triangle
+    faces to a mesh created by a Delaunay triangulation on existing
+    vertices.
+
+    .. versionadded:: 3.22
+    """
 
     @typing.overload
     def __init__(self) -> None: ...
@@ -283,19 +790,43 @@ class QgsMeshEditingDelaunayTriangulation(_core.QgsMeshAdvancedEditing):
 
 
 class QgsGraphEdge(PyQt6.sip.wrapper):
+    """Represents an edge in a graph."""
 
     @typing.overload
     def __init__(self) -> None: ...
     @typing.overload
     def __init__(self, a0: 'QgsGraphEdge') -> None: ...
 
-    def fromVertex(self) -> int: ...
-    def toVertex(self) -> int: ...
-    def strategies(self) -> list[typing.Any]: ...
-    def cost(self, strategyIndex: int) -> typing.Any: ...
+    def fromVertex(self) -> int:
+        """Returns the index of the vertex at the start of this edge.
+
+        .. seealso:: `toVertex`
+        """
+    def toVertex(self) -> int:
+        """Returns the index of the vertex at the end of this edge.
+
+        .. seealso:: `fromVertex`
+        """
+    def strategies(self) -> list[typing.Any]:
+        """Returns array of available strategies"""
+    def cost(self, strategyIndex: int) -> typing.Any:
+        """Returns edge cost calculated using specified strategy
+
+        :param strategyIndex: strategy index
+        """
 
 
 class QgsGraphVertex(PyQt6.sip.wrapper):
+    """Represents vertex in a graph.
+
+    QgsGraphVertex()
+
+    QgsGraphVertex(point: QgsPointXY)
+    This constructor initializes QgsGraphVertex object and associates a
+    vertex with a point
+
+    QgsGraphVertex(a0: QgsGraphVertex)
+    """
 
     @typing.overload
     def __init__(self) -> None: ...
@@ -304,33 +835,111 @@ class QgsGraphVertex(PyQt6.sip.wrapper):
     @typing.overload
     def __init__(self, a0: 'QgsGraphVertex') -> None: ...
 
-    def point(self) -> _core.QgsPointXY: ...
-    def outgoingEdges(self) -> list[int]: ...
-    def incomingEdges(self) -> list[int]: ...
+    def point(self) -> _core.QgsPointXY:
+        """Returns point associated with graph vertex."""
+    def outgoingEdges(self) -> list[int]:
+        """Returns outgoing edge ids, i.e. edges which start at this node.
+
+        .. seealso:: `incomingEdges`
+        """
+    def incomingEdges(self) -> list[int]:
+        """Returns the incoming edge ids, i.e. edges which end at this node.
+
+        .. seealso:: `outgoingEdges`
+        """
 
 
 class QgsGraph(PyQt6.sip.wrapper):
+    """Mathematical graph representation."""
 
     @typing.overload
     def __init__(self) -> None: ...
     @typing.overload
     def __init__(self, a0: 'QgsGraph') -> None: ...
 
-    def hasVertex(self, index: int) -> bool: ...
-    def hasEdge(self, index: int) -> bool: ...
-    def findOppositeEdge(self, index: int) -> int: ...
-    def findVertex(self, pt: _core.QgsPointXY) -> int: ...
-    def removeEdge(self, index: int) -> None: ...
-    def edge(self, idx: int) -> QgsGraphEdge: ...
-    def edgeCount(self) -> int: ...
-    def removeVertex(self, index: int) -> None: ...
-    def vertex(self, idx: int) -> QgsGraphVertex: ...
-    def vertexCount(self) -> int: ...
-    def addEdge(self, fromVertexIdx: int, toVertexIdx: int, strategies: collections.abc.Iterable[typing.Any]) -> int: ...
-    def addVertex(self, pt: _core.QgsPointXY) -> int: ...
+    def hasVertex(self, index: int) -> bool:
+        """Returns whether the vertex of the given index exists.
+
+        .. versionadded:: 3.24
+        """
+    def hasEdge(self, index: int) -> bool:
+        """Returns whether the edge of the given index exists.
+
+        .. versionadded:: 3.24
+        """
+    def findOppositeEdge(self, index: int) -> int:
+        """Finds the first edge which is the opposite of the edge with the
+        specified index.
+
+        This represents the edge which has the same vertices as the specified
+        edge, but the opposite direction in the graph.(I.e. the edge which
+        starts at the "from" vertex of the specified edge and ends at the "to"
+        vertex.)
+
+        Returns -1 if no opposite edge exists.
+
+        :raises IndexError: if the edge with the specified ``index`` is not
+                            found.
+
+        .. versionadded:: 3.24
+        """
+    def findVertex(self, pt: _core.QgsPointXY) -> int:
+        """Find vertex by associated point
+
+        :return: vertex index
+        """
+    def removeEdge(self, index: int) -> None:
+        """Removes the edge at specified ``index``.
+
+        The incoming and outgoing edges for all graph vertices will be updated
+        accordingly. Vertices which no longer have any incoming or outgoing
+        edges as a result will be removed from the graph automatically.
+
+        :raises IndexError: if the vertex is not found.
+
+        .. versionadded:: 3.24
+        """
+    def edge(self, idx: int) -> QgsGraphEdge:
+        """Returns the edge at the given index.
+
+        :raises IndexError: if the edge is not found.
+        """
+    def edgeCount(self) -> int:
+        """Returns number of graph edges"""
+    def removeVertex(self, index: int) -> None:
+        """Removes the vertex at specified ``index``.
+
+        All edges which are incoming or outgoing edges for the vertex will also
+        be removed.
+
+        :raises IndexError: if the vertex is not found.
+
+        .. versionadded:: 3.24
+        """
+    def vertex(self, idx: int) -> QgsGraphVertex:
+        """Returns the vertex at the given index.
+
+        :raises IndexError: if the vertex is not found.
+        """
+    def vertexCount(self) -> int:
+        """Returns number of graph vertices"""
+    def addEdge(self, fromVertexIdx: int, toVertexIdx: int, strategies: collections.abc.Iterable[typing.Any]) -> int:
+        """Add an edge to the graph, going from the ``fromVertexIdx`` to
+        ``toVertexIdx``.
+
+        :return: the index of the newly added edge.
+        """
+    def addVertex(self, pt: _core.QgsPointXY) -> int:
+        """Add a vertex to the graph.
+
+        :return: the index of the newly added vertex.
+        """
 
 
 class QgsGraphAnalyzer(PyQt6.sip.wrapper):
+    """Performs graph analysis, e.g. calculates shortest path between two
+    points using different strategies with Dijkstra's algorithm.
+    """
 
     @typing.overload
     def __init__(self) -> None: ...
@@ -338,57 +947,170 @@ class QgsGraphAnalyzer(PyQt6.sip.wrapper):
     def __init__(self, a0: 'QgsGraphAnalyzer') -> None: ...
 
     @staticmethod
-    def shortestTree(source: typing.Optional[QgsGraph], startVertexIdx: int, criterionNum: int) -> typing.Optional[QgsGraph]: ...
+    def shortestTree(source: typing.Optional[QgsGraph], startVertexIdx: int, criterionNum: int) -> typing.Optional[QgsGraph]:
+        """Returns shortest path tree with root-node in startVertexIdx
+
+        :param source: source graph
+        :param startVertexIdx: index of the start vertex
+        :param criterionNum: index of the optimization strategy
+        """
     @staticmethod
-    def dijkstra(source: typing.Optional[QgsGraph], startVertexIdx: int, criterionNum: int, resultTree: typing.Optional[collections.abc.Iterable[int]] = ..., resultCost: typing.Optional[collections.abc.Iterable[float]] = ...) -> tuple[list[int], list[float]]: ...
+    def dijkstra(source: typing.Optional[QgsGraph], startVertexIdx: int, criterionNum: int, resultTree: typing.Optional[collections.abc.Iterable[int]] = ..., resultCost: typing.Optional[collections.abc.Iterable[float]] = ...) -> tuple[list[int], list[float]]:
+        """Solve shortest path problem using Dijkstra algorithm
+
+        :param source: source graph
+        :param startVertexIdx: index of the start vertex
+        :param criterionNum: index of the optimization strategy
+
+        :return: a tuple of (resultTree, resultCost) where resultTree is a list
+                 of vertex indices representing the shortest path tree and
+                 resultCost is a list of path costs
+        """
 
 
 class QgsGraphBuilderInterface(PyQt6.sip.wrapper):
+    """Interface for creating a graph.
+
+    Contains the settings of the graph.
+
+    `QgsGraphBuilder` and `QgsGraphDirector` both use a
+    "builder" design pattern
+
+    QgsGraphBuilderInterface(crs: QgsCoordinateReferenceSystem, ctfEnabled: bool = True, topologyTolerance: float = 0, ellipsoidID: str|None = '')
+    Default constructor
+
+    :param crs: Coordinate reference system for new graph vertex
+    :param ctfEnabled: enable coordinate transform from source graph CRS to
+                       CRS graph
+    :param topologyTolerance: sqrt distance between source point as one
+                              graph vertex
+    :param ellipsoidID: ellipsoid for edge measurement
+
+    QgsGraphBuilderInterface(a0: QgsGraphBuilderInterface)
+    """
 
     @typing.overload
     def __init__(self, crs: _core.QgsCoordinateReferenceSystem, ctfEnabled: bool = ..., topologyTolerance: float = ..., ellipsoidID: typing.Optional[str] = ...) -> None: ...
     @typing.overload
     def __init__(self, a0: 'QgsGraphBuilderInterface') -> None: ...
 
-    def addEdge(self, pt1id: int, pt1: _core.QgsPointXY, pt2id: int, pt2: _core.QgsPointXY, strategies: collections.abc.Iterable[typing.Any]) -> None: ...
-    def addVertex(self, id: int, pt: _core.QgsPointXY) -> int: ...
-    def distanceArea(self) -> typing.Optional[_core.QgsDistanceArea]: ...
-    def topologyTolerance(self) -> float: ...
-    def coordinateTransformationEnabled(self) -> bool: ...
-    def destinationCrs(self) -> _core.QgsCoordinateReferenceSystem: ...
+    def addEdge(self, pt1id: int, pt1: _core.QgsPointXY, pt2id: int, pt2: _core.QgsPointXY, strategies: collections.abc.Iterable[typing.Any]) -> None:
+        """Add edge to the graph
+
+        :param pt1id: first vertex identificator
+        :param pt1: first vertex coordinates
+        :param pt2id: second vertex identificator
+        :param pt2: second vertex coordinates
+        :param strategies: optimization strategies
+
+        .. note::
+
+           pt1id, pt1 and pt2id, pt2 is a redundant interface. You can use vertex coordinates or their identificators.
+        """
+    def addVertex(self, id: int, pt: _core.QgsPointXY) -> int:
+        """Add vertex to the graph
+
+        :param id: vertex identifier
+        :param pt: vertex coordinates
+
+        .. note::
+
+           id and pt are redundant. You can use pt or id to identify the vertex
+
+        :return: the index of the newly added vertex
+        """
+    def distanceArea(self) -> typing.Optional[_core.QgsDistanceArea]:
+        """Returns measurement tool"""
+    def topologyTolerance(self) -> float:
+        """Returns topology tolerance"""
+    def coordinateTransformationEnabled(self) -> bool:
+        """Returns coordinate transformation enabled"""
+    def destinationCrs(self) -> _core.QgsCoordinateReferenceSystem:
+        """Returns destinaltion CRS"""
 
 
 class QgsGraphBuilder(QgsGraphBuilderInterface):
+    """Used for making the `QgsGraph` object.
+
+    QgsGraphBuilder(crs: QgsCoordinateReferenceSystem, otfEnabled: bool = True, topologyTolerance: float = 0, ellipsoidID: str|None = '')
+    Default constructor
+    """
 
     def __init__(self, crs: _core.QgsCoordinateReferenceSystem, otfEnabled: bool = ..., topologyTolerance: float = ..., ellipsoidID: typing.Optional[str] = ...) -> None: ...
 
-    def takeGraph(self) -> typing.Optional[QgsGraph]: ...
-    def graph(self) -> QgsGraph: ...
+    def takeGraph(self) -> typing.Optional[QgsGraph]:
+        """Takes the generated graph from the builder, resetting the builder back
+        to its initial state ready for additional graph construction.
+
+        .. versionadded:: 3.22
+        """
+    def graph(self) -> QgsGraph:
+        """Returns the generated `QgsGraph`.
+
+        The builder is left in its current state.
+
+        .. seealso:: `takeGraph`
+        """
     def addEdge(self, pt1id: int, pt1: _core.QgsPointXY, pt2id: int, pt2: _core.QgsPointXY, prop: collections.abc.Iterable[typing.Any]) -> None: ...
-    def addVertex(self, id: int, pt: _core.QgsPointXY) -> int: ...
+    def addVertex(self, id: int, pt: _core.QgsPointXY) -> int:
+        """MANDATORY BUILDER PROPERTY DECLARATION"""
 
 
 class QgsGraphDirector(QtCore.QObject):
+    """Determine making the graph. `QgsGraphBuilder` and
+    `QgsGraphDirector` implemented using "builder" design patter.
+    """
 
     def __init__(self) -> None: ...
 
-    def name(self) -> str: ...
-    def addStrategy(self, prop: typing.Optional['QgsNetworkStrategy']) -> None: ...
-    def makeGraph(self, builder: typing.Optional[QgsGraphBuilderInterface], additionalPoints: collections.abc.Iterable[_core.QgsPointXY], feedback: typing.Optional[_core.QgsFeedback] = ...) -> list[_core.QgsPointXY]: ...
+    def name(self) -> str:
+        """Returns director name"""
+    def addStrategy(self, prop: typing.Optional['QgsNetworkStrategy']) -> None:
+        """Add optimization strategy"""
+    def makeGraph(self, builder: typing.Optional[QgsGraphBuilderInterface], additionalPoints: collections.abc.Iterable[_core.QgsPointXY], feedback: typing.Optional[_core.QgsFeedback] = ...) -> list[_core.QgsPointXY]:
+        """Make a graph using `QgsGraphBuilder`
+
+        :param builder: the graph builder
+        :param additionalPoints: list of points that should be snapped to the
+                                 graph
+        :param feedback: feedback object for reporting progress
+
+        .. note::
+
+           if snappedPoints[i] == QgsPointXY(0.0,0.0) then snapping failed.
+
+        :return: list of snapped points
+        """
 
 
 class QgsNetworkStrategy(PyQt6.sip.wrapper):
+    """Defines strategy used for calculation of the edge cost in networks.
+
+    For example it can take into account travel distance, amount of time or
+    money. Currently there are two strategies implemented in the analysis
+    library: `QgsNetworkDistanceStrategy` and
+    `QgsNetworkSpeedStrategy`. `QgsNetworkStrategy`
+    implemented using "strategy" design pattern.
+    """
 
     @typing.overload
     def __init__(self) -> None: ...
     @typing.overload
     def __init__(self, a0: 'QgsNetworkStrategy') -> None: ...
 
-    def cost(self, distance: float, f: _core.QgsFeature) -> typing.Any: ...
-    def requiredAttributes(self) -> typing.Any: ...
+    def cost(self, distance: float, f: _core.QgsFeature) -> typing.Any:
+        """Returns edge cost"""
+    def requiredAttributes(self) -> typing.Any:
+        """Returns a list of the source layer attributes needed for cost
+        calculation. This is method called by `QgsGraphDirector`.
+        """
 
 
 class QgsNetworkDistanceStrategy(QgsNetworkStrategy):
+    """Strategy for calculating edge cost based on its length.
+
+    Should be used for finding shortest path between two points.
+    """
 
     @typing.overload
     def __init__(self) -> None: ...
@@ -399,6 +1121,15 @@ class QgsNetworkDistanceStrategy(QgsNetworkStrategy):
 
 
 class QgsNetworkSpeedStrategy(QgsNetworkStrategy):
+    """Strategy for calculating edge cost based on travel time.
+
+    Should be used for finding fastest path between two points.
+
+    QgsNetworkSpeedStrategy(attributeId: int, defaultValue: float, toMetricFactor: float)
+    Default constructor
+
+    QgsNetworkSpeedStrategy(a0: QgsNetworkSpeedStrategy)
+    """
 
     @typing.overload
     def __init__(self, attributeId: int, defaultValue: float, toMetricFactor: float) -> None: ...
@@ -410,6 +1141,20 @@ class QgsNetworkSpeedStrategy(QgsNetworkStrategy):
 
 
 class QgsVectorLayerDirector(QgsGraphDirector):
+    """Determines creating a graph from a vector line layer.
+
+    QgsVectorLayerDirector(source: QgsFeatureSource|None, directionFieldId: int, directDirectionValue: str|None, reverseDirectionValue: str|None, bothDirectionValue: str|None, defaultDirection: QgsVectorLayerDirector.Direction)
+    Default constructor
+
+    :param source: feature source representing network
+    :param directionFieldId: field containing direction value
+    :param directDirectionValue: value for direct one-way road
+    :param reverseDirectionValue: value for reversed one-way road
+    :param bothDirectionValue: value for two-way (bidirectional) road
+    :param defaultDirection: default direction. Will be used if
+                             corresponding attribute value is not set or
+                             does not equal to the given values
+    """
 
     class Direction(enum.IntEnum):
         DirectionForward = ... # type: QgsVectorLayerDirector.Direction
@@ -419,13 +1164,62 @@ class QgsVectorLayerDirector(QgsGraphDirector):
     def __init__(self, source: typing.Optional[_core.QgsFeatureSource], directionFieldId: int, directDirectionValue: typing.Optional[str], reverseDirectionValue: typing.Optional[str], bothDirectionValue: typing.Optional[str], defaultDirection: 'QgsVectorLayerDirector.Direction') -> None: ...
 
     def name(self) -> str: ...
-    def makeGraph(self, builder: typing.Optional[QgsGraphBuilderInterface], additionalPoints: collections.abc.Iterable[_core.QgsPointXY], feedback: typing.Optional[_core.QgsFeedback] = ...) -> list[_core.QgsPointXY]: ...
+    def makeGraph(self, builder: typing.Optional[QgsGraphBuilderInterface], additionalPoints: collections.abc.Iterable[_core.QgsPointXY], feedback: typing.Optional[_core.QgsFeedback] = ...) -> list[_core.QgsPointXY]:
+        """MANDATORY DIRECTOR PROPERTY DECLARATION"""
     DirectionForward: QgsVectorLayerDirector.Direction
     DirectionBackward: QgsVectorLayerDirector.Direction
     DirectionBoth: QgsVectorLayerDirector.Direction
 
 
 class QgsBatchGeocodeAlgorithm(_core.QgsProcessingFeatureBasedAlgorithm):
+    """A base class for batch geocoder algorithms, which takes a
+    `QgsGeocoderInterface` object and exposes it as a Processing
+    algorithm for batch geocoding operations.
+
+    Example
+    -------------------------------------
+
+    .. code-block:: python
+
+           # create a class which implements the QgsGeocoderInterface interface:
+           class MyGeocoder(QgsGeocoderInterface):
+
+              def geocodeString(self, string, context, feedback):
+                 # calculate and return results...
+                 pass
+
+           my_geocoder = MyGeocoder()
+
+           # create an algorithm which allows for batch geocoding operations using the custom geocoder interface
+           # and implement the few required pure virtual methods
+           class MyGeocoderAlgorithm(QgsBatchGeocodeAlgorithm):
+
+               def __init__(self):
+                   super().__init__(my_geocoder)
+
+               def displayName(self):
+                   return "My Geocoder"
+
+               def name(self):
+                   return "my_geocoder_alg"
+
+               def createInstance(self):
+                   return MyGeocoderAlgorithm()
+
+               # optionally, the group(), groupId(), tags(), shortHelpString() and other metadata style methods can be overridden and customized:
+               def tags(self):
+                   return 'geocode,my service,batch'
+
+    .. versionadded:: 3.18
+
+    QgsBatchGeocodeAlgorithm(geocoder: QgsGeocoderInterface|None)
+    Constructor for QgsBatchGeocodeAlgorithm.
+
+    The ``geocoder`` must specify an instance of a class which implements
+    the `QgsGeocoderInterface` interface. Ownership of
+    ``geocoder`` is not transferred, and the caller must ensure that
+    ``geocoder`` exists for the lifetime of this algorithm.
+    """
 
     def __init__(self, geocoder: typing.Optional[_core.QgsGeocoderInterface]) -> None: ...
 
@@ -444,6 +1238,11 @@ class QgsBatchGeocodeAlgorithm(_core.QgsProcessingFeatureBasedAlgorithm):
 
 
 class QgsNativeAlgorithms(_core.QgsProcessingProvider):
+    """Native c++ processing algorithm provider.
+
+    QgsNativeAlgorithms(parent: QObject|None = None)
+    Constructor for QgsNativeAlgorithms.
+    """
 
     def __init__(self, parent: typing.Optional[QtCore.QObject] = ...) -> None: ...
 
@@ -458,6 +1257,13 @@ class QgsNativeAlgorithms(_core.QgsProcessingProvider):
 
 
 class QgsPdalAlgorithms(_core.QgsProcessingProvider):
+    """PDAL Processing algorithm provider.
+
+    .. versionadded:: 3.32
+
+    QgsPdalAlgorithms(parent: QObject|None = None)
+    Constructor for QgsPdalAlgorithms.
+    """
 
     def __init__(self, parent: typing.Optional[QtCore.QObject] = ...) -> None: ...
 
@@ -474,30 +1280,58 @@ class QgsPdalAlgorithms(_core.QgsProcessingProvider):
 
 
 class QgsAlignRaster(PyQt6.sip.wrapper):
+    """Takes one or more raster layers and warps (resamples) them to a common
+    grid.
+
+    The aligned rasters will have the same:
+
+    - coordinate reference system
+    - cell size and raster size
+    - offset of the raster grid
+    """
 
     class RasterInfo(PyQt6.sip.wrapper):
+        """Utility class for gathering information about rasters"""
 
         def __init__(self, layerpath: typing.Optional[str]) -> None: ...
 
-        def identify(self, mx: float, my: float) -> float: ...
-        def dump(self) -> None: ...
-        def origin(self) -> QtCore.QPointF: ...
-        def extent(self) -> _core.QgsRectangle: ...
-        def gridOffset(self) -> QtCore.QPointF: ...
-        def cellSize(self) -> QtCore.QSizeF: ...
-        def bandCount(self) -> int: ...
-        def rasterSize(self) -> QtCore.QSize: ...
-        def crs(self) -> str: ...
-        def isValid(self) -> bool: ...
+        def identify(self, mx: float, my: float) -> float:
+            """Gets raster value at the given coordinates (from the first band)"""
+        def dump(self) -> None:
+            """Write contents of the object to standard error stream - for debugging"""
+        def origin(self) -> QtCore.QPointF:
+            """Returns the origin of the raster"""
+        def extent(self) -> _core.QgsRectangle:
+            """Returns the extent of the raster"""
+        def gridOffset(self) -> QtCore.QPointF:
+            """Returns the grid offset"""
+        def cellSize(self) -> QtCore.QSizeF:
+            """Returns the cell size in map units"""
+        def bandCount(self) -> int:
+            """Returns the number of raster bands in the file"""
+        def rasterSize(self) -> QtCore.QSize:
+            """Returns the size of the raster grid in pixels"""
+        def crs(self) -> str:
+            """Returns the CRS in WKT format"""
+        def isValid(self) -> bool:
+            """Check whether the given path is a valid raster"""
 
     class ProgressHandler(PyQt6.sip.wrapper):
+        """Helper struct to be sub-classed for progress reporting"""
 
         @typing.overload
         def __init__(self) -> None: ...
         @typing.overload
         def __init__(self, a0: 'QgsAlignRaster.ProgressHandler') -> None: ...
 
-        def progress(self, complete: float) -> bool: ...
+        def progress(self, complete: float) -> bool:
+            """Method to be overridden for progress reporting.
+
+            :param complete: Overall progress of the alignment operation
+
+            :return: ``False`` if the execution should be canceled, ``True``
+                     otherwise
+            """
 
     @typing.overload
     def __init__(self) -> None: ...
@@ -505,37 +1339,109 @@ class QgsAlignRaster(PyQt6.sip.wrapper):
     def __init__(self, a0: 'QgsAlignRaster') -> None: ...
 
     @staticmethod
-    def suggestedWarpOutput(info: 'QgsAlignRaster.RasterInfo', destWkt: typing.Optional[str], cellSize: typing.Optional[QtCore.QSizeF] = ..., gridOffset: typing.Optional[QtCore.QPointF] = ..., rect: typing.Optional[_core.QgsRectangle] = ...) -> bool: ...
-    def createAndWarp(self, raster: _core.QgsAlignRasterData.RasterItem) -> bool: ...
-    def suggestedReferenceLayer(self) -> int: ...
-    def dump(self) -> None: ...
-    def errorMessage(self) -> str: ...
-    def run(self) -> bool: ...
-    def alignedRasterExtent(self) -> _core.QgsRectangle: ...
-    def alignedRasterSize(self) -> QtCore.QSize: ...
-    def checkInputParameters(self) -> bool: ...
+    def suggestedWarpOutput(info: 'QgsAlignRaster.RasterInfo', destWkt: typing.Optional[str], cellSize: typing.Optional[QtCore.QSizeF] = ..., gridOffset: typing.Optional[QtCore.QPointF] = ..., rect: typing.Optional[_core.QgsRectangle] = ...) -> bool:
+        """Determine suggested output of raster warp to a different CRS. Returns
+        ``True`` on success
+        """
+    def createAndWarp(self, raster: _core.QgsAlignRasterData.RasterItem) -> bool:
+        """Internal function for processing of one raster (1. create output, 2. do
+        the alignment)
+        """
+    def suggestedReferenceLayer(self) -> int:
+        """Returns the index of the layer which has smallest cell size (returns -1
+        on error)
+        """
+    def dump(self) -> None:
+        """write contents of the object to standard error stream - for debugging"""
+    def errorMessage(self) -> str:
+        """Returns the error from a previous `QgsAlignRaster.run` call.
+        Error message is empty if `QgsAlignRaster.run` succeeded
+        (returned ``True``)
+        """
+    def run(self) -> bool:
+        """Run the alignment process
+
+        :return: ``True`` on success, sets error on error (see
+                 `QgsAlignRaster.errorMessage`)
+        """
+    def alignedRasterExtent(self) -> _core.QgsRectangle:
+        """Returns the expected extent of the resulting aligned raster
+
+        .. note::
+
+           first need to run `QgsAlignRaster.checkInputParameters` which returns with success
+        """
+    def alignedRasterSize(self) -> QtCore.QSize:
+        """Returns the expected size of the resulting aligned raster
+
+        .. note::
+
+           first need to run `QgsAlignRaster.checkInputParameters` which returns with success
+        """
+    def checkInputParameters(self) -> bool:
+        """Determine destination extent from the input rasters and calculate
+        derived values
+
+        :return: ``True`` on success, sets error on error (see
+                 `QgsAlignRaster.errorMessage`)
+        """
     @typing.overload
-    def setParametersFromRaster(self, rasterInfo: 'QgsAlignRaster.RasterInfo', customCRSWkt: typing.Optional[str] = ..., customCellSize: QtCore.QSizeF = ..., customGridOffset: QtCore.QPointF = ...) -> bool: ...
+    def setParametersFromRaster(self, rasterInfo: 'QgsAlignRaster.RasterInfo', customCRSWkt: typing.Optional[str] = ..., customCellSize: QtCore.QSizeF = ..., customGridOffset: QtCore.QPointF = ...) -> bool:
+        """Set destination CRS, cell size and grid offset from a raster file. The
+        user may provide custom values for some of the parameters - in such case
+        only the remaining parameters are calculated.
+
+        If default CRS is used, the parameters are set according to the raster
+        file's geo-transform. If a custom CRS is provided, suggested
+        reprojection is calculated first (using GDAL) in order to determine
+        suitable defaults for cell size and grid offset.
+
+        :return: ``True`` on success (may fail if it is not possible to
+                 reproject raster to given CRS)
+        """
     @typing.overload
-    def setParametersFromRaster(self, filename: typing.Optional[str], customCRSWkt: typing.Optional[str] = ..., customCellSize: QtCore.QSizeF = ..., customGridOffset: QtCore.QPointF = ...) -> bool: ...
-    def clipExtent(self) -> _core.QgsRectangle: ...
+    def setParametersFromRaster(self, filename: typing.Optional[str], customCRSWkt: typing.Optional[str] = ..., customCellSize: QtCore.QSizeF = ..., customGridOffset: QtCore.QPointF = ...) -> bool:
+        """Overridden variant for convenience, taking filename instead RasterInfo
+        object. See the other variant for details.
+        """
+    def clipExtent(self) -> _core.QgsRectangle:
+        """Gets clipping extent (region of interest). No extra clipping is done if
+        the rectangle is null
+        """
     @typing.overload
-    def setClipExtent(self, xmin: float, ymin: float, xmax: float, ymax: float) -> None: ...
+    def setClipExtent(self, xmin: float, ymin: float, xmax: float, ymax: float) -> None:
+        """Configure clipping extent (region of interest). No extra clipping is
+        done if the rectangle is null
+        """
     @typing.overload
-    def setClipExtent(self, extent: _core.QgsRectangle) -> None: ...
-    def destinationCrs(self) -> str: ...
-    def setDestinationCrs(self, crsWkt: typing.Optional[str]) -> None: ...
-    def cellSize(self) -> QtCore.QSizeF: ...
+    def setClipExtent(self, extent: _core.QgsRectangle) -> None:
+        """Configure clipping extent (region of interest). No extra clipping is
+        done if the rectangle is null
+        """
+    def destinationCrs(self) -> str:
+        """Gets the output CRS in WKT format"""
+    def setDestinationCrs(self, crsWkt: typing.Optional[str]) -> None:
+        """Sets the output CRS in WKT format"""
+    def cellSize(self) -> QtCore.QSizeF:
+        """Gets output cell size"""
     @typing.overload
-    def setCellSize(self, x: float, y: float) -> None: ...
+    def setCellSize(self, x: float, y: float) -> None:
+        """Sets output cell size"""
     @typing.overload
-    def setCellSize(self, size: QtCore.QSizeF) -> None: ...
+    def setCellSize(self, size: QtCore.QSizeF) -> None:
+        """Sets output cell size"""
     def gridOffset(self) -> QtCore.QPointF: ...
     def setGridOffset(self, offset: QtCore.QPointF) -> None: ...
-    def rasters(self) -> list[_core.QgsAlignRasterData.RasterItem]: ...
-    def setRasters(self, list: collections.abc.Iterable[_core.QgsAlignRasterData.RasterItem]) -> None: ...
-    def progressHandler(self) -> typing.Optional['QgsAlignRaster.ProgressHandler']: ...
-    def setProgressHandler(self, progressHandler: typing.Optional['QgsAlignRaster.ProgressHandler']) -> None: ...
+    def rasters(self) -> list[_core.QgsAlignRasterData.RasterItem]:
+        """Gets list of rasters that will be aligned"""
+    def setRasters(self, list: collections.abc.Iterable[_core.QgsAlignRasterData.RasterItem]) -> None:
+        """Sets list of rasters that will be aligned"""
+    def progressHandler(self) -> typing.Optional['QgsAlignRaster.ProgressHandler']:
+        """Gets associated progress handler. May be ``None`` (default)"""
+    def setProgressHandler(self, progressHandler: typing.Optional['QgsAlignRaster.ProgressHandler']) -> None:
+        """Assign a progress handler instance. Does not take ownership. ``None``
+        can be passed.
+        """
     Item: typing.Type[QgsAlignRasterData.RasterItem]
     ResampleAlg: typing.Type[_core.Qgis.GdalResampleAlgorithm]
     RA_NearestNeighbour: _core.Qgis.GdalResampleAlgorithm
@@ -553,25 +1459,91 @@ class QgsAlignRaster(PyQt6.sip.wrapper):
 
 
 class QgsNineCellFilter(PyQt6.sip.wrapper):
+    """Base class for raster analysis methods that work with a 3x3 cell filter
+    and calculate the value of each cell based on the cell value and the
+    eight neighbour cells.
+
+    Common examples are slope and aspect calculation in DEMs. Subclasses
+    only implement the method that calculates the new value from the nine
+    values. Everything else (reading file, writing file) is done by this
+    subclass
+
+    QgsNineCellFilter(inputFile: str|None, outputFile: str|None, outputFormat: str|None)
+    Constructor that takes input file, output file and output format (GDAL
+    string)
+
+    QgsNineCellFilter(a0: QgsNineCellFilter)
+    """
 
     class Result(enum.IntEnum):
+        """.. versionadded:: 3.44
+
+        * ``Success``: Operation completed successfully
+        * ``InputLayerError``: Error reading input file
+        * ``DriverError``: Could not open the driver for the specified format
+        * ``CreateOutputError``: Error creating output file
+        * ``InputBandError``: Error reading input raster band
+        * ``OutputBandError``: Error reading output raster band
+        * ``RasterSizeError``: Raster height is too small (need at least 3 rows)
+        * ``Canceled``: User canceled calculation
+        """
         Success = ... # type: QgsNineCellFilter.Result
+        """Operation completed successfully"""
         InputLayerError = ... # type: QgsNineCellFilter.Result
+        """Error reading input file"""
         DriverError = ... # type: QgsNineCellFilter.Result
+        """Could not open the driver for the specified format"""
         CreateOutputError = ... # type: QgsNineCellFilter.Result
+        """Error creating output file"""
         InputBandError = ... # type: QgsNineCellFilter.Result
+        """Error reading input raster band"""
         OutputBandError = ... # type: QgsNineCellFilter.Result
+        """Error reading output raster band"""
         RasterSizeError = ... # type: QgsNineCellFilter.Result
+        """Raster height is too small (need at least 3 rows)"""
         Canceled = ... # type: QgsNineCellFilter.Result
+        """User canceled calculation"""
 
     @typing.overload
     def __init__(self, inputFile: typing.Optional[str], outputFile: typing.Optional[str], outputFormat: typing.Optional[str]) -> None: ...
     @typing.overload
     def __init__(self, a0: 'QgsNineCellFilter') -> None: ...
 
-    def processNineCellWindow(self) -> typing.Tuple[float, typing.Optional[float], typing.Optional[float], typing.Optional[float], typing.Optional[float], typing.Optional[float], typing.Optional[float], typing.Optional[float], typing.Optional[float], typing.Optional[float]]: ...
-    def creationOptions(self) -> list[str]: ...
-    def setCreationOptions(self, options: collections.abc.Iterable[typing.Optional[str]]) -> None: ...
+    def processNineCellWindow(self) -> typing.Tuple[float, typing.Optional[float], typing.Optional[float], typing.Optional[float], typing.Optional[float], typing.Optional[float], typing.Optional[float], typing.Optional[float], typing.Optional[float], typing.Optional[float]]:
+        """Calculates output value from nine input values. The input values and the
+        output value can be equal to the nodata value if not present or outside
+        of the border. Must be implemented by subclasses.
+
+        First index of the input cell is the row, second index is the column
+
+        :param x11: surrounding cell top left
+        :param x21: surrounding cell central left
+        :param x31: surrounding cell bottom left
+        :param x12: surrounding cell top central
+        :param x22: the central cell for which the value will be calculated
+        :param x32: surrounding cell bottom central
+        :param x13: surrounding cell top right
+        :param x23: surrounding cell central right
+        :param x33: surrounding cell bottom right
+
+        :return: the calculated cell value for the central cell x22
+        """
+    def creationOptions(self) -> list[str]:
+        """Returns the list of data source creation options which will be used when
+        creating the output raster file.
+
+        .. seealso:: `setCreationOptions`
+
+        .. versionadded:: 3.44
+        """
+    def setCreationOptions(self, options: collections.abc.Iterable[typing.Optional[str]]) -> None:
+        """Sets a list of data source creation options to use when creating the
+        output raster file.
+
+        .. seealso:: `creationOptions`
+
+        .. versionadded:: 3.44
+        """
     def setOutputNodataValue(self, value: float) -> None: ...
     def outputNodataValue(self) -> float: ...
     def setInputNodataValue(self, value: float) -> None: ...
@@ -582,22 +1554,46 @@ class QgsNineCellFilter(PyQt6.sip.wrapper):
     def cellSizeY(self) -> float: ...
     def setCellSizeX(self, size: float) -> None: ...
     def cellSizeX(self) -> float: ...
-    def processRaster(self, feedback: typing.Optional[_core.QgsFeedback] = ...) -> 'QgsNineCellFilter.Result': ...
+    def processRaster(self, feedback: typing.Optional[_core.QgsFeedback] = ...) -> 'QgsNineCellFilter.Result':
+        """Starts the calculation, reads from mInputFile and stores the result in
+        mOutputFile
+
+        :param feedback: feedback object that receives update and that is
+                         checked for cancellation.
+
+        :return: QgsNineCellFilter.Result.Success in case of success or error
+                 value on failure.
+        """
 
 
 class QgsDerivativeFilter(QgsNineCellFilter):
+    """Adds the ability to calculate derivatives in x- and y-directions.
+
+    Needs to be subclassed (e.g. for slope and aspect).
+    """
 
     @typing.overload
     def __init__(self, inputFile: typing.Optional[str], outputFile: typing.Optional[str], outputFormat: typing.Optional[str]) -> None: ...
     @typing.overload
     def __init__(self, a0: 'QgsDerivativeFilter') -> None: ...
 
-    def calcFirstDerY(self, x11: float, x21: float, x31: float, x12: float, x22: float, x32: float, x13: float, x23: float, x33: float) -> float: ...
-    def calcFirstDerX(self, x11: float, x21: float, x31: float, x12: float, x22: float, x32: float, x13: float, x23: float, x33: float) -> float: ...
+    def calcFirstDerY(self, x11: float, x21: float, x31: float, x12: float, x22: float, x32: float, x13: float, x23: float, x33: float) -> float:
+        """Calculates the first order derivative in y-direction according to Horn
+        (1981)
+        """
+    def calcFirstDerX(self, x11: float, x21: float, x31: float, x12: float, x22: float, x32: float, x13: float, x23: float, x33: float) -> float:
+        """Calculates the first order derivative in x-direction according to Horn
+        (1981)
+        """
     def processNineCellWindow(self) -> typing.Tuple[float, typing.Optional[float], typing.Optional[float], typing.Optional[float], typing.Optional[float], typing.Optional[float], typing.Optional[float], typing.Optional[float], typing.Optional[float], typing.Optional[float]]: ...
 
 
 class QgsAspectFilter(QgsDerivativeFilter):
+    """Calculates aspect values in a window of 3x3 cells based on first order
+    derivatives in x- and y- directions.
+
+    Direction is clockwise starting from north.
+    """
 
     @typing.overload
     def __init__(self, inputFile: typing.Optional[str], outputFile: typing.Optional[str], outputFormat: typing.Optional[str]) -> None: ...
@@ -608,6 +1604,7 @@ class QgsAspectFilter(QgsDerivativeFilter):
 
 
 class QgsHillshadeFilter(QgsDerivativeFilter):
+    """A hillshade filter."""
 
     @typing.overload
     def __init__(self, inputFile: typing.Optional[str], outputFile: typing.Optional[str], outputFormat: typing.Optional[str], lightAzimuth: float = ..., lightAngle: float = ...) -> None: ...
@@ -622,26 +1619,87 @@ class QgsHillshadeFilter(QgsDerivativeFilter):
 
 
 class QgsKernelDensityEstimation(PyQt6.sip.wrapper):
+    """Performs Kernel Density Estimation ("heatmap") calculations on a vector
+    layer.
+
+    QgsKernelDensityEstimation(parameters: QgsKernelDensityEstimation.Parameters, outputFile: str|None, outputFormat: str|None)
+    Constructor for QgsKernelDensityEstimation. Requires a Parameters object
+    specifying the options to use to generate the surface. The output path
+    and file format are also required.
+    """
 
     class Result(enum.IntEnum):
+        """Result of operation
+
+        * ``Success``: Operation completed successfully
+        * ``DriverError``: Could not open the driver for the specified format
+        * ``InvalidParameters``: Input parameters were not valid
+        * ``FileCreationError``: Error creating output file
+        * ``RasterIoError``: Error writing to raster
+        """
         Success = ... # type: QgsKernelDensityEstimation.Result
+        """Operation completed successfully"""
         DriverError = ... # type: QgsKernelDensityEstimation.Result
+        """Could not open the driver for the specified format"""
         InvalidParameters = ... # type: QgsKernelDensityEstimation.Result
+        """Input parameters were not valid"""
         FileCreationError = ... # type: QgsKernelDensityEstimation.Result
+        """Error creating output file"""
         RasterIoError = ... # type: QgsKernelDensityEstimation.Result
+        """Error writing to raster"""
 
     class OutputValues(enum.IntEnum):
+        """Output values type
+
+        * ``Raw``: Output the raw KDE values
+
+          Available as ``QgsKernelDensityEstimation.OutputRaw`` in older QGIS releases.
+
+        * ``Scaled``: Output mathematically correct scaled values
+
+          Available as ``QgsKernelDensityEstimation.OutputScaled`` in older QGIS releases.
+        """
         Raw = ... # type: QgsKernelDensityEstimation.OutputValues
+        """Output the raw KDE values"""
         Scaled = ... # type: QgsKernelDensityEstimation.OutputValues
+        """Output mathematically correct scaled values"""
 
     class KernelShape(enum.IntEnum):
+        """Kernel shape type
+
+        * ``Quartic``: Quartic kernel
+
+          Available as ``QgsKernelDensityEstimation.KernelQuartic`` in older QGIS releases.
+
+        * ``Triangular``: Triangular kernel
+
+          Available as ``QgsKernelDensityEstimation.KernelTriangular`` in older QGIS releases.
+
+        * ``Uniform``: Uniform (flat) kernel
+
+          Available as ``QgsKernelDensityEstimation.KernelUniform`` in older QGIS releases.
+
+        * ``Triweight``: Triweight kernel
+
+          Available as ``QgsKernelDensityEstimation.KernelTriweight`` in older QGIS releases.
+
+        * ``Epanechnikov``: Epanechnikov kernel
+
+          Available as ``QgsKernelDensityEstimation.KernelEpanechnikov`` in older QGIS releases.
+        """
         Quartic = ... # type: QgsKernelDensityEstimation.KernelShape
+        """Quartic kernel"""
         Triangular = ... # type: QgsKernelDensityEstimation.KernelShape
+        """Triangular kernel"""
         Uniform = ... # type: QgsKernelDensityEstimation.KernelShape
+        """Uniform (flat) kernel"""
         Triweight = ... # type: QgsKernelDensityEstimation.KernelShape
+        """Triweight kernel"""
         Epanechnikov = ... # type: QgsKernelDensityEstimation.KernelShape
+        """Epanechnikov kernel"""
 
     class Parameters(PyQt6.sip.wrapper):
+        """KDE parameters"""
 
         decayRatio = ... # type: float
         outputValues = ... # type: 'QgsKernelDensityEstimation.OutputValues'
@@ -659,10 +1717,39 @@ class QgsKernelDensityEstimation(PyQt6.sip.wrapper):
 
     def __init__(self, parameters: 'QgsKernelDensityEstimation.Parameters', outputFile: typing.Optional[str], outputFormat: typing.Optional[str]) -> None: ...
 
-    def finalise(self) -> 'QgsKernelDensityEstimation.Result': ...
-    def addFeature(self, feature: _core.QgsFeature) -> 'QgsKernelDensityEstimation.Result': ...
-    def prepare(self) -> 'QgsKernelDensityEstimation.Result': ...
-    def run(self) -> 'QgsKernelDensityEstimation.Result': ...
+    def finalise(self) -> 'QgsKernelDensityEstimation.Result':
+        """Finalises the output file. Must be called after adding all features via
+        `QgsKernelDensityEstimation.addFeature`.
+
+        .. seealso:: `prepare`
+
+        .. seealso:: `addFeature`
+        """
+    def addFeature(self, feature: _core.QgsFeature) -> 'QgsKernelDensityEstimation.Result':
+        """Adds a single feature to the KDE surface.
+        `QgsKernelDensityEstimation.prepare` must be called before
+        adding features.
+
+        .. seealso:: `prepare`
+
+        .. seealso:: `finalise`
+        """
+    def prepare(self) -> 'QgsKernelDensityEstimation.Result':
+        """Prepares the output file for writing and setups up the surface
+        calculation. This must be called before adding features via
+        `QgsKernelDensityEstimation.addFeature`.
+
+        .. seealso:: `addFeature`
+
+        .. seealso:: `finalise`
+        """
+    def run(self) -> 'QgsKernelDensityEstimation.Result':
+        """Runs the KDE calculation across the whole layer at once. Either call
+        this method, or manually call
+        `QgsKernelDensityEstimation.run`,
+        `QgsKernelDensityEstimation.addFeature` and
+        `QgsKernelDensityEstimation.finalise` separately.
+        """
     KernelQuartic: QgsKernelDensityEstimation.KernelShape
     KernelTriangular: QgsKernelDensityEstimation.KernelShape
     KernelUniform: QgsKernelDensityEstimation.KernelShape
@@ -678,6 +1765,21 @@ class QgsKernelDensityEstimation(PyQt6.sip.wrapper):
 
 
 class QgsRasterCalcNode(PyQt6.sip.wrapper):
+    """Represents a node in a raster calculator.
+
+    QgsRasterCalcNode()
+
+    QgsRasterCalcNode(number: float)
+
+    QgsRasterCalcNode(matrix: QgsRasterMatrix|None)
+
+    QgsRasterCalcNode(op: QgsRasterCalcNode.Operator, left: QgsRasterCalcNode|None, right: QgsRasterCalcNode|None)
+
+    QgsRasterCalcNode(functionName: str|None, functionArgs: Iterable[QgsRasterCalcNode])
+    Constructor for the tFunction type
+
+    QgsRasterCalcNode(rasterName: str|None)
+    """
 
     class Operator(enum.IntEnum):
         opPLUS = ... # type: QgsRasterCalcNode.Operator
@@ -728,12 +1830,37 @@ class QgsRasterCalcNode(PyQt6.sip.wrapper):
     @typing.overload
     def __init__(self, rasterName: typing.Optional[str]) -> None: ...
 
-    def cleanRasterReferences(self) -> list[str]: ...
-    def referencedLayerNames(self) -> list[str]: ...
+    def cleanRasterReferences(self) -> list[str]:
+        """Returns a list of raster layer references that are addressed in the
+        formula, without quotation marks.
+
+        .. note::
+
+           since QGIS 3.22
+        """
+    def referencedLayerNames(self) -> list[str]:
+        """Returns a list of raster layer names that are referenced in the formula
+        without the quotation marks. It uses
+        QgsRasterCalcNode.cleanRasterReferences
+
+        .. note::
+
+           since QGIS 3.22
+        """
     @staticmethod
     def parseRasterCalcString(str: typing.Optional[str], parserErrorMsg: typing.Optional[str]) -> typing.Optional['QgsRasterCalcNode']: ...
-    def findNodes(self, type: 'QgsRasterCalcNode.Type') -> list['QgsRasterCalcNode']: ...
-    def toString(self, cStyle: bool = ...) -> str: ...
+    def findNodes(self, type: 'QgsRasterCalcNode.Type') -> list['QgsRasterCalcNode']:
+        """Returns a list of nodes of a specific ``type``
+
+        .. versionadded:: 3.6
+        """
+    def toString(self, cStyle: bool = ...) -> str:
+        """Returns a string representation of the expression
+
+        :param cStyle: if ``True`` operators will follow C syntax
+
+        .. versionadded:: 3.6
+        """
     def setRight(self, right: typing.Optional['QgsRasterCalcNode']) -> None: ...
     def setLeft(self, left: typing.Optional['QgsRasterCalcNode']) -> None: ...
     def type(self) -> 'QgsRasterCalcNode.Type': ...
@@ -772,6 +1899,9 @@ class QgsRasterCalcNode(PyQt6.sip.wrapper):
 
 
 class QgsRasterCalculatorEntry(PyQt6.sip.wrapper):
+    """Represents an individual raster layer/band number entry within a raster
+    calculation.
+    """
 
     bandNumber = ... # type: int
     raster = ... # type: _core.QgsRasterLayer
@@ -783,21 +1913,124 @@ class QgsRasterCalculatorEntry(PyQt6.sip.wrapper):
     def __init__(self, a0: 'QgsRasterCalculatorEntry') -> None: ...
 
     @staticmethod
-    def rasterEntries() -> list['QgsRasterCalculatorEntry']: ...
+    def rasterEntries() -> list['QgsRasterCalculatorEntry']:
+        """Creates a list of raster entries from the current project.
+
+        If there is more than one layer with the same data source only one of
+        them is added to the list, duplicate names are also handled by appending
+        an _n integer to the base name.
+
+        :return: the list of raster entries form the current project
+
+        .. versionadded:: 3.6
+        """
 
 
 class QgsRasterCalculator(PyQt6.sip.wrapper):
+    """Performs raster layer calculations.
+
+    QgsRasterCalculator(formulaString: str|None, outputFile: str|None, outputFormat: str|None, outputExtent: QgsRectangle, outputCrs: QgsCoordinateReferenceSystem, nOutputColumns: int, nOutputRows: int, rasterEntries: Iterable[QgsRasterCalculatorEntry], transformContext: QgsCoordinateTransformContext)
+    QgsRasterCalculator constructor.
+
+    :param formulaString: formula for raster calculation
+    :param outputFile: output file path
+    :param outputFormat: output file format
+    :param outputExtent: output extent, CRS is specified by outputCrs
+                         parameter
+    :param outputCrs: destination CRS for output raster
+    :param nOutputColumns: number of columns in output raster
+    :param nOutputRows: number of rows in output raster
+    :param rasterEntries: list of referenced raster layers
+    :param transformContext: coordinate transformation context
+
+    .. versionadded:: 3.8
+
+    QgsRasterCalculator(formulaString: str|None, outputFile: str|None, outputFormat: str|None, outputExtent: QgsRectangle, nOutputColumns: int, nOutputRows: int, rasterEntries: Iterable[QgsRasterCalculatorEntry], transformContext: QgsCoordinateTransformContext)
+    QgsRasterCalculator constructor.
+
+    :param formulaString: formula for raster calculation
+    :param outputFile: output file path
+    :param outputFormat: output file format
+    :param outputExtent: output extent. CRS for output is taken from first
+                         entry in rasterEntries.
+    :param nOutputColumns: number of columns in output raster
+    :param nOutputRows: number of rows in output raster
+    :param rasterEntries: list of referenced raster layers
+    :param transformContext: coordinate transformation context
+
+    .. versionadded:: 3.8
+
+    QgsRasterCalculator(formulaString: str|None, outputFile: str|None, outputFormat: str|None, outputExtent: QgsRectangle, outputCrs: QgsCoordinateReferenceSystem, nOutputColumns: int, nOutputRows: int, rasterEntries: Iterable[QgsRasterCalculatorEntry])
+    QgsRasterCalculator constructor.
+
+    :param formulaString: formula for raster calculation
+    :param outputFile: output file path
+    :param outputFormat: output file format
+    :param outputExtent: output extent, CRS is specified by outputCrs
+                         parameter
+    :param outputCrs: destination CRS for output raster
+    :param nOutputColumns: number of columns in output raster
+    :param nOutputRows: number of rows in output raster
+    :param rasterEntries: list of referenced raster layers
+
+    .. deprecated:: 3.8
+
+       Use the version with transformContext instead.
+
+    QgsRasterCalculator(formulaString: str|None, outputFile: str|None, outputFormat: str|None, outputExtent: QgsRectangle, nOutputColumns: int, nOutputRows: int, rasterEntries: Iterable[QgsRasterCalculatorEntry])
+    QgsRasterCalculator constructor.
+
+    :param formulaString: formula for raster calculation
+    :param outputFile: output file path
+    :param outputFormat: output file format
+    :param outputExtent: output extent. CRS for output is taken from first
+                         entry in rasterEntries.
+    :param nOutputColumns: number of columns in output raster
+    :param nOutputRows: number of rows in output raster
+    :param rasterEntries: list of referenced raster layers
+
+    .. deprecated:: 3.8
+
+       Use the version with transformContext instead.
+
+    QgsRasterCalculator(a0: QgsRasterCalculator)
+    """
 
     class Result(enum.IntEnum):
+        """Result of the calculation
+
+        * ``Success``: Calculation successful
+        * ``CreateOutputError``: Error creating output data file
+        * ``InputLayerError``: Error reading input layer
+        * ``Canceled``: User canceled calculation
+        * ``ParserError``: Error parsing formula
+        * ``MemoryError``: Error allocating memory for result
+        * ``BandError``: Invalid band number for input
+        * ``CalculationError``: Error occurred while performing calculation
+        * ``OpenCLKernelBuildError``: Error building OpenCL kernel.
+
+          .. versionadded:: 4.0
+        """
         Success = ... # type: QgsRasterCalculator.Result
+        """Calculation successful"""
         CreateOutputError = ... # type: QgsRasterCalculator.Result
+        """Error creating output data file"""
         InputLayerError = ... # type: QgsRasterCalculator.Result
+        """Error reading input layer"""
         Canceled = ... # type: QgsRasterCalculator.Result
+        """User canceled calculation"""
         ParserError = ... # type: QgsRasterCalculator.Result
+        """Error parsing formula"""
         MemoryError = ... # type: QgsRasterCalculator.Result
+        """Error allocating memory for result"""
         BandError = ... # type: QgsRasterCalculator.Result
+        """Invalid band number for input"""
         CalculationError = ... # type: QgsRasterCalculator.Result
+        """Error occurred while performing calculation"""
         OpenCLKernelBuildError = ... # type: QgsRasterCalculator.Result
+        """Error building OpenCL kernel.
+        .. versionadded:: 4.0
+        """
 
     @typing.overload
     def __init__(self, formulaString: typing.Optional[str], outputFile: typing.Optional[str], outputFormat: typing.Optional[str], outputExtent: _core.QgsRectangle, outputCrs: _core.QgsCoordinateReferenceSystem, nOutputColumns: int, nOutputRows: int, rasterEntries: collections.abc.Iterable[QgsRasterCalculatorEntry], transformContext: _core.QgsCoordinateTransformContext) -> None: ...
@@ -812,12 +2045,51 @@ class QgsRasterCalculator(PyQt6.sip.wrapper):
     @typing.overload
     def __init__(self, a0: 'QgsRasterCalculator') -> None: ...
 
-    def noDataValue(self) -> float: ...
-    def setNoDataValue(self, noDataValue: float) -> None: ...
-    def creationOptions(self) -> list[str]: ...
-    def setCreationOptions(self, options: collections.abc.Iterable[typing.Optional[str]]) -> None: ...
-    def lastError(self) -> str: ...
-    def processCalculation(self, feedback: typing.Optional[_core.QgsFeedback] = ...) -> 'QgsRasterCalculator.Result': ...
+    def noDataValue(self) -> float:
+        """Returns no data value used for output file.
+
+        .. seealso:: `setNoDataValue`
+
+        .. versionadded:: 3.44
+        """
+    def setNoDataValue(self, noDataValue: float) -> None:
+        """Set no data value for output file.
+
+        .. seealso:: `noDataValue`
+
+        .. versionadded:: 3.44
+        """
+    def creationOptions(self) -> list[str]:
+        """Returns the list of data source creation options which will be used when
+        creating the output raster file.
+
+        .. seealso:: `setCreationOptions`
+
+        .. versionadded:: 3.44
+        """
+    def setCreationOptions(self, options: collections.abc.Iterable[typing.Optional[str]]) -> None:
+        """Sets a list of data source creation options to use when creating the
+        output raster file.
+
+        .. seealso:: `creationOptions`
+
+        .. versionadded:: 3.44
+        """
+    def lastError(self) -> str:
+        """Returns a description of the last error encountered.
+
+        .. versionadded:: 3.4
+        """
+    def processCalculation(self, feedback: typing.Optional[_core.QgsFeedback] = ...) -> 'QgsRasterCalculator.Result':
+        """Starts the calculation and writes a new raster.
+
+        The optional ``feedback`` argument can be used for progress reporting
+        and cancellation support.
+
+        :return: QgsRasterCalculator.Result.Success in case of success. If an
+                 error is encountered then a description of the error can be
+                 obtained by calling `QgsRasterCalculator.lastError`.
+        """
     Success: QgsRasterCalculator.Result
     CreateOutputError: QgsRasterCalculator.Result
     InputLayerError: QgsRasterCalculator.Result
@@ -830,6 +2102,7 @@ class QgsRasterCalculator(PyQt6.sip.wrapper):
 
 
 class QgsRasterMatrix(PyQt6.sip.wrapper):
+    """Represents a matrix in a raster calculator operation."""
 
     class OneArgOperator(enum.IntEnum):
         opSQRT = ... # type: QgsRasterMatrix.OneArgOperator
@@ -866,7 +2139,13 @@ class QgsRasterMatrix(PyQt6.sip.wrapper):
     @typing.overload
     def __init__(self, m: 'QgsRasterMatrix') -> None: ...
 
-    def absoluteValue(self) -> bool: ...
+    def absoluteValue(self) -> bool:
+        """Calculates the absolute value
+
+        :return: ``True`` on success
+
+        .. versionadded:: 3.10
+        """
     def log10(self) -> bool: ...
     def log(self) -> bool: ...
     def changeSign(self) -> bool: ...
@@ -877,8 +2156,20 @@ class QgsRasterMatrix(PyQt6.sip.wrapper):
     def asinus(self) -> bool: ...
     def sinus(self) -> bool: ...
     def squareRoot(self) -> bool: ...
-    def min(self, other: 'QgsRasterMatrix') -> bool: ...
-    def max(self, other: 'QgsRasterMatrix') -> bool: ...
+    def min(self, other: 'QgsRasterMatrix') -> bool:
+        """Calculates the minimum value between two matrices
+
+        :return: ``True`` on success
+
+        .. versionadded:: 3.10
+        """
+    def max(self, other: 'QgsRasterMatrix') -> bool:
+        """Calculates the maximum value between two matrices
+
+        :return: ``True`` on success
+
+        .. versionadded:: 3.10
+        """
     def logicalOr(self, other: 'QgsRasterMatrix') -> bool: ...
     def logicalAnd(self, other: 'QgsRasterMatrix') -> bool: ...
     def lesserEqual(self, other: 'QgsRasterMatrix') -> bool: ...
@@ -890,15 +2181,18 @@ class QgsRasterMatrix(PyQt6.sip.wrapper):
     def power(self, other: 'QgsRasterMatrix') -> bool: ...
     def divide(self, other: 'QgsRasterMatrix') -> bool: ...
     def multiply(self, other: 'QgsRasterMatrix') -> bool: ...
-    def subtract(self, other: 'QgsRasterMatrix') -> bool: ...
-    def add(self, other: 'QgsRasterMatrix') -> bool: ...
+    def subtract(self, other: 'QgsRasterMatrix') -> bool:
+        """Subtracts another matrix from this one"""
+    def add(self, other: 'QgsRasterMatrix') -> bool:
+        """Adds another matrix to this one"""
     def setNodataValue(self, d: float) -> None: ...
     def nodataValue(self) -> float: ...
     def nRows(self) -> int: ...
     def nColumns(self) -> int: ...
     def setData(self, cols: int, rows: int, nodataValue: float) -> typing.Optional[float]: ...
     def number(self) -> float: ...
-    def isNumber(self) -> bool: ...
+    def isNumber(self) -> bool:
+        """Returns ``True`` if matrix is 1x1 (=scalar number)"""
     opPLUS: QgsRasterMatrix.TwoArgOperator
     opMINUS: QgsRasterMatrix.TwoArgOperator
     opMUL: QgsRasterMatrix.TwoArgOperator
@@ -928,29 +2222,111 @@ class QgsRasterMatrix(PyQt6.sip.wrapper):
 
 
 class QgsRelief(PyQt6.sip.wrapper):
+    """Produces colored relief rasters from DEM.
+
+    QgsRelief(inputFile: str|None, outputFile: str|None, outputFormat: str|None)
+    Constructor for QgsRelief.
+    """
 
     class Result(enum.IntEnum):
+        """Calculation results.
+
+        .. versionadded:: 4.2
+
+        * ``Success``: Calculation succeeded
+        * ``InvalidInput``: Invalid input layer
+        * ``OutputCreationFailed``: Creation of output layer failed
+        * ``InvalidInputSize``: Input raster was too small (at least 3 rows are required)
+        * ``Canceled``: Operation was canceled
+        """
         Success = ... # type: QgsRelief.Result
+        """Calculation succeeded"""
         InvalidInput = ... # type: QgsRelief.Result
+        """Invalid input layer"""
         OutputCreationFailed = ... # type: QgsRelief.Result
+        """Creation of output layer failed"""
         InvalidInputSize = ... # type: QgsRelief.Result
+        """Input raster was too small (at least 3 rows are required)"""
         Canceled = ... # type: QgsRelief.Result
+        """Operation was canceled"""
 
     def __init__(self, inputFile: typing.Optional[str], outputFile: typing.Optional[str], outputFormat: typing.Optional[str]) -> None: ...
 
-    def exportFrequencyDistributionToCsv(self, file: typing.Optional[str]) -> bool: ...
-    def calculateOptimizedReliefClasses(self) -> list[_core.QgsRasterReliefColor]: ...
-    def setReliefColors(self, c: collections.abc.Iterable[_core.QgsRasterReliefColor]) -> None: ...
-    def reliefColors(self) -> list[_core.QgsRasterReliefColor]: ...
-    def addReliefColorClass(self, color: _core.QgsRasterReliefColor) -> None: ...
-    def clearReliefColors(self) -> None: ...
-    def setZFactor(self, factor: float) -> None: ...
-    def zFactor(self) -> float: ...
-    def processRaster(self, feedback: typing.Optional[_core.QgsFeedback] = ...) -> 'QgsRelief.Result': ...
+    def exportFrequencyDistributionToCsv(self, file: typing.Optional[str]) -> bool:
+        """Writes frequency of elevation values to a ``file`` for manual inspection"""
+    def calculateOptimizedReliefClasses(self) -> list[_core.QgsRasterReliefColor]:
+        """Calculates class breaks according with the method of Buenzli (2011)
+        using an iterative algorithm for segmented regression.
+
+        :return: ``True`` in case of success
+        """
+    def setReliefColors(self, c: collections.abc.Iterable[_core.QgsRasterReliefColor]) -> None:
+        """Sets the list of relief colors.
+
+        .. seealso:: `clearReliefColors`
+
+        .. seealso:: `addReliefColorClass`
+
+        .. seealso:: `reliefColors`
+        """
+    def reliefColors(self) -> list[_core.QgsRasterReliefColor]:
+        """Returns a list of all relief colors.
+
+        .. seealso:: `clearReliefColors`
+
+        .. seealso:: `addReliefColorClass`
+
+        .. seealso:: `setReliefColors`
+        """
+    def addReliefColorClass(self, color: _core.QgsRasterReliefColor) -> None:
+        """Adds a relief ``color``.
+
+        .. seealso:: `clearReliefColors`
+
+        .. seealso:: `reliefColors`
+
+        .. seealso:: `setReliefColors`
+        """
+    def clearReliefColors(self) -> None:
+        """Clears all existing relief colors.
+
+        .. seealso:: `addReliefColorClass`
+
+        .. seealso:: `reliefColors`
+
+        .. seealso:: `setReliefColors`
+        """
+    def setZFactor(self, factor: float) -> None:
+        """Sets the z ``factor``, which controls vertical elevation exaggeration.
+
+        .. seealso:: `zFactor`
+        """
+    def zFactor(self) -> float:
+        """Returns the z factor, which controls vertical elevation exaggeration.
+
+        .. seealso:: `setZFactor`
+        """
+    def processRaster(self, feedback: typing.Optional[_core.QgsFeedback] = ...) -> 'QgsRelief.Result':
+        """Starts the calculation.
+
+        Reads from the intput input file and stores the result in the output
+        file.
+
+        :param feedback: feedback object that receives update and that is
+                         checked for cancellation.
+
+        :return: result code. Prior to QGIS 4.2 the results were returned as a
+                 raw integer value.
+        """
     ReliefColor: typing.Type[_core.QgsRasterReliefColor]
 
 
 class QgsRuggednessFilter(QgsNineCellFilter):
+    """Calculates the ruggedness index based on a 3x3 moving window.
+
+    Algorithm from Riley et al. 1999: A terrain ruggedness index that
+    quantifies topographic heterogeneity
+    """
 
     @typing.overload
     def __init__(self, inputFile: typing.Optional[str], outputFile: typing.Optional[str], outputFormat: typing.Optional[str]) -> None: ...
@@ -961,6 +2337,9 @@ class QgsRuggednessFilter(QgsNineCellFilter):
 
 
 class QgsSlopeFilter(QgsDerivativeFilter):
+    """Calculates slope values in a window of 3x3 cells based on first order
+    derivatives in x- and y- directions.
+    """
 
     @typing.overload
     def __init__(self, inputFile: typing.Optional[str], outputFile: typing.Optional[str], outputFormat: typing.Optional[str]) -> None: ...
@@ -971,6 +2350,9 @@ class QgsSlopeFilter(QgsDerivativeFilter):
 
 
 class QgsTotalCurvatureFilter(QgsNineCellFilter):
+    """Calculates total curvature as described by Wilson, Gallant (2000):
+    terrain analysis.
+    """
 
     @typing.overload
     def __init__(self, inputFile: typing.Optional[str], outputFile: typing.Optional[str], outputFormat: typing.Optional[str]) -> None: ...
@@ -981,33 +2363,187 @@ class QgsTotalCurvatureFilter(QgsNineCellFilter):
 
 
 class QgsFeaturePool(_core.QgsFeatureSink):
+    """A feature pool is based on a vector layer and caches features.
+
+    .. note::
+
+       This class is a technology preview and unstable API.
+
+    .. versionadded:: 3.4
+
+    QgsFeaturePool(layer: QgsVectorLayer|None)
+    Creates a new feature pool for ``layer``.
+
+    Must be created on the same thread as ``layer``.
+    """
 
     def __init__(self, layer: typing.Optional[_core.QgsVectorLayer]) -> None: ...
 
-    def removeFeature(self, featureId: int) -> None: ...
-    def refreshCache(self, feature: _core.QgsFeature, origFeature: _core.QgsFeature) -> None: ...
-    def insertFeature(self, feature: _core.QgsFeature, skipLock: bool = ...) -> None: ...
-    def layerName(self) -> str: ...
-    def crs(self) -> _core.QgsCoordinateReferenceSystem: ...
-    def geometryType(self) -> _core.Qgis.GeometryType: ...
-    def layerId(self) -> str: ...
-    def layer(self) -> typing.Optional[_core.QgsVectorLayer]: ...
-    def deleteFeature(self, fid: int) -> None: ...
-    def updateFeature(self, feature: _core.QgsFeature) -> None: ...
-    def getFeature(self, id: int, feature: _core.QgsFeature) -> bool: ...
+    def removeFeature(self, featureId: int) -> None:
+        """The type of the None singleton."""
+    def refreshCache(self, feature: _core.QgsFeature, origFeature: _core.QgsFeature) -> None:
+        """The type of the None singleton."""
+    def insertFeature(self, feature: _core.QgsFeature, skipLock: bool = ...) -> None:
+        """The type of the None singleton."""
+    def layerName(self) -> str:
+        """Returns the name of the layer.
+
+        Should be preferred over `QgsFeaturePool.layer`.name() because
+        it can directly be run on the background thread.
+        """
+    def crs(self) -> _core.QgsCoordinateReferenceSystem:
+        """The coordinate reference system of this layer."""
+    def geometryType(self) -> _core.Qgis.GeometryType:
+        """The geometry type of this layer."""
+    def layerId(self) -> str:
+        """The layer id of the layer."""
+    def layer(self) -> typing.Optional[_core.QgsVectorLayer]:
+        """Gets a pointer to the underlying layer. May return a ````None```` if the
+        layer has been deleted.
+
+        .. warning::
+
+           This must be called from the same thread as the vector layer belongs to.
+        """
+    def deleteFeature(self, fid: int) -> None:
+        """Removes a feature from this pool. Implementations will remove the
+        feature from the layer or from the data provider.
+
+        .. warning::
+
+           This method can safely be called from a different thread vs the object's creation thread or
+           the original layer's thread. The update will be delegated to run in the main thread, and care must
+           be taken to avoid deadlocks if the main thread is busy.
+        """
+    def updateFeature(self, feature: _core.QgsFeature) -> None:
+        """Updates a feature in this pool. Implementations will update the feature
+        on the layer or on the data provider.
+
+        .. warning::
+
+           This method can safely be called from a different thread vs the object's creation thread or
+           the original layer's thread. The update will be delegated to run in the main thread, and care must
+           be taken to avoid deadlocks if the main thread is busy.
+        """
+    def getFeature(self, id: int, feature: _core.QgsFeature) -> bool:
+        """Retrieves the feature with the specified ``id`` into ``feature``. It
+        will be retrieved from the cache or from the underlying feature source
+        if unavailable. If the feature is neither available from the cache nor
+        from the source it will return ``False``.
+
+        .. note::
+
+           This method can safely be called from a different thread vs the object's creation thread or
+           the original layer's thread.
+        """
 
 
 class QgsGeometryCheck(PyQt6.sip.wrapper):
+    """Base class for geometry checks.
+
+    Geometry checks run over a set of features and can detect errors like
+    topological or other issues which are reported in the geometry
+    validation panel in QGIS and help a user to create valid geometries.
+
+    Implementing a custom geometry check consists of the following parts
+
+    Writing the check
+    -----------------------------------------------
+
+    A new subclass of `QgsGeometryCheck` needs to be written and
+    at least the following abstract methods need to be implemented:
+
+    - `compatibleGeometryTypes`: A list of geometry types to which
+      this check applies
+    - `availableResolutionMethods`: A list of resolution methods
+      that can be used to fix errors of this type
+    - `description`: A description for the geometry check.
+    - `id`: A unique id for this check.
+    - `checkType`: One of `QgsGeometryCheck`.LayerCheck,
+      `QgsGeometryCheck`.FeatureCheck,
+      `QgsGeometryCheck`.FeatureNodeCheck
+    - `collectErrors`: This method will be called to validate
+      geometries. All geometries which should be validated are passed into
+      this method with the parameter ids and should be retrieved from the
+      available featurePools to make use of caching. New errors should be
+      appended to the error list and other message strings to messages. The
+      method needs to return a tuple (errors, messages).
+
+    Creating a geometry check factory
+    ---------------------------------------------------------------
+
+    A Geometry check factory manages meta information for checks. There will
+    always be one single geometry check factory created per check type, but
+    it's possible that multiple `QgsGeometryCheck` instances are
+    created and used in parallel.
+
+    A new subclass of `QgsGeometryCheckFactory` needs to be
+    written and at least the following abstract methods need to be
+    implemented:
+
+    - `QgsGeometryCheckFactory.createGeometryCheck()`: Needs to
+      return a new subclassed `QgsGeometryCheck` object that has
+      been written in the previous step.
+    - `QgsGeometryCheckFactory.id()`: A unique id for this geometry
+      check.
+    - `QgsGeometryCheckFactory.description()`: A description for
+      this geometry check that can be presented to the user for more
+      explanation.
+    - `QgsGeometryCheckFactory.isCompatible()`: Returns a boolean
+      that determines if this check is available for a given layer. This
+      often checks for the geometry type of the layer.
+    - `QgsGeometryCheckFactory.flags()`: Returns additional flags
+      for a geometry check. If unsure return
+      `QgsGeometryCheck`.AvailableInValidation.
+    - `QgsGeometryCheckFactory.checkType()`: Returns the type of
+      this geometry check.
+
+    Registering the geometry check
+    ------------------------------------------------------------
+
+    Finally the geometry check factory needs to be registered in QGIS, so
+    the system is aware of the available geometry checks.
+
+    .. code-block:: python
+
+         # Make sure you always keep a reference
+         checkFactory = MyGeometryCheckFactory()
+         QgsAnalysis.geometryCheckRegistry().registerGeometryCheck(checkFactory)
+
+    .. note::
+
+       This class is a technology preview and unstable API.
+
+    .. versionadded:: 3.4
+
+    QgsGeometryCheck(context: QgsGeometryCheckContext|None, configuration: dict[str|None, Any])
+    Create a new geometry check.
+
+    QgsGeometryCheck(a0: QgsGeometryCheck)
+    """
 
     class Flag(enum.IntEnum):
         AvailableInValidation = ... # type: QgsGeometryCheck.Flag
 
     class Result(enum.IntEnum):
+        """.. versionadded:: 4.0
+
+        * ``Success``: Operation completed successfully
+        * ``Canceled``: User canceled calculation
+        * ``DuplicatedUniqueId``: Found duplicated unique ID value
+        * ``InvalidReferenceLayer``: Missed or invalid reference layer
+        * ``GeometryOverlayError``: Error performing geometry overlay operation
+        """
         Success = ... # type: QgsGeometryCheck.Result
+        """Operation completed successfully"""
         Canceled = ... # type: QgsGeometryCheck.Result
+        """User canceled calculation"""
         DuplicatedUniqueId = ... # type: QgsGeometryCheck.Result
+        """Found duplicated unique ID value"""
         InvalidReferenceLayer = ... # type: QgsGeometryCheck.Result
+        """Missed or invalid reference layer"""
         GeometryOverlayError = ... # type: QgsGeometryCheck.Result
+        """Error performing geometry overlay operation"""
 
     class CheckType(enum.IntEnum):
         FeatureNodeCheck = ... # type: QgsGeometryCheck.CheckType
@@ -1026,6 +2562,12 @@ class QgsGeometryCheck(PyQt6.sip.wrapper):
         ChangeNode = ... # type: QgsGeometryCheck.ChangeWhat
 
     class LayerFeatureIds(PyQt6.sip.wrapper):
+        """A list of layers and feature ids for each of these layers.
+        In C++, the member `ids` can be accessed directly.
+        In Python some accessor methods will need to be written.
+
+        .. versionadded:: 3.4
+        """
 
         @typing.overload
         def __init__(self) -> None: ...
@@ -1033,6 +2575,10 @@ class QgsGeometryCheck(PyQt6.sip.wrapper):
         def __init__(self, a0: 'QgsGeometryCheck.LayerFeatureIds') -> None: ...
 
     class Change(PyQt6.sip.wrapper):
+        """Descripts a change to fix a geometry.
+
+        .. versionadded:: 3.4
+        """
 
         type = ... # type: 'QgsGeometryCheck.ChangeType'
         vidx = ... # type: _core.QgsVertexId
@@ -1055,18 +2601,74 @@ class QgsGeometryCheck(PyQt6.sip.wrapper):
     @typing.overload
     def __init__(self, a0: 'QgsGeometryCheck') -> None: ...
 
-    def context(self) -> typing.Optional['QgsGeometryCheckContext']: ...
-    def checkType(self) -> 'QgsGeometryCheck.CheckType': ...
-    def id(self) -> str: ...
-    def description(self) -> str: ...
+    def context(self) -> typing.Optional['QgsGeometryCheckContext']:
+        """Returns the context
+
+        .. versionadded:: 3.4
+        """
+    def checkType(self) -> 'QgsGeometryCheck.CheckType':
+        """Returns the check type.
+
+        .. versionadded:: 3.4
+        """
+    def id(self) -> str:
+        """Returns an id for this check.
+
+        .. versionadded:: 3.4
+        """
+    def description(self) -> str:
+        """Returns a human readable description for this check.
+
+        .. versionadded:: 3.4
+        """
     @deprecated("""Since 3.12. Use availableResolutionMethods() instead.""")
-    def resolutionMethods(self) -> list[str]: ...
-    def availableResolutionMethods(self) -> list['QgsGeometryCheckResolutionMethod']: ...
-    def collectErrors(self, featurePools: typing.Any, errors: collections.abc.Iterable['QgsGeometryCheckError'], messages: collections.abc.Iterable[typing.Optional[str]], feedback: typing.Optional[_core.QgsFeedback], ids: 'QgsGeometryCheck.LayerFeatureIds' = ...) -> typing.Tuple['QgsGeometryCheck.Result', list['QgsGeometryCheckError'], list[str]]: ...
-    def flags(self) -> 'QgsGeometryCheck.Flag': ...
-    def compatibleGeometryTypes(self) -> list[_core.Qgis.GeometryType]: ...
-    def isCompatible(self, layer: typing.Optional[_core.QgsVectorLayer]) -> bool: ...
-    def prepare(self, context: typing.Optional['QgsGeometryCheckContext'], configuration: dict[typing.Optional[str], typing.Any]) -> None: ...
+    def resolutionMethods(self) -> list[str]:
+        """Returns a list of descriptions for available resolutions for errors. The
+        index will be passed as ``method`` to `fixError`.
+
+        .. deprecated:: 3.12
+
+           Use `QgsGeometryCheck.availableResolutionMethods` instead.
+        .. versionadded:: 3.4
+        """
+    def availableResolutionMethods(self) -> list['QgsGeometryCheckResolutionMethod']:
+        """Returns a list of available resolution methods.
+
+        .. versionadded:: 3.12
+        """
+    def collectErrors(self, featurePools: typing.Any, errors: collections.abc.Iterable['QgsGeometryCheckError'], messages: collections.abc.Iterable[typing.Optional[str]], feedback: typing.Optional[_core.QgsFeedback], ids: 'QgsGeometryCheck.LayerFeatureIds' = ...) -> typing.Tuple['QgsGeometryCheck.Result', list['QgsGeometryCheckError'], list[str]]:
+        """The main worker method. Check all features available from
+        ``featurePools`` and write errors found to ``errors``. Other status
+        messages can be written to ``messages``. Progress should be reported to
+        ``feedback``. Only features and layers listed in ``ids`` should be
+        checked.
+
+        :return: QgsGeometryCheck.Result.Success in case of success or error
+                 value on failure.
+
+        .. versionadded:: 3.4
+        """
+    def flags(self) -> 'QgsGeometryCheck.Flag':
+        """Flags for this geometry check."""
+    def compatibleGeometryTypes(self) -> list[_core.Qgis.GeometryType]:
+        """A list of geometry types for which this check can be performed.
+
+        .. versionadded:: 3.4
+        """
+    def isCompatible(self, layer: typing.Optional[_core.QgsVectorLayer]) -> bool:
+        """Returns if this geometry check is compatible with ``layer``. By default
+        it checks for the geometry type in
+        `QgsGeometryCheck.compatibleGeometryTypes`.
+
+        .. versionadded:: 3.4
+        """
+    def prepare(self, context: typing.Optional['QgsGeometryCheckContext'], configuration: dict[typing.Optional[str], typing.Any]) -> None:
+        """Will be run in the main thread before
+        `QgsGeometryCheck.collectErrors` is called (which may be run
+        from a background thread).
+
+        .. versionadded:: 3.10
+        """
     ChangeFeature: QgsGeometryCheck.ChangeWhat
     ChangePart: QgsGeometryCheck.ChangeWhat
     ChangeRing: QgsGeometryCheck.ChangeWhat
@@ -1081,19 +2683,56 @@ class QgsGeometryCheck(PyQt6.sip.wrapper):
 
 
 class QgsGeometryCheckResolutionMethod(PyQt6.sip.wrapper):
+    """Implements a resolution for problems detected in geometry checks.
+
+    .. versionadded:: 3.12
+
+    QgsGeometryCheckResolutionMethod(id: int, name: str|None, description: str|None, isStable: bool = True)
+    Creates a new method with the specified parameters.
+
+    QgsGeometryCheckResolutionMethod(a0: QgsGeometryCheckResolutionMethod)
+    """
 
     @typing.overload
     def __init__(self, id: int, name: typing.Optional[str], description: typing.Optional[str], isStable: bool = ...) -> None: ...
     @typing.overload
     def __init__(self, a0: 'QgsGeometryCheckResolutionMethod') -> None: ...
 
-    def description(self) -> str: ...
-    def name(self) -> str: ...
-    def isStable(self) -> bool: ...
-    def id(self) -> int: ...
+    def description(self) -> str:
+        """A human readable and translated description for this fix."""
+    def name(self) -> str:
+        """A human readable and translated name for this fix."""
+    def isStable(self) -> bool:
+        """If this fix is stable enough to be listed by default."""
+    def id(self) -> int:
+        """An id that is unique per check. This will be used to trigger
+        resolutions.
+        """
 
 
 class QgsGeometryCheckContext(PyQt6.sip.wrapper):
+    """Base configuration for geometry checks.
+
+    .. note::
+
+       This class is a technology preview and unstable API.
+
+    .. versionadded:: 3.4
+
+    QgsGeometryCheckContext(precision: int, mapCrs: QgsCoordinateReferenceSystem, transformContext: QgsCoordinateTransformContext, mProject: QgsProject|None = None, uniqueIdFieldIndex: int = -1)
+    Creates a new QgsGeometryCheckContext.
+
+    :param precision: The precision used to define geometry check tolerance.
+                      Tolerance is calculated as pow(10, -precision)
+    :param mapCrs: The coordinate system in which calculations should be
+                   done
+    :param transformContext: The coordinate transform context
+    :param mProject: The project used to resolve additional layers
+    :param uniqueIdFieldIndex: The index of the unique ID field used to
+                               identify features. If set to valid field
+                               index, geometry checker will fail if this
+                               field is not unique (since QGIS 4.0)
+    """
 
     mapCrs = ... # type: _core.QgsCoordinateReferenceSystem
     reducedTolerance = ... # type: float
@@ -1103,10 +2742,40 @@ class QgsGeometryCheckContext(PyQt6.sip.wrapper):
 
     def __init__(self, precision: int, mapCrs: _core.QgsCoordinateReferenceSystem, transformContext: _core.QgsCoordinateTransformContext, mProject: typing.Optional[_core.QgsProject] = ..., uniqueIdFieldIndex: int = ...) -> None: ...
 
-    def project(self) -> typing.Optional[_core.QgsProject]: ...
+    def project(self) -> typing.Optional[_core.QgsProject]:
+        """The project can be used to resolve additional layers.
+
+        This must only be accessed from the main thread (i.e. do not access from
+        the collectError method)
+
+        .. versionadded:: 3.10
+        """
 
 
 class QgsGeometryCheckError(PyQt6.sip.wrapper):
+    """This represents an error reported by a geometry check.
+
+    .. note::
+
+       This class is a technology preview and unstable API.
+
+    .. versionadded:: 3.4
+
+    QgsGeometryCheckError(check: QgsGeometryCheck|None, layerFeature: QgsGeometryCheckerUtils.LayerFeature, errorLocation: QgsPointXY, vidx: QgsVertexId = QgsVertexId(), value: Any = None, valueType: QgsGeometryCheckError.ValueType = QgsGeometryCheckError.ValueOther)
+    Create a new geometry check error with the parent ``check`` and for the
+    ``layerFeature`` pair at the ``errorLocation``. Optionally the vertex
+    can be specified via ``vixd`` and a ``value`` with its ``value`` Type
+    for additional information.
+
+    QgsGeometryCheckError(check: QgsGeometryCheck|None, layerId: str|None, featureId: int, geometry: QgsGeometry, errorLocation: QgsPointXY, vidx: QgsVertexId = QgsVertexId(), value: Any = None, valueType: QgsGeometryCheckError.ValueType = QgsGeometryCheckError.ValueOther)
+    Create a new geometry check error with the parent ``check`` and for the
+    layer with ``layerId`` and ``featureId``. The ``geometry`` of the error
+    and the ``errorLocation`` need to be specified in map coordinates.
+    Optionally the vertex can be specified via ``vixd`` and a ``value`` with
+    its ``value`` Type for additional information.
+
+    QgsGeometryCheckError(a0: QgsGeometryCheckError)
+    """
 
     class ValueType(enum.IntEnum):
         ValueLength = ... # type: QgsGeometryCheckError.ValueType
@@ -1126,26 +2795,74 @@ class QgsGeometryCheckError(PyQt6.sip.wrapper):
     @typing.overload
     def __init__(self, a0: 'QgsGeometryCheckError') -> None: ...
 
-    def icon(self) -> QtGui.QIcon: ...
-    def update(self, other: typing.Optional['QgsGeometryCheckError']) -> None: ...
-    def closeMatch(self, a0: typing.Optional['QgsGeometryCheckError']) -> bool: ...
-    def isEqual(self, other: typing.Optional['QgsGeometryCheckError']) -> bool: ...
-    def setObsolete(self) -> None: ...
-    def setFixFailed(self, reason: typing.Optional[str]) -> None: ...
-    def setFixed(self, method: int) -> None: ...
-    def resolutionMessage(self) -> str: ...
-    def status(self) -> 'QgsGeometryCheckError.Status': ...
-    def vidx(self) -> _core.QgsVertexId: ...
-    def valueType(self) -> 'QgsGeometryCheckError.ValueType': ...
-    def value(self) -> typing.Any: ...
-    def location(self) -> _core.QgsPointXY: ...
-    def description(self) -> str: ...
-    def affectedAreaBBox(self) -> _core.QgsRectangle: ...
-    def contextBoundingBox(self) -> _core.QgsRectangle: ...
-    def geometry(self) -> _core.QgsGeometry: ...
-    def featureId(self) -> int: ...
-    def layerId(self) -> str: ...
-    def check(self) -> typing.Optional[QgsGeometryCheck]: ...
+    def icon(self) -> QtGui.QIcon:
+        """Returns an icon that should be shown for this kind of error.
+
+        .. versionadded:: 3.8
+        """
+    def update(self, other: typing.Optional['QgsGeometryCheckError']) -> None:
+        """Update this error with the information from ``other``. Will be used to
+        update existing errors whenever they are re-checked.
+        """
+    def closeMatch(self, a0: typing.Optional['QgsGeometryCheckError']) -> bool:
+        """Check if this error is almost equal to ``other``. If this returns
+        ``True``, it can be used to update existing errors after re-checking.
+        """
+    def isEqual(self, other: typing.Optional['QgsGeometryCheckError']) -> bool:
+        """Check if this error is equal to ``other``. Is reimplemented by
+        subclasses with additional information, comparison of base information
+        is done in parent class.
+        """
+    def setObsolete(self) -> None:
+        """Set the error status to obsolete."""
+    def setFixFailed(self, reason: typing.Optional[str]) -> None:
+        """Set the error status to failed and specify the ``reason`` for failure."""
+    def setFixed(self, method: int) -> None:
+        """Set the status to fixed and specify the ``method`` that has been used to
+        fix the error.
+        """
+    def resolutionMessage(self) -> str:
+        """A message with details, how the error has been resolved."""
+    def status(self) -> 'QgsGeometryCheckError.Status':
+        """The status of the error."""
+    def vidx(self) -> _core.QgsVertexId:
+        """The id of the affected vertex. May be valid or not, depending on the
+        check.
+        """
+    def valueType(self) -> 'QgsGeometryCheckError.ValueType':
+        """The type of the value.
+
+        .. seealso:: `value`
+        """
+    def value(self) -> typing.Any:
+        """An additional value for the error. Lengths and areas are provided in map
+        units.
+
+        .. seealso:: `valueType`
+        """
+    def location(self) -> _core.QgsPointXY:
+        """The location of the error in map units."""
+    def description(self) -> str:
+        """The error description. By default the description of the parent check
+        will be returned.
+        """
+    def affectedAreaBBox(self) -> _core.QgsRectangle:
+        """The bounding box of the affected area of the error."""
+    def contextBoundingBox(self) -> _core.QgsRectangle:
+        """The context of the error. For topology checks like gap checks this
+        returns the context of an error and the involved features. May be a NULL
+        rectangle.
+
+        .. versionadded:: 3.10
+        """
+    def geometry(self) -> _core.QgsGeometry:
+        """The geometry of the error in map units."""
+    def featureId(self) -> int:
+        """The id of the feature on which this error has been detected."""
+    def layerId(self) -> str:
+        """The id of the layer on which this error has been detected."""
+    def check(self) -> typing.Optional[QgsGeometryCheck]:
+        """The geometry check that created this error."""
     StatusPending: QgsGeometryCheckError.Status
     StatusFixFailed: QgsGeometryCheckError.Status
     StatusFixed: QgsGeometryCheckError.Status
@@ -1156,23 +2873,59 @@ class QgsGeometryCheckError(PyQt6.sip.wrapper):
 
 
 class QgsGeometryCheckerUtils(PyQt6.sip.wrapper):
+    """Contains utilities required for geometry checks.
+
+    .. note::
+
+       This class is a technology preview and unstable API.
+
+    .. versionadded:: 3.4
+    """
 
     class LayerFeature(PyQt6.sip.wrapper):
+        """A layer feature combination to uniquely identify and access a feature in
+        a set of layers.
+
+        .. versionadded:: 3.4
+
+        QgsGeometryCheckerUtils.LayerFeature(pool: QgsFeaturePool|None, feature: QgsFeature, context: QgsGeometryCheckContext|None, useMapCrs: bool)
+        Create a new layer/feature combination. The layer is defined by
+        ``pool``, ``feature`` needs to be from this layer. If ``useMapCrs`` is
+        ``True``, geometries will be reprojected to the mapCrs defined in
+        ``context``.
+
+        QgsGeometryCheckerUtils.LayerFeature(a0: QgsGeometryCheckerUtils.LayerFeature)
+        """
 
         @typing.overload
         def __init__(self, pool: typing.Optional[QgsFeaturePool], feature: _core.QgsFeature, context: typing.Optional[QgsGeometryCheckContext], useMapCrs: bool) -> None: ...
         @typing.overload
         def __init__(self, a0: 'QgsGeometryCheckerUtils.LayerFeature') -> None: ...
 
-        def useMapCrs(self) -> bool: ...
+        def useMapCrs(self) -> bool:
+            """Returns if the geometry is reprojected to the map CRS or not."""
         def __ne__(self, other: object): ...
         def __eq__(self, other: object): ...
-        def id(self) -> str: ...
-        def geometry(self) -> _core.QgsGeometry: ...
-        def layerId(self) -> str: ...
-        def feature(self) -> _core.QgsFeature: ...
+        def id(self) -> str:
+            """Returns a combination of the layerId and the feature id."""
+        def geometry(self) -> _core.QgsGeometry:
+            """Returns the geometry of this feature. If useMapCrs was specified, it
+            will already be reprojected into the CRS specified in the context
+            specified in the constructor.
+            """
+        def layerId(self) -> str:
+            """The layer id."""
+        def feature(self) -> _core.QgsFeature:
+            """Returns the feature. The geometry will not be reprojected regardless of
+            useMapCrs.
+            """
 
     class LayerFeatures(PyQt6.sip.wrapper):
+        """Contains a set of layers and feature ids in those layers to pass to a
+        geometry check.
+
+        .. versionadded:: 3.4
+        """
 
         def __init__(self, a0: 'QgsGeometryCheckerUtils.LayerFeatures') -> None: ...
 
@@ -1183,69 +2936,201 @@ class QgsGeometryCheckerUtils(PyQt6.sip.wrapper):
 
 
 class QgsGeometryCheckFactory(PyQt6.sip.wrapper):
+    """A factory for geometry checks.
+
+    .. note::
+
+       This class is a technology preview and unstable API.
+
+    .. versionadded:: 3.4
+    """
 
     @typing.overload
     def __init__(self) -> None: ...
     @typing.overload
     def __init__(self, a0: 'QgsGeometryCheckFactory') -> None: ...
 
-    def checkType(self) -> QgsGeometryCheck.CheckType: ...
-    def flags(self) -> QgsGeometryCheck.Flag: ...
-    def isCompatible(self, layer: typing.Optional[_core.QgsVectorLayer]) -> bool: ...
-    def description(self) -> str: ...
-    def id(self) -> str: ...
-    def createGeometryCheck(self, context: typing.Optional[QgsGeometryCheckContext], configuration: dict[typing.Optional[str], typing.Any]) -> typing.Optional[QgsGeometryCheck]: ...
+    def checkType(self) -> QgsGeometryCheck.CheckType:
+        """The type of this check."""
+    def flags(self) -> QgsGeometryCheck.Flag:
+        """Flags for this check."""
+    def isCompatible(self, layer: typing.Optional[_core.QgsVectorLayer]) -> bool:
+        """Checks if this check should be made available for ``layer``."""
+    def description(self) -> str:
+        """A human readable description for this check."""
+    def id(self) -> str:
+        """The unique id for this geometry check."""
+    def createGeometryCheck(self, context: typing.Optional[QgsGeometryCheckContext], configuration: dict[typing.Optional[str], typing.Any]) -> typing.Optional[QgsGeometryCheck]:
+        """Creates a new geometry check with ``context`` and ``configuration``."""
 
 
 class QgsGeometryCheckRegistry(PyQt6.sip.wrapper):
+    """A registry for all known geometry check factories.
+
+    `QgsGeometryCheckRegistry` is not usually directly created,
+    but rather accessed through
+    `QgsAnalysis.geometryCheckRegistry()`.
+
+    .. note::
+
+       This class is a technology preview and unstable API.
+
+    .. versionadded:: 3.4
+
+    QgsGeometryCheckRegistry()
+    Constructor for QgsGeometryCheckRegistry. QgsGeometryCheckRegistry is
+    not usually directly created, but rather accessed through
+    `QgsAnalysis.geometryCheckRegistry()`.
+
+    QgsGeometryCheckRegistry(a0: QgsGeometryCheckRegistry)
+    """
 
     @typing.overload
     def __init__(self) -> None: ...
     @typing.overload
     def __init__(self, a0: 'QgsGeometryCheckRegistry') -> None: ...
 
-    def registerGeometryCheck(self, checkFactory: typing.Optional[QgsGeometryCheckFactory]) -> None: ...
-    def geometryCheckFactories(self, layer: typing.Optional[_core.QgsVectorLayer], type: QgsGeometryCheck.CheckType, flags: QgsGeometryCheck.Flag = ...) -> list[QgsGeometryCheckFactory]: ...
-    def geometryCheck(self, checkId: typing.Optional[str], context: typing.Optional[QgsGeometryCheckContext], geometryCheckConfig: dict[typing.Optional[str], typing.Any]) -> typing.Optional[QgsGeometryCheck]: ...
+    def registerGeometryCheck(self, checkFactory: typing.Optional[QgsGeometryCheckFactory]) -> None:
+        """Registers a new geometry check factory.
+
+        .. versionadded:: 3.4
+        """
+    def geometryCheckFactories(self, layer: typing.Optional[_core.QgsVectorLayer], type: QgsGeometryCheck.CheckType, flags: QgsGeometryCheck.Flag = ...) -> list[QgsGeometryCheckFactory]:
+        """Returns all geometry check factories that are compatible with ``layer``
+        and have all of the ``flags`` set.
+
+        .. versionadded:: 3.4
+        """
+    def geometryCheck(self, checkId: typing.Optional[str], context: typing.Optional[QgsGeometryCheckContext], geometryCheckConfig: dict[typing.Optional[str], typing.Any]) -> typing.Optional[QgsGeometryCheck]:
+        """Create a new geometryCheck of type ``checkId`` Pass the ``context`` and
+        ``geometryCheckConfiguration`` to the newly created check. Ownership is
+        transferred to the caller.
+
+        .. versionadded:: 3.4
+        """
 
 
 class QgsSingleGeometryCheckError(PyQt6.sip.wrapper):
+    """An error from a `QgsSingleGeometryCheck`.
+
+    .. note::
+
+       This class is a technology preview and unstable API.
+
+    .. versionadded:: 3.4
+
+    QgsSingleGeometryCheckError(check: QgsSingleGeometryCheck|None, geometry: QgsGeometry, errorLocation: QgsGeometry, vertexId: QgsVertexId = QgsVertexId())
+    Creates a new single geometry check error.
+
+    QgsSingleGeometryCheckError(a0: QgsSingleGeometryCheckError)
+    """
 
     @typing.overload
     def __init__(self, check: typing.Optional['QgsSingleGeometryCheck'], geometry: _core.QgsGeometry, errorLocation: _core.QgsGeometry, vertexId: _core.QgsVertexId = ...) -> None: ...
     @typing.overload
     def __init__(self, a0: 'QgsSingleGeometryCheckError') -> None: ...
 
-    def vertexId(self) -> _core.QgsVertexId: ...
-    def errorLocation(self) -> _core.QgsGeometry: ...
-    def check(self) -> typing.Optional['QgsSingleGeometryCheck']: ...
-    def description(self) -> str: ...
-    def isEqual(self, other: typing.Optional['QgsSingleGeometryCheckError']) -> bool: ...
-    def update(self, other: typing.Optional['QgsSingleGeometryCheckError']) -> None: ...
+    def vertexId(self) -> _core.QgsVertexId:
+        """The vertex id of the error. May be invalid depending on the check.
+
+        .. versionadded:: 3.4
+        """
+    def errorLocation(self) -> _core.QgsGeometry:
+        """The exact location of the error.
+
+        .. versionadded:: 3.4
+        """
+    def check(self) -> typing.Optional['QgsSingleGeometryCheck']:
+        """The check that created this error.
+
+        .. versionadded:: 3.4
+        """
+    def description(self) -> str:
+        """A human readable description of this error."""
+    def isEqual(self, other: typing.Optional['QgsSingleGeometryCheckError']) -> bool:
+        """Check if this error is equal to ``other``. Is reimplemented by
+        subclasses with additional information, comparison of base information
+        is done in parent class.
+        """
+    def update(self, other: typing.Optional['QgsSingleGeometryCheckError']) -> None:
+        """Update this error with the information from ``other``. Will be used to
+        update existing errors whenever they are re-checked.
+        """
 
 
 class QgsGeometryCheckErrorSingle(QgsGeometryCheckError):
+    """Wraps a `QgsSingleGeometryError` into a standard
+    `QgsGeometryCheckError`. The single error can be obtained via
+    singleError.
+
+    .. note::
+
+       This class is a technology preview and unstable API.
+
+    .. versionadded:: 3.4
+
+    QgsGeometryCheckErrorSingle(singleError: QgsSingleGeometryCheckError|None, layerFeature: QgsGeometryCheckerUtils.LayerFeature)
+    Creates a new error for a `QgsSingleGeometryCheck`.
+
+    QgsGeometryCheckErrorSingle(a0: QgsGeometryCheckErrorSingle)
+    """
 
     @typing.overload
     def __init__(self, singleError: typing.Optional[QgsSingleGeometryCheckError], layerFeature: QgsGeometryCheckerUtils.LayerFeature) -> None: ...
     @typing.overload
     def __init__(self, a0: 'QgsGeometryCheckErrorSingle') -> None: ...
 
-    def singleError(self) -> typing.Optional[QgsSingleGeometryCheckError]: ...
+    def singleError(self) -> typing.Optional[QgsSingleGeometryCheckError]:
+        """The underlying single error."""
 
 
 class QgsSingleGeometryCheck(QgsGeometryCheck):
+    """Base class for geometry checks for a single geometry without any context
+    of the layer or other layers in the project.
+
+    Classic examples are validity checks like self-intersection.
+
+    Subclasses need to implement the processGeometry method.
+
+    .. versionadded:: 3.4
+
+    QgsSingleGeometryCheck(context: QgsGeometryCheckContext|None, configuration: dict[str|None, Any])
+    Creates a new single geometry check.
+
+    QgsSingleGeometryCheck(a0: QgsSingleGeometryCheck)
+    """
 
     @typing.overload
     def __init__(self, context: typing.Optional[QgsGeometryCheckContext], configuration: dict[typing.Optional[str], typing.Any]) -> None: ...
     @typing.overload
     def __init__(self, a0: 'QgsSingleGeometryCheck') -> None: ...
 
-    def processGeometry(self, geometry: _core.QgsGeometry) -> list[QgsSingleGeometryCheckError]: ...
+    def processGeometry(self, geometry: _core.QgsGeometry) -> list[QgsSingleGeometryCheckError]:
+        """Check the ``geometry`` for errors. It may make use of ``configuration``
+        options.
+
+        Returns a list of `QgsSingleGeometryCheckErrors`, ownership is
+        transferred to the caller. An empty list is returned for geometries
+        without errors.
+
+        .. versionadded:: 3.4
+        """
     def collectErrors(self, featurePools: typing.Any, errors: collections.abc.Iterable[QgsGeometryCheckError], messages: collections.abc.Iterable[typing.Optional[str]], feedback: typing.Optional[_core.QgsFeedback] = ..., ids: QgsGeometryCheck.LayerFeatureIds = ...) -> QgsGeometryCheck.Result: ...
 
 
 class QgsGeometrySnapper(QtCore.QObject):
+    """Allows a geometry to be snapped to the geometries within a different
+    reference layer.
+
+    Vertices in the geometries will be modified to match the reference layer
+    features within a specified snap tolerance.
+
+    QgsGeometrySnapper(referenceSource: QgsFeatureSource|None)
+    Constructor for QgsGeometrySnapper. A reference feature source which
+    contains geometries to snap to must be set. It is assumed that all
+    geometries snapped using this object will have the same CRS as the
+    reference source (ie, no reprojection is performed).
+    """
 
     class SnapMode(enum.IntEnum):
         PreferNodes = ... # type: QgsGeometrySnapper.SnapMode
@@ -1259,12 +3144,24 @@ class QgsGeometrySnapper(QtCore.QObject):
     def __init__(self, referenceSource: typing.Optional[_core.QgsFeatureSource]) -> None: ...
 
     featureSnapped: typing.ClassVar[QtCore.pyqtSignal]
-    def snapFeatures(self, features: collections.abc.Iterable[_core.QgsFeature], snapTolerance: float, mode: 'QgsGeometrySnapper.SnapMode' = ...) -> list[_core.QgsFeature]: ...
+    def snapFeatures(self, features: collections.abc.Iterable[_core.QgsFeature], snapTolerance: float, mode: 'QgsGeometrySnapper.SnapMode' = ...) -> list[_core.QgsFeature]:
+        """Snaps a set of features to the reference layer and returns the result.
+        This operation is multithreaded for performance. The
+        `QgsGeometrySnapper.featureSnapped` signal will be emitted
+        each time a feature is processed. The snap tolerance is specified in the
+        layer units for the reference layer.
+        """
     @typing.overload
-    def snapGeometry(self, geometry: _core.QgsGeometry, snapTolerance: float, mode: 'QgsGeometrySnapper.SnapMode' = ...) -> _core.QgsGeometry: ...
+    def snapGeometry(self, geometry: _core.QgsGeometry, snapTolerance: float, mode: 'QgsGeometrySnapper.SnapMode' = ...) -> _core.QgsGeometry:
+        """Snaps a geometry to the reference layer and returns the result. The
+        geometry must be in the same CRS as the reference layer, and must have
+        the same type as the reference layer geometry. The snap tolerance is
+        specified in the layer units for the reference layer.
+        """
     @typing.overload
     @staticmethod
-    def snapGeometry(geometry: _core.QgsGeometry, snapTolerance: float, referenceGeometries: collections.abc.Iterable[_core.QgsGeometry], mode: 'QgsGeometrySnapper.SnapMode' = ...) -> _core.QgsGeometry: ...
+    def snapGeometry(geometry: _core.QgsGeometry, snapTolerance: float, referenceGeometries: collections.abc.Iterable[_core.QgsGeometry], mode: 'QgsGeometrySnapper.SnapMode' = ...) -> _core.QgsGeometry:
+        """Snaps a single geometry against a list of reference geometries."""
     PreferNodes: QgsGeometrySnapper.SnapMode
     PreferClosest: QgsGeometrySnapper.SnapMode
     PreferNodesNoExtraVertices: QgsGeometrySnapper.SnapMode
@@ -1275,17 +3172,70 @@ class QgsGeometrySnapper(QtCore.QObject):
 
 
 class QgsInternalGeometrySnapper(PyQt6.sip.wrapper):
+    """Allows a set of geometries to be snapped to each other.
+
+    `QgsInternalGeometrySnapper` can be used to close gaps in
+    layers.
+
+    To use `QgsInternalGeometrySnapper`, first construct the
+    snapper using the desired snap parameters. Then, features are fed to to
+    the snapper one-by-one by calling `snapFeature`. Each feature
+    passed by calling `snapFeature` will be snapped to any
+    features which have already been processed by the snapper.
+
+    After processing all desired features, the results can be fetched by
+    calling `snappedGeometries`. The returned
+    `QgsGeometryMap` can be passed to
+    `QgsVectorDataProvider.changeGeometryValues()` to save the
+    snapped geometries back to the source layer.
+
+    QgsInternalGeometrySnapper(snapTolerance: float, mode: QgsGeometrySnapper.SnapMode = QgsGeometrySnapper.PreferNodes)
+    Constructor for QgsInternalGeometrySnapper. The ``snapTolerance`` and
+    ``mode`` parameters dictate how geometries will be snapped by the
+    snapper.
+
+    QgsInternalGeometrySnapper(a0: QgsInternalGeometrySnapper)
+    """
 
     @typing.overload
     def __init__(self, snapTolerance: float, mode: QgsGeometrySnapper.SnapMode = ...) -> None: ...
     @typing.overload
     def __init__(self, a0: 'QgsInternalGeometrySnapper') -> None: ...
 
-    def snappedGeometries(self) -> typing.Any: ...
-    def snapFeature(self, feature: _core.QgsFeature) -> _core.QgsGeometry: ...
+    def snappedGeometries(self) -> typing.Any:
+        """Returns a `QgsGeometryMap` of all feature geometries snapped
+        by this object.
+        """
+    def snapFeature(self, feature: _core.QgsFeature) -> _core.QgsGeometry:
+        """Snaps a single feature's geometry against all feature geometries already
+        processed by calls to `QgsInternalGeometrySnapper.snapFeature`
+        in this object, and returns the snapped geometry.
+        """
 
 
 class QgsGeometrySnapperSingleSource(PyQt6.sip.wrapper):
+    """Ensures that any two vertices of the vector layer are at least at a
+    distance given by the threshold value.
+
+    The algorithm moves nearby vertices to one location and adds vertices to
+    segments that are passing around other vertices within the threshold. It
+    does not remove any vertices. Also, it does not modify geometries unless
+    needed (it does not snap coordinates to a grid).
+
+    This algorithm comes handy when doing vector overlay operations such as
+    intersection, union or difference to prevent possible topological errors
+    caused by numerical errors if coordinates are very close to each other.
+
+    After running the algorithm some previously valid geometries may become
+    invalid and therefore it may be useful to run Fix geometries algorithm
+    afterwards.
+
+    .. note::
+
+       Originally ported from GRASS implementation of Vect_snap_lines_list()
+
+    .. versionadded:: 3.4
+    """
 
     @typing.overload
     def __init__(self) -> None: ...
@@ -1293,10 +3243,64 @@ class QgsGeometrySnapperSingleSource(PyQt6.sip.wrapper):
     def __init__(self, a0: 'QgsGeometrySnapperSingleSource') -> None: ...
 
     @staticmethod
-    def run(source: _core.QgsFeatureSource, sink: _core.QgsFeatureSink, thresh: float, feedback: typing.Optional[_core.QgsFeedback]) -> int: ...
+    def run(source: _core.QgsFeatureSource, sink: _core.QgsFeatureSink, thresh: float, feedback: typing.Optional[_core.QgsFeedback]) -> int:
+        """Run the algorithm on given source and output results to the sink, using
+        threshold value in the source's map units. Returns number of modified
+        geometries.
+        """
 
 
 class QgsZonalStatistics(PyQt6.sip.wrapper):
+    """Calculates raster statistics (count, sum, mean) for a polygon or
+    multipolygon layer and appends the results as attributes.
+
+    QgsZonalStatistics(polygonLayer: QgsVectorLayer|None, rasterLayer: QgsRasterLayer|None, attributePrefix: str|None = '', rasterBand: int = 1, stats: Qgis.ZonalStatistic = Qgis.ZonalStatistic.Default)
+    Convenience constructor for QgsZonalStatistics, using an input raster
+    layer.
+
+    The raster layer must exist for the lifetime of the zonal statistics
+    calculation.
+
+    .. warning::
+
+       Constructing QgsZonalStatistics using this method is not thread safe, and
+       the constructor which accepts a `QgsRasterInterface` should be used instead.
+
+    QgsZonalStatistics(polygonLayer: QgsVectorLayer|None, rasterInterface: QgsRasterInterface|None, rasterCrs: QgsCoordinateReferenceSystem, rasterUnitsPerPixelX: float, rasterUnitsPerPixelY: float, attributePrefix: str|None = '', rasterBand: int = 1, stats: Qgis.ZonalStatistic = Qgis.ZonalStatistic.Default)
+    Constructor for QgsZonalStatistics, using a QgsRasterInterface.
+
+    The ``polygonLayer`` gives the vector layer containing the
+    (multi)polygon features corresponding to the different zones. This layer
+    will be modified, adding extra attributes for each of the zonal
+    statistics calculated.
+
+    Pixel values for each zone are taken from the raster
+    ``rasterInterface``. The constructor must also be given various
+    properties relating to the input raster, such as the raster CRS
+    (``rasterCrs``), and the size (X and Y) in map units for each raster
+    pixel. The source raster band is specified via ``rasterBand``, where a
+    value of 1 corresponds to the first band.
+
+    If the CRS of the ``polygonLayer`` and ``rasterCrs`` differ, the
+    calculation will automatically reproject the zones to ensure valid
+    results are calculated.
+
+    The ``attributePrefix`` argument specifies an optional prefix to use
+    when creating the new fields for each calculated statistic.
+
+    Finally, the calculated statistics can be set via the ``stats``
+    argument. A new field will be added to ``polygonLayer`` for each
+    statistic calculated.
+
+    .. warning::
+
+       The raster interface must exist for the lifetime of the zonal statistics calculation. For thread
+       safe use, always use a cloned raster interface.
+
+    .. versionadded:: 3.2
+
+    QgsZonalStatistics(a0: QgsZonalStatistics)
+    """
 
     @typing.overload
     def __init__(self, polygonLayer: typing.Optional[_core.QgsVectorLayer], rasterLayer: typing.Optional[_core.QgsRasterLayer], attributePrefix: typing.Optional[str] = ..., rasterBand: int = ..., stats: _core.Qgis.ZonalStatistic = ...) -> None: ...
@@ -1306,14 +3310,37 @@ class QgsZonalStatistics(PyQt6.sip.wrapper):
     def __init__(self, a0: 'QgsZonalStatistics') -> None: ...
 
     @staticmethod
-    def shortName(statistic: _core.Qgis.ZonalStatistic) -> str: ...
+    def shortName(statistic: _core.Qgis.ZonalStatistic) -> str:
+        """Returns a short, friendly display name for a ``statistic``, suitable for
+        use in a field name.
+
+        .. seealso:: `displayName`
+
+        .. versionadded:: 3.12
+        """
     @staticmethod
-    def displayName(statistic: _core.Qgis.ZonalStatistic) -> str: ...
+    def displayName(statistic: _core.Qgis.ZonalStatistic) -> str:
+        """Returns the friendly display name for a ``statistic``.
+
+        .. seealso:: `shortName`
+
+        .. versionadded:: 3.12
+        """
     @typing.overload
-    def calculateStatistics(self, feedback: typing.Optional[_core.QgsFeedback]) -> _core.Qgis.ZonalStatisticResult: ...
+    def calculateStatistics(self, feedback: typing.Optional[_core.QgsFeedback]) -> _core.Qgis.ZonalStatisticResult:
+        """Runs the calculation."""
     @typing.overload
     @staticmethod
-    def calculateStatistics(rasterInterface: typing.Optional[_core.QgsRasterInterface], geometry: _core.QgsGeometry, cellSizeX: float, cellSizeY: float, rasterBand: int, statistics: _core.Qgis.ZonalStatistic) -> dict[int, typing.Any]: ...
+    def calculateStatistics(rasterInterface: typing.Optional[_core.QgsRasterInterface], geometry: _core.QgsGeometry, cellSizeX: float, cellSizeY: float, rasterBand: int, statistics: _core.Qgis.ZonalStatistic) -> dict[int, typing.Any]:
+        """Calculates the specified ``statistics`` for the pixels of ``rasterBand``
+        in ``rasterInterface`` (a raster layer
+        `QgsZonalStatistics.dataProvider` ) within polygon
+        ``geometry``.
+
+        Returns a map of statistic to result value.
+
+        .. versionadded:: 3.16
+        """
     Statistic: typing.Type[_core.Qgis.ZonalStatistic]
     Count: _core.Qgis.ZonalStatistic
     Sum: _core.Qgis.ZonalStatistic
